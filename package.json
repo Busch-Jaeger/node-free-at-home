@@ -1,0 +1,26 @@
+{
+  "name": "free-at-home",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "npx tsc -p ."
+  },
+  "keywords": [],
+  "author": "Stefan Guelland <Stefan.Guelland@de.abb.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/ws": "^6.0.2",
+    "@types/node": "^12.6.8",
+    "nodemon": "^1.19.1",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "bufferutil": "^4.0.1",
+    "strict-event-emitter-types": "^2.0.0",
+    "utf-8-validate": "^5.0.2",
+    "ws": "^7.1.1"
+  }
+}
