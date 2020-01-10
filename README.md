@@ -1,3 +1,7 @@
+Library for free@home local device api
+
+This api is unstable.
+
 #Install
 
 ##Prepare for local developement
