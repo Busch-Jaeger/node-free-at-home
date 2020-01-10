@@ -63,45 +63,45 @@ export class FreeAtHome extends EventEmitter {
         this.emit("open");
     }
 
-    createBlindDevice(delegate: FreeAtHomeBlindDelegateInterface) {
-        if (true === this.nodesBySerial.has(delegate.getSerialNumber()))
+    createBlindDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindDelegateInterface,) {
+        if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeBlindChannel(this.freeAtHomeApi, 0, delegate);
+        const device = new FreeAtHomeBlindChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 
-    createWindowDevice(delegate: FreeAtHomeBlindDelegateInterface) {
-        if (true === this.nodesBySerial.has(delegate.getSerialNumber()))
+    createWindowDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindDelegateInterface) {
+        if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeWindowChannel(this.freeAtHomeApi, 0, delegate);
+        const device = new FreeAtHomeWindowChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 
-    createOnOffDevice(delegate: FreeAtHomeOnOffDelegateInterface) {
-        if (true === this.nodesBySerial.has(delegate.getSerialNumber()))
+    createOnOffDevice(serialNumber: string, name: string, delegate: FreeAtHomeOnOffDelegateInterface) {
+        if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeOnOffChannel(this.freeAtHomeApi, 0, delegate);
+        const device = new FreeAtHomeOnOffChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 
-    createRawDevice(delegate: FreeAtHomeRawDelegateInterface) {
-        if (true === this.nodesBySerial.has(delegate.getSerialNumber()))
+    createRawDevice(serialNumber: string, name: string, deviceType: DeviceType, delegate: FreeAtHomeRawDelegateInterface) {
+        if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeRawChannel(this.freeAtHomeApi, 0, delegate);
+        const device = new FreeAtHomeRawChannel(this.freeAtHomeApi, 0, serialNumber, name, deviceType, delegate);
         this.addDevice(device);
     }
 
-    createWeatherBrightnessSensorDevice(delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface) {
-        if (true === this.nodesBySerial.has(delegate.getSerialNumber()))
+    createWeatherBrightnessSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface) {
+        if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeWeatherBrightnessSensorChannel(this.freeAtHomeApi, 0, delegate);
+        const device = new FreeAtHomeWeatherBrightnessSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 
     addDevice(device: FreeAtHomeChannelInterface) {
-        const delegate = device.delegate;
-        this.freeAtHomeApi.createDevice(device.deviceType, delegate.getSerialNumber(), delegate.getFrindlyName());
-        this.nodesBySerial.set(delegate.getSerialNumber(), device);
+        const {serialNumber, name, deviceType } = device;
+        this.freeAtHomeApi.createDevice(deviceType, serialNumber, name);
+        this.nodesBySerial.set(serialNumber, device);
     }
 
     dataPointChanged(datapoint: Datapoint) {

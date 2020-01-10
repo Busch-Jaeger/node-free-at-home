@@ -4,15 +4,19 @@ import { DeviceType } from '.';
 
 export class FreeAtHomeWeatherBrightnessSensorChannel implements FreeAtHomeChannelInterface {
     deviceType: DeviceType = DeviceType.weatherBrightnessSensor;
+    serialNumber: string;
+    name: string;
     channelNumber: number;
     freeAtHome: FreeAtHomeApi;
     delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface;
 
     alertActivationLevel: number | undefined;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface) {
         this.freeAtHome = freeAtHome;
         this.channelNumber = channelNumber;
+        this.serialNumber = serialNumber;
+        this.name = name;
         this.alertActivationLevel = undefined
 
         this.delegate = delegate;
@@ -34,9 +38,8 @@ export class FreeAtHomeWeatherBrightnessSensorChannel implements FreeAtHomeChann
     }
 
     setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: DatapointIds, value: string) {
-        const { delegate, channelNumber } = this;
-        const nativeId = delegate.getSerialNumber();
-        freeAtHome.setDatapoint(nativeId, channelNumber, datapointId, value);
+        const { channelNumber, serialNumber } = this;
+        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void {

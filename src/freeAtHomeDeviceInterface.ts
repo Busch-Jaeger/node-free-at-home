@@ -1,8 +1,6 @@
 import { DatapointIds, ParameterIds, FreeAtHomeApi, DeviceType } from "./freeAtHomeApi"
 
 export declare interface FreeAtHomeDelegateInterface {
-    getSerialNumber(): string;
-    getFrindlyName(): string;
 }
 
 export enum NodeState {
@@ -23,8 +21,6 @@ export declare interface FreeAtHomeRawDelegateInterface extends FreeAtHomeDelega
     dataPointChanged(channel: number, id: DatapointIds, value: string): void;
     parameterChanged(id: ParameterIds, value: string): void;
 
-    getDeviceType(): DeviceType;
-
     on(event: 'datapointChanged', listener: (datapointId: DatapointIds, value: string) => void): this;
 }
 
@@ -44,6 +40,9 @@ export declare interface FreeAtHomeChannelInterface {
     delegate: FreeAtHomeDelegateInterface;
     freeAtHome: FreeAtHomeApi;
     deviceType: DeviceType;
+
+    serialNumber: string;
+    name: string;
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void;
     parameterChanged(id: ParameterIds, value: string): void;

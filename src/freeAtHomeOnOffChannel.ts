@@ -3,22 +3,25 @@ import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeOnOffDelegateInterface
 import { DeviceType } from '.';
 
 export class FreeAtHomeOnOffChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.switchingActuator
+    deviceType: DeviceType = DeviceType.switchingActuator;
+    serialNumber: string;
+    name: string;
     channelNumber: number;
     freeAtHome: FreeAtHomeApi;
     delegate: FreeAtHomeOnOffDelegateInterface;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, delegate: FreeAtHomeOnOffDelegateInterface) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeOnOffDelegateInterface) {
         this.freeAtHome = freeAtHome;
         this.channelNumber = channelNumber;
+        this.serialNumber = serialNumber;
+        this.name = name;
 
         this.delegate = delegate;
     }
 
     setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: DatapointIds, value: string) {
-        const { delegate, channelNumber } = this;
-        const nativeId = delegate.getSerialNumber();
-        freeAtHome.setDatapoint(nativeId, channelNumber, datapointId, value);
+        const { channelNumber, serialNumber } = this;
+        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void {

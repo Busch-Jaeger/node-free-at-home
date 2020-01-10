@@ -4,14 +4,18 @@ import { DeviceType } from '.';
 
 export class FreeAtHomeRawChannel implements FreeAtHomeChannelInterface {
     deviceType: DeviceType;
+    serialNumber: string;
+    name: string;
     channelNumber: number;
     freeAtHome: FreeAtHomeApi;
     delegate: FreeAtHomeRawDelegateInterface;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, delegate: FreeAtHomeRawDelegateInterface, ) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, deviceType: DeviceType, delegate: FreeAtHomeRawDelegateInterface, ) {
         this.freeAtHome = freeAtHome;
         this.channelNumber = channelNumber;
-        this.deviceType = delegate.getDeviceType();
+        this.serialNumber = serialNumber;
+        this.name = name;
+        this.deviceType = deviceType;
 
         this.delegate = delegate;
 
@@ -19,9 +23,8 @@ export class FreeAtHomeRawChannel implements FreeAtHomeChannelInterface {
     }
 
     delegateDatapointChanged(datapointId: DatapointIds, value: string): void {
-        const { delegate, channelNumber } = this;
-        const nativeId = delegate.getSerialNumber();
-        this.freeAtHome.setDatapoint(nativeId, channelNumber, datapointId, value);
+        const { delegate, channelNumber, serialNumber } = this;
+        this.freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void {

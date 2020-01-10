@@ -9,16 +9,20 @@ enum ForcePositionBlind {
 }
 
 export class FreeAtHomeWindowChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.windowActuator
+    deviceType: DeviceType = DeviceType.windowActuator;
+    serialNumber: string;
+    name: string;
     channelNumber: number;
     freeAtHome: FreeAtHomeApi;
     preForcedPosition: number;
     delegate: FreeAtHomeBlindDelegateInterface;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, delegate: FreeAtHomeBlindDelegateInterface) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeBlindDelegateInterface) {
         this.preForcedPosition = 0;
         this.freeAtHome = freeAtHome;
         this.channelNumber = channelNumber;
+        this.serialNumber = serialNumber;
+        this.name = name;
 
         this.delegate = delegate;
         delegate.on("positionChanged", this.delegatePositionChanged.bind(this));
@@ -26,9 +30,8 @@ export class FreeAtHomeWindowChannel implements FreeAtHomeChannelInterface {
     }
 
     setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: DatapointIds, value: string) {
-        const { delegate, channelNumber } = this;
-        const nativeId = delegate.getSerialNumber();
-        freeAtHome.setDatapoint(nativeId, channelNumber, datapointId, value);
+        const { channelNumber, serialNumber } = this;
+        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void {
