@@ -94,6 +94,8 @@ export enum DeviceType {
     homeApplianceCoffeeMachine = "HomeAppliance-CoffeeMachine",
     rtc = "RTC",
     sonos = "sonos",
+
+    knxSwitchSensor = "KNX-SwitchSensor",
 }
 
 export enum ConnectionStates {
