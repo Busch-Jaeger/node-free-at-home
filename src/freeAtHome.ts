@@ -7,6 +7,7 @@ import { FreeAtHomeWindowChannel } from './freeAtHomeWindowChannel';
 import { FreeAtHomeRawChannel } from './freeAtHomeRawChannel';
 import { FreeAtHomeWeatherBrightnessSensorChannel } from './freeAtHomeWeatherBrightnessSensorChannel';
 import { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface} from './freeAtHomeWeatherTemperatureSensorChannel';
+import { FreeAtHomeWindowSensorChannel, FreeAtHomeWindowSensorDelegateInterface} from './freeAtHomeWindowSensorChannel';
 import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface} from './freeAtHomeSwitchSensor';
 import {
     FreeAtHomeChannelInterface,
@@ -112,6 +113,13 @@ export class FreeAtHome extends EventEmitter {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
         const device = new FreeAtHomeWeatherTemperatureSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+        this.addDevice(device);
+    }
+
+    createWindowSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWindowSensorDelegateInterface) {
+        if (true === this.nodesBySerial.has(serialNumber))
+            return;
+        const device = new FreeAtHomeWindowSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 

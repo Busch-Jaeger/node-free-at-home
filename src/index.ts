@@ -8,6 +8,7 @@ export { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface}
 
 export { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface} from './freeAtHomeWeatherTemperatureSensorChannel';
 export { FreeAtHomeDimActuatorChannel, FreeAtHomeDimActuatorDelegateInterface} from './freeAtHomeDimActuatorChannel';
+export { FreeAtHomeWindowSensorChannel ,FreeAtHomeWindowSensorDelegateInterface, WindowState} from './freeAtHomeWindowSensorChannel';
 
 export { FreeAtHome };
 export { FreeAtHomeApi, Datapoint, Parameter, DeviceType };

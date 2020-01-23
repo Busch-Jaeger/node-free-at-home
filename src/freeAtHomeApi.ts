@@ -24,8 +24,8 @@ export enum DatapointIds {
     rainAlarm = 0x27,
     frostAlarm = 0x26,
     sceneControl = 0x4,
-    windowDoor = 0x35,
-
+    windowDoorPosition = 0x0029,
+    windowDoor = 0x0035,
 
 
     infoOnOff = 0x0100,
