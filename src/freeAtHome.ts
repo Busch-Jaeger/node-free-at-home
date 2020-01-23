@@ -1,10 +1,12 @@
 import { EventEmitter } from 'events';
 import { FreeAtHomeApi, DeviceType, Datapoint, Parameter } from './freeAtHomeApi';
 import { FreeAtHomeBlindChannel } from './freeAtHomeBlindChannel';
+import { FreeAtHomeDimActuatorChannel, FreeAtHomeDimActuatorDelegateInterface } from './freeAtHomeDimActuatorChannel'
 import { FreeAtHomeOnOffChannel } from './freeAtHomeOnOffChannel';
 import { FreeAtHomeWindowChannel } from './freeAtHomeWindowChannel';
 import { FreeAtHomeRawChannel } from './freeAtHomeRawChannel';
 import { FreeAtHomeWeatherBrightnessSensorChannel } from './freeAtHomeWeatherBrightnessSensorChannel';
+import { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface} from './freeAtHomeWeatherTemperatureSensorChannel';
 import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface} from './freeAtHomeSwitchSensor';
 import {
     FreeAtHomeChannelInterface,
@@ -71,6 +73,13 @@ export class FreeAtHome extends EventEmitter {
         this.addDevice(device);
     }
 
+    createDimActuatorDevice(serialNumber: string, name: string, delegate: FreeAtHomeDimActuatorDelegateInterface, isAutoConfirm: boolean = false) {
+        if (true === this.nodesBySerial.has(serialNumber))
+            return;
+        const device = new FreeAtHomeDimActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate, isAutoConfirm);
+        this.addDevice(device);
+    }
+
     createWindowDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindDelegateInterface) {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
@@ -96,6 +105,13 @@ export class FreeAtHome extends EventEmitter {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
         const device = new FreeAtHomeWeatherBrightnessSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+        this.addDevice(device);
+    }
+
+    createWeatherTemperatureSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWeatherTemperatureSensorDelegateInterface) {
+        if (true === this.nodesBySerial.has(serialNumber))
+            return;
+        const device = new FreeAtHomeWeatherTemperatureSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 

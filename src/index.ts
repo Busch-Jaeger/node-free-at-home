@@ -6,6 +6,9 @@ import { FreeAtHomeChannelInterface, FreeAtHomeBlindDelegateInterface, FreeAtHom
 import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface} from './freeAtHomeSwitchSensor';
 export { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface};
 
+export { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface} from './freeAtHomeWeatherTemperatureSensorChannel';
+export { FreeAtHomeDimActuatorChannel, FreeAtHomeDimActuatorDelegateInterface} from './freeAtHomeDimActuatorChannel';
+
 export { FreeAtHome };
 export { FreeAtHomeApi, Datapoint, Parameter, DeviceType };
 export { FreeAtHomeBlindChannel };

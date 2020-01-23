@@ -7,6 +7,13 @@ import WebSocket from 'ws';
 
 export enum DatapointIds {
     switchOnOff = 0x0001,
+    timedStartStop = 0x0002,
+    forced = 0x0003,
+    timedMovement = 0x0006,
+
+    relativeSetValue = 0x0010,
+    absoluteSetValue = 0x0011,
+    night = 0x0012,
 
     moveUpDown = 0x20,
     adjustUpDown = 0x21,
@@ -23,6 +30,7 @@ export enum DatapointIds {
 
     infoOnOff = 0x0100,
 
+    infoActualDimmingValue = 0x0110,
     infoMoveUpDown = 0x120,
     currentAbsolutePositionBlindsPercentage = 0x121,
     currentAbsolutePositionSlatsPercentage = 0x122,
@@ -41,6 +49,12 @@ export enum DatapointIds {
 
 export enum ParameterIds {
     dummy = 0x01,
+
+    dimmingActuatorMinBrightness = 0x0004,
+    dimmingActuatorMaxBrightnessDay = 0x0005,
+    dimmingActuatorMaxBrightnessNight = 0x0012,
+    autonomousSwitchOffTimeDuration = 0x0015,
+    dimmerSwitchOnMode = 0x0029,
 
     biContactType = 0x0010,
     sensorType = 0x0043,
