@@ -53,7 +53,7 @@ export class FreeAtHomeWeatherTemperatureSensorChannel implements FreeAtHomeChan
     parameterChanged(id: ParameterIds, value: string): void {
 
         switch (id) {
-            case ParameterIds.brightnessAlertActivationLevel:
+            case ParameterIds.frostAlarmActivationLevel:
                 this.alertActivationLevel = <number>parseInt(value);
                 console.log("Parameter temperature alertActivationLevel changed %s", this.alertActivationLevel);
                 break;
