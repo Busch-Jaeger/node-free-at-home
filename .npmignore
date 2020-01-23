@@ -2,3 +2,4 @@ src/
 lib/*.map
 .vscode/
 tsconfig.json
+azure-pipelines.yml
