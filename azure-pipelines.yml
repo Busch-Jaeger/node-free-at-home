@@ -6,6 +6,9 @@
 trigger:
 - master
 
+variables:
+  HTTPS_PROXY: "http://proxy.de.abb.com:8080"
+
 pool:
   name: 'DEBJE'
 
