@@ -42,7 +42,7 @@ export class FreeAtHomeWindowSensorChannel implements FreeAtHomeChannelInterface
                 this.setDatapoint(DatapointIds.windowDoorPosition, "0");
                 break;
             case WindowState.tilted:
-                this.setDatapoint(DatapointIds.windowDoor, "0");
+                this.setDatapoint(DatapointIds.windowDoor, "1");
                 this.setDatapoint(DatapointIds.windowDoorPosition, "1");
                 break;
             case WindowState.opened:
