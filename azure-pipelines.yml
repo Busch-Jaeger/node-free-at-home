@@ -12,12 +12,10 @@ pool:
   name: 'DEBJE'
 
 steps:
-- task: NodeTool@0
-  variables:
-    HTTPS_PROXY: "http://proxy.de.abb.com:8080"
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
+# - task: NodeTool@0
+#   inputs:
+#     versionSpec: '10.x'
+#   displayName: 'Install Node.js'
 
 - script: |
     npm install
