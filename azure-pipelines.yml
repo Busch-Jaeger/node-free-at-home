@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  name: 'nodered'
+  name: 'DEBJE'
 
 steps:
 - task: NodeTool@0
