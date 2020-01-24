@@ -18,6 +18,6 @@ steps:
 #   displayName: 'Install Node.js'
 
 - script: |
-    npm install
+    npm install --registry  http://10.3.101.26:4873
     npm run build
   displayName: 'npm install and build'
