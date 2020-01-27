@@ -64,6 +64,7 @@ export enum ParameterIds {
     hysteresis = 0x002C,
     /** Frost Alarm activation level **/
     frostAlarmActivationLevel = 0x002D,
+    windForce = 0x002E,
 
     alertActivationDelay = 0x0047,
     /** Alert deactiviation delay **/

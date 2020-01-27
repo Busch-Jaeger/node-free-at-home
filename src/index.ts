@@ -8,6 +8,7 @@ export { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface}
 
 export { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface} from './freeAtHomeWeatherTemperatureSensorChannel';
 export { freeAtHomeWeatherRainSensorChannel, FreeAtHomeWeatherRainSensorDelegateInterface } from './freeAtHomeWeatherRainSensorChannel';
+export { FreeAtHomeWeatherWindSensorChannel, FreeAtHomeWeatherWindSensorDelegateInterface } from './freeAtHomeWeatherWindSensorChannel';
 export { FreeAtHomeDimActuatorChannel, FreeAtHomeDimActuatorDelegateInterface} from './freeAtHomeDimActuatorChannel';
 export { FreeAtHomeWindowSensorChannel ,FreeAtHomeWindowSensorDelegateInterface, WindowState} from './freeAtHomeWindowSensorChannel';
 
