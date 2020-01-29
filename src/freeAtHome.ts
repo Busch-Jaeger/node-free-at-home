@@ -1,10 +1,12 @@
 import { EventEmitter } from 'events';
 import { FreeAtHomeApi, DeviceType, Datapoint, Parameter } from './freeAtHomeApi';
-import { FreeAtHomeBlindChannel } from './freeAtHomeBlindChannel';
+
+import { FreeAtHomeBlindActuatorChannel, FreeAtHomeBlindActuatorDelegateInterface } from './freeAtHomeBlindActuatorChannel';
 import { FreeAtHomeDimActuatorChannel, FreeAtHomeDimActuatorDelegateInterface } from './freeAtHomeDimActuatorChannel'
+import { FreeAtHomeWindowActuatorChannel, FreeAtHomeWindowActuatorDelegateInterface } from './freeAtHomeWindowActuatorChannel';
 import { FreeAtHomeOnOffChannel } from './freeAtHomeOnOffChannel';
-import { FreeAtHomeWindowChannel } from './freeAtHomeWindowChannel';
 import { FreeAtHomeRawChannel } from './freeAtHomeRawChannel';
+
 import { FreeAtHomeWeatherBrightnessSensorChannel } from './freeAtHomeWeatherBrightnessSensorChannel';
 import { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface} from './freeAtHomeWeatherTemperatureSensorChannel';
 import { freeAtHomeWeatherRainSensorChannel, FreeAtHomeWeatherRainSensorDelegateInterface } from './freeAtHomeWeatherRainSensorChannel';
@@ -13,7 +15,6 @@ import { FreeAtHomeWindowSensorChannel, FreeAtHomeWindowSensorDelegateInterface}
 import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface} from './freeAtHomeSwitchSensor';
 import {
     FreeAtHomeChannelInterface,
-    FreeAtHomeBlindDelegateInterface,
     FreeAtHomeOnOffDelegateInterface,
     FreeAtHomeRawDelegateInterface,
     FreeAtHomeWeatherBrightnessSensorDelegateInterface,
@@ -69,10 +70,10 @@ export class FreeAtHome extends EventEmitter {
         this.emit("open");
     }
 
-    createBlindDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindDelegateInterface,) {
+    createBlindDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindActuatorDelegateInterface,) {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeBlindChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+        const device = new FreeAtHomeBlindActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 
@@ -83,10 +84,10 @@ export class FreeAtHome extends EventEmitter {
         this.addDevice(device);
     }
 
-    createWindowDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindDelegateInterface) {
+    createWindowDevice(serialNumber: string, name: string, delegate: FreeAtHomeWindowActuatorDelegateInterface) {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeWindowChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+        const device = new FreeAtHomeWindowActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
         this.addDevice(device);
     }
 

@@ -24,18 +24,6 @@ export declare interface FreeAtHomeRawDelegateInterface extends FreeAtHomeDelega
     on(event: 'datapointChanged', listener: (datapointId: DatapointIds, value: string) => void): this;
 }
 
-export declare interface FreeAtHomeBlindDelegateInterface extends FreeAtHomeDelegateInterface {
-    setRelativeValue(value: number): void;
-    stopMovement(): void;
-
-    getPostition(): number;
-    getState(): NodeState;
-    setSilentMode(silentMode: boolean): void;
-
-    on(event: 'positionChanged', listener: (position: number) => void): this;
-    on(event: 'stateChanged', listener: (state: NodeState) => void): this;
-}
-
 export declare interface FreeAtHomeChannelInterface {
     delegate: FreeAtHomeDelegateInterface;
     freeAtHome: FreeAtHomeApi;

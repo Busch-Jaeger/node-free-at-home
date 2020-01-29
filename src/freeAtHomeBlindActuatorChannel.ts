@@ -1,5 +1,5 @@
 import { FreeAtHomeApi, DatapointIds, ParameterIds, DeviceType } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeBlindDelegateInterface } from './freeAtHomeDeviceInterface';
+import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
 
 enum ForcePositionBlind {
     off = "0",
@@ -8,16 +8,28 @@ enum ForcePositionBlind {
     forceDown = "3",
 }
 
-export class FreeAtHomeBlindChannel implements FreeAtHomeChannelInterface {
+export declare interface FreeAtHomeBlindActuatorDelegateInterface extends FreeAtHomeDelegateInterface {
+    setRelativeValue(value: number): void;
+    stopMovement(): void;
+
+    getPostition(): number;
+    getState(): NodeState;
+    setSilentMode(silentMode: boolean): void;
+
+    on(event: 'positionChanged', listener: (position: number) => void): this;
+    on(event: 'stateChanged', listener: (state: NodeState) => void): this;
+}
+
+export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterface {
     deviceType: DeviceType = DeviceType.blindActuator;
     serialNumber: string;
     name: string;
     channelNumber: number;
     freeAtHome: FreeAtHomeApi;
     preForcedPosition: number;
-    delegate: FreeAtHomeBlindDelegateInterface;
+    delegate: FreeAtHomeBlindActuatorDelegateInterface;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeBlindDelegateInterface) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeBlindActuatorDelegateInterface) {
         this.preForcedPosition = 0;
         this.freeAtHome = freeAtHome;
         this.channelNumber = channelNumber;
