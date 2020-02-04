@@ -70,10 +70,10 @@ export class FreeAtHome extends EventEmitter {
         this.emit("open");
     }
 
-    createBlindDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindActuatorDelegateInterface,) {
+    createBlindDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindActuatorDelegateInterface, isAutoConfirm: boolean = false) {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeBlindActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+        const device = new FreeAtHomeBlindActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate, isAutoConfirm);
         this.addDevice(device);
     }
 
