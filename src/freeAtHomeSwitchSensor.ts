@@ -4,6 +4,7 @@ import { DeviceType } from '.';
 
 
 export declare interface FreeAtHomeSwitchSensorDelegateInterface extends FreeAtHomeDelegateInterface {
+    setInfoOnOff(value: boolean): void;
     on(event: 'onOffChanged', listener: (isOn: boolean) => void): this;
 }
 
@@ -39,6 +40,22 @@ export class FreeAtHomeSwitchSensorChannel implements FreeAtHomeChannelInterface
     }
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void {
+        const { delegate } = this;
+        switch (<DatapointIds>id) {
+            case DatapointIds.infoOnOff: {
+                switch (value) {
+                    case "1": {
+                        delegate.setInfoOnOff(true);
+                        break;
+                    }
+                    case "0": {
+                        delegate.setInfoOnOff(false);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
