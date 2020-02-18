@@ -25,7 +25,15 @@ steps:
     npm install --registry  http://10.3.101.26:4873
     npm run build
   displayName: 'npm install and build'
+
+- task: DownloadSecureFile@1
+  name: npmrc
+  displayName: 'Download .npmrc'
+  inputs:
+    secureFile: '.npmrc'
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+
 - script: |
-    npm publish --registry  http://10.3.101.26:4873
+    npm publish --registry  http://10.3.101.26:4873 --userconfig $(npmrc.secureFilePath)
   displayName: 'npm publish'
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
