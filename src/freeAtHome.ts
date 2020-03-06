@@ -53,7 +53,7 @@ export class FreeAtHome extends EventEmitter {
     }
 
     onClose(code: number, reason: string) {
-        console.log("try to reconnect in 10 secounds...");
+        console.log("try to reconnect in 10 seconds...");
         setTimeout(
             () => {
                 console.log("reconnecting...");

@@ -29,7 +29,7 @@ export class FreeAtHomeRawChannel implements FreeAtHomeChannelInterface {
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void {
         const { delegate } = this;
-        console.log("lajflajslf %s %s", channel, id);
+        console.log("datapoint changed %s %s", channel, id);
         delegate.dataPointChanged(channel, id, value);
     }
 

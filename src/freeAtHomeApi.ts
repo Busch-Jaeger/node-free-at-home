@@ -18,7 +18,7 @@ export enum DatapointIds {
     moveUpDown = 0x20,
     adjustUpDown = 0x21,
     setAbsolutePositionBlinds = 0x23,
-    setAbsolutePositionSlatets = 0x24,
+    setAbsolutePositionSlats = 0x24,
     forcePositionBlind = 0x28,
     windAlarm = 0x25,
     rainAlarm = 0x27,
@@ -67,7 +67,7 @@ export enum ParameterIds {
     windForce = 0x002E,
 
     alertActivationDelay = 0x0047,
-    /** Alert deactiviation delay **/
+    /** Alert deactivation delay **/
     dealertActivationDelay = 0x0048,
 }
 

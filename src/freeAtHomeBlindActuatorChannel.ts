@@ -16,7 +16,7 @@ export declare interface FreeAtHomeBlindActuatorDelegateInterface extends FreeAt
     setSilentMode(silentMode: boolean): void;
 
     on(event: 'positionChanged', listener: (position: number) => void): this;
-    on(event: 'isMoveingChanged', listener: (isMoveing: boolean) => void): this;
+    on(event: 'isMovingChanged', listener: (isMoving: boolean) => void): this;
 }
 
 export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterface {
@@ -29,7 +29,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
     delegate: FreeAtHomeBlindActuatorDelegateInterface;
 
     position = 0;
-    isMoveing = false;
+    isMoving = false;
     isForced = false;
     isAutoConfirm: boolean;
 
@@ -44,7 +44,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
         this.delegate = delegate;
         delegate.on("positionChanged", this.delegatePositionChanged.bind(this));
         // delegate.on("stateChanged", this.delegateStateChanged.bind(this));
-        delegate.on("isMoveingChanged", this.delegateIsMoveingChanged.bind(this));
+        delegate.on("isMovingChanged", this.delegateIsMovingChanged.bind(this));
     }
 
     setDatapoint(datapointId: DatapointIds, value: string) {
@@ -59,7 +59,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                 if (true === this.isForced)
                     break;
                 if (true === this.isAutoConfirm)
-                    this.isMoveing = true;
+                    this.isMoving = true;
                 switch (value) {
                     case "1": {
                         delegate.setRelativeValue(100);
@@ -88,9 +88,9 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
             case DatapointIds.adjustUpDown: {
                 if (true === this.isForced)
                     break;
-                if (true === this.isMoveing) {
+                if (true === this.isMoving) {
                     if (true === this.isAutoConfirm)
-                        this.isMoveing = false;
+                        this.isMoving = false;
                     delegate.stopMovement();
                     return;
                 }
@@ -101,7 +101,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                             if (true === this.isAutoConfirm) {
                                 this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "100");
                                 this.position = 100;
-                                this.isMoveing = true;
+                                this.isMoving = true;
                             } else {
                                 this.setDatapoint(DatapointIds.infoMoveUpDown, "3");
                             }
@@ -112,7 +112,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                             if (true === this.isAutoConfirm) {
                                 this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "0");
                                 this.position = 0;
-                                this.isMoveing = true;
+                                this.isMoving = true;
                             } else {
                                 this.setDatapoint(DatapointIds.infoMoveUpDown, "2");
                             }
@@ -196,9 +196,9 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
             this.setDatapoint(DatapointIds.infoMoveUpDown, "0");
     }
 
-    delegateIsMoveingChanged(isMoveing: boolean): void {
-        this.isMoveing = isMoveing;
-        if (isMoveing === false)
+    delegateIsMovingChanged(isMoving: boolean): void {
+        this.isMoving = isMoving;
+        if (isMoving === false)
             this.setDatapoint(DatapointIds.infoMoveUpDown, "0");
     }
 }

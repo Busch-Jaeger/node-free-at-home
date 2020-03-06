@@ -12,7 +12,7 @@ export declare interface FreeAtHomeWindowActuatorDelegateInterface extends FreeA
     setRelativeValue(value: number): void;
     stopMovement(): void;
 
-    getPostition(): number;
+    getPosition(): number;
     getState(): NodeState;
     setSilentMode(silentMode: boolean): void;
 
@@ -87,7 +87,7 @@ export class FreeAtHomeWindowActuatorChannel implements FreeAtHomeChannelInterfa
             }
             case DatapointIds.currentAbsolutePositionBlindsPercentage:
             case DatapointIds.setAbsolutePositionBlinds: {
-                if (delegate.getPostition() <= <number><unknown>value) {
+                if (delegate.getPosition() <= <number><unknown>value) {
                     this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "3");
                 } else {
                     this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "2");
@@ -100,12 +100,12 @@ export class FreeAtHomeWindowActuatorChannel implements FreeAtHomeChannelInterfa
                 this.setDatapoint(freeAtHome, DatapointIds.forcePositionInfo, value);
                 switch (<ForcePositionBlind>value) {
                     case ForcePositionBlind.forceUp:
-                        this.preForcedPosition = delegate.getPostition();
+                        this.preForcedPosition = delegate.getPosition();
                         delegate.setRelativeValue(0);
                         this.setDatapoint(freeAtHome, DatapointIds.infoError, "32");
                         break;
                     case ForcePositionBlind.forceDown:
-                        this.preForcedPosition = delegate.getPostition();
+                        this.preForcedPosition = delegate.getPosition();
                         delegate.setRelativeValue(100);
                         this.setDatapoint(freeAtHome, DatapointIds.infoError, "32");
                         break;

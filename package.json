@@ -9,14 +9,16 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "npx tsc -p ."
+    "build": "npx tsc -p .",
+    "spellcheck": "npx cspell 'src/**/*.ts'"
   },
   "keywords": [],
   "author": "Stefan Guelland <Stefan.Guelland@de.abb.com>",
   "license": "ISC",
   "devDependencies": {
-    "@types/ws": "^6.0.2",
     "@types/node": "^12.6.8",
+    "@types/ws": "^6.0.2",
+    "cspell": "^4.0.55",
     "nodemon": "^1.19.1",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3"
