@@ -4,7 +4,7 @@ This api is unstable.
 
 # Install
 
-Npm packages for this project are avalible [here](http://10.3.101.26:4873/-/web/detail/free-at-home).
+Npm packages for this project are available [here](http://10.3.101.26:4873/-/web/detail/free-at-home).
 
 To install this packages run:
 ```
@@ -15,7 +15,7 @@ npm install --registry http://10.3.101.26:4873 free-at-home
 
 # Prepare for local developement
 
-Change prefix to user writeble directory.
+Change prefix to user writeable directory.
 ```
 npm config set prefix ~/.npm
 ```
@@ -36,7 +36,7 @@ For the package that uses this library:
 npm link free-at-home
 ```
 
-Build projekt
+Build project
 ```
 npm run build
 ```
