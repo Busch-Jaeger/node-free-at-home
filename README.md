@@ -13,7 +13,7 @@ npm install --registry http://10.3.101.26:4873 free-at-home
 
 # Example
 
-# Prepare for local developement
+# Prepare for local development
 
 Change prefix to user writeable directory.
 ```
