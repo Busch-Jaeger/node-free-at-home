@@ -174,6 +174,7 @@ type MyEmitter = StrictEventEmitter<EventEmitter, Events>;
 
 export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
     websocket: WebSocket;
+    pingTimer: NodeJS.Timeout;
 
     constructor(host: string) {
         super();
@@ -187,9 +188,16 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         this.websocket.on('error', this.onError.bind(this));
 
         this.websocket.on('message', this.incoming.bind(this));
+
+        this.pingTimer = setInterval(() => {
+            if(  this.websocket.OPEN == this.websocket.readyState) {
+                this.websocket.ping();
+            }
+        },5000);
     }
 
     disconnect() {
+        clearInterval(this.pingTimer);
         this.websocket.removeAllListeners('close');
         this.websocket.close();
     }

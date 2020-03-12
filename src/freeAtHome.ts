@@ -28,7 +28,7 @@ export class FreeAtHome extends EventEmitter {
     constructor(host: string | undefined = process.env.FREEATHOME_API_HOST) {
         super();
         if ("undefined" === typeof host)
-            host = "ws://localhost:8888";
+            host = "  ws+unix:///run/api/vdev/v1/websocket.socket ";
         this.host = host;
         this.freeAtHomeApi = this.connectToFreeAtHomeApi();
 
