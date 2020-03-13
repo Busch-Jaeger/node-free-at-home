@@ -43,7 +43,6 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
 
         this.delegate = delegate;
         delegate.on("positionChanged", this.delegatePositionChanged.bind(this));
-        // delegate.on("stateChanged", this.delegateStateChanged.bind(this));
         delegate.on("isMovingChanged", this.delegateIsMovingChanged.bind(this));
     }
 

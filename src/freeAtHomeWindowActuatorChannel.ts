@@ -11,13 +11,12 @@ enum ForcePositionBlind {
 export declare interface FreeAtHomeWindowActuatorDelegateInterface extends FreeAtHomeDelegateInterface {
     setRelativeValue(value: number): void;
     stopMovement(): void;
+    setIsForced(isForced: boolean): void;
 
-    getPosition(): number;
-    getState(): NodeState;
     setSilentMode(silentMode: boolean): void;
 
     on(event: 'positionChanged', listener: (position: number) => void): this;
-    on(event: 'stateChanged', listener: (state: NodeState) => void): this;
+    on(event: 'isMovingChanged', listener: (isMoving: boolean) => void): this;
 }
 
 export class FreeAtHomeWindowActuatorChannel implements FreeAtHomeChannelInterface {
@@ -29,112 +28,176 @@ export class FreeAtHomeWindowActuatorChannel implements FreeAtHomeChannelInterfa
     preForcedPosition: number;
     delegate: FreeAtHomeWindowActuatorDelegateInterface;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeWindowActuatorDelegateInterface) {
+    position = 0;
+    isMoving = false;
+    isForced = false;
+    isAutoConfirm: boolean;
+
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeWindowActuatorDelegateInterface, isAutoConfirm: boolean = false) {
         this.preForcedPosition = 0;
         this.freeAtHome = freeAtHome;
         this.channelNumber = channelNumber;
         this.serialNumber = serialNumber;
         this.name = name;
+        this.isAutoConfirm = isAutoConfirm;
 
         this.delegate = delegate;
         delegate.on("positionChanged", this.delegatePositionChanged.bind(this));
-        delegate.on("stateChanged", this.delegateStateChanged.bind(this));
+        delegate.on("isMovingChanged", this.delegateIsMovingChanged.bind(this));
     }
 
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: DatapointIds, value: string) {
-        const { channelNumber, serialNumber } = this;
+    setDatapoint(datapointId: DatapointIds, value: string) {
+        const { channelNumber, serialNumber, freeAtHome } = this;
         freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: DatapointIds, value: string): void {
-        const { delegate, preForcedPosition, freeAtHome } = this;
-
+        const { delegate, preForcedPosition } = this;
         switch (<DatapointIds>id) {
             case DatapointIds.moveUpDown: {
+                if (true === this.isForced)
+                    break;
+                if (true === this.isAutoConfirm)
+                    this.isMoving = true;
                 switch (value) {
                     case "1": {
                         delegate.setRelativeValue(100);
-                        this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "3");
+                        if (true === this.isAutoConfirm) {
+                            this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "100");
+                            this.position = 100;
+                        } else {
+                            this.setDatapoint(DatapointIds.infoMoveUpDown, "3");
+                        }
                         break;
                     }
                     case "0": {
                         delegate.setRelativeValue(0);
-                        this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "2");
+                        if (true === this.isAutoConfirm) {
+                            this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "0");
+                            this.position = 0;
+                        } else {
+                            this.setDatapoint(DatapointIds.infoMoveUpDown, "2");
+                        }
                         break;
                     }
                 }
+
                 break;
             }
             case DatapointIds.adjustUpDown: {
-                if (delegate.getState() === NodeState.active) {
+                if (true === this.isForced)
+                    break;
+                if (true === this.isMoving) {
+                    if (true === this.isAutoConfirm)
+                        this.isMoving = false;
                     delegate.stopMovement();
+                    return;
                 }
                 else {
                     switch (value) {
                         case "1": {
                             delegate.setRelativeValue(100);
-                            this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "3");
+                            if (true === this.isAutoConfirm) {
+                                this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "100");
+                                this.position = 100;
+                                this.isMoving = true;
+                            } else {
+                                this.setDatapoint(DatapointIds.infoMoveUpDown, "3");
+                            }
                             break;
                         }
                         case "0": {
                             delegate.setRelativeValue(0);
-                            this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "2");
+                            if (true === this.isAutoConfirm) {
+                                this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "0");
+                                this.position = 0;
+                                this.isMoving = true;
+                            } else {
+                                this.setDatapoint(DatapointIds.infoMoveUpDown, "2");
+                            }
                             break;
+
                         }
                     }
                 }
                 break;
             }
-            case DatapointIds.currentAbsolutePositionBlindsPercentage:
+            case DatapointIds.currentAbsolutePositionBlindsPercentage: // for scene playback
             case DatapointIds.setAbsolutePositionBlinds: {
-                if (delegate.getPosition() <= <number><unknown>value) {
-                    this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "3");
+                if (true === this.isForced)
+                    break;
+                const position = parseInt(value);
+                if (undefined === position)
+                    break;
+                if (true === this.isAutoConfirm) {
+                    this.position = position;
+                    this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, value);
                 } else {
-                    this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "2");
+                    if (this.position <= position) {
+                        this.setDatapoint(DatapointIds.infoMoveUpDown, "3");
+                    } else {
+                        this.setDatapoint(DatapointIds.infoMoveUpDown, "2");
+                    }
                 }
-                delegate.setRelativeValue(<number><unknown>value);
-                this.setDatapoint(freeAtHome, DatapointIds.currentAbsolutePositionBlindsPercentage, value);
+                delegate.setRelativeValue(position);
                 break;
             }
             case DatapointIds.forcePositionBlind: {
-                this.setDatapoint(freeAtHome, DatapointIds.forcePositionInfo, value);
+                this.setDatapoint(DatapointIds.forcePositionInfo, value);
                 switch (<ForcePositionBlind>value) {
                     case ForcePositionBlind.forceUp:
-                        this.preForcedPosition = delegate.getPosition();
+                        this.preForcedPosition = this.position;
+                        if (this.isAutoConfirm)
+                            this.position = 0;
                         delegate.setRelativeValue(0);
-                        this.setDatapoint(freeAtHome, DatapointIds.infoError, "32");
+                        this.setDatapoint(DatapointIds.infoError, "32");
+                        this.isForced = true;
                         break;
                     case ForcePositionBlind.forceDown:
-                        this.preForcedPosition = delegate.getPosition();
+                        this.preForcedPosition = this.position;
+                        if (this.isAutoConfirm)
+                            this.position = 100;
                         delegate.setRelativeValue(100);
-                        this.setDatapoint(freeAtHome, DatapointIds.infoError, "32");
+                        this.setDatapoint(DatapointIds.infoError, "32");
+                        this.isForced = true;
                         break;
                     case ForcePositionBlind.oldPositionAndOff:
                         delegate.setRelativeValue(preForcedPosition);
-                        this.setDatapoint(freeAtHome, DatapointIds.infoError, "0");
-                        this.setDatapoint(freeAtHome, DatapointIds.forcePositionInfo, "0");
+                        if (this.isAutoConfirm)
+                            this.position = this.preForcedPosition;
+                        this.setDatapoint(DatapointIds.infoError, "0");
+                        this.setDatapoint(DatapointIds.forcePositionInfo, "0");
+                        this.isForced = false;
                     case ForcePositionBlind.off:
-                        this.setDatapoint(freeAtHome, DatapointIds.infoError, "0");
+                        this.setDatapoint(DatapointIds.infoError, "0");
+                        this.isForced = false;
                         break;
                 }
+                this.delegate.setIsForced(this.isForced);
             }
         }
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
-        const { freeAtHome } = this;
         const silentMode = (value === "02") ? true : false;
         this.delegate.setSilentMode(silentMode);
     }
 
     delegatePositionChanged(position: number): void {
-        const { freeAtHome } = this;
-        this.setDatapoint(freeAtHome, DatapointIds.currentAbsolutePositionBlindsPercentage, <string><unknown>position);
+        console.log(position);
+        this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, position.toString());
+        this.position = position;
     }
 
     delegateStateChanged(state: NodeState): void {
         const { freeAtHome } = this;
         if (state === NodeState.inactive)
-            this.setDatapoint(freeAtHome, DatapointIds.infoMoveUpDown, "0");
+            this.setDatapoint(DatapointIds.infoMoveUpDown, "0");
+    }
+
+    delegateIsMovingChanged(isMoving: boolean): void {
+        this.isMoving = isMoving;
+        if (isMoving === false)
+            this.setDatapoint(DatapointIds.infoMoveUpDown, "0");
     }
 }
