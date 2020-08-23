@@ -178,7 +178,12 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
 
     constructor(host: string) {
         super();
-        this.websocket = new WebSocket(host);
+        this.websocket = new WebSocket(host, {
+            rejectUnauthorized: false,
+            headers : {
+                Authorization: 'Basic ' + new Buffer("installer"+ ':' + "12345").toString('base64')
+            }
+        });
 
         // this.websocket.on('error', (err: any) => {
         // })
