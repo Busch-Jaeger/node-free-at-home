@@ -1,6 +1,6 @@
-import { FreeAtHomeApi, DatapointIds, ParameterIds } from './freeAtHomeApi';
+import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
 import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { DeviceType } from '.';
+import { VirtualDeviceType } from '.';
 
 export enum WindowState {
     closed,
@@ -14,7 +14,7 @@ export declare interface FreeAtHomeWindowSensorDelegateInterface extends FreeAtH
 }
 
 export class FreeAtHomeWindowSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.windowSensor;
+    deviceType: VirtualDeviceType = "WindowSensor";
     serialNumber: string;
     name: string;
     channelNumber: number;
@@ -38,28 +38,28 @@ export class FreeAtHomeWindowSensorChannel implements FreeAtHomeChannelInterface
     delegateWindowStateChanged(state: WindowState): void {
         switch (state) {
             case WindowState.closed:
-                this.setDatapoint(DatapointIds.windowDoor, "0");
-                this.setDatapoint(DatapointIds.windowDoorPosition, "0");
+                this.setDatapoint(PairingIds.windowDoor, "0");
+                this.setDatapoint(PairingIds.windowDoorPosition, "0");
                 break;
             case WindowState.tilted:
-                this.setDatapoint(DatapointIds.windowDoor, "1");
-                this.setDatapoint(DatapointIds.windowDoorPosition, "1");
+                this.setDatapoint(PairingIds.windowDoor, "1");
+                this.setDatapoint(PairingIds.windowDoorPosition, "1");
                 break;
             case WindowState.opened:
-                this.setDatapoint(DatapointIds.windowDoor, "1");
-                this.setDatapoint(DatapointIds.windowDoorPosition, "0");
+                this.setDatapoint(PairingIds.windowDoor, "1");
+                this.setDatapoint(PairingIds.windowDoorPosition, "0");
                 break;
             default:
                 console.error("unknown window state: %s", state);
         }
     }
 
-    setDatapoint(datapointId: DatapointIds, value: string) {
+    setDatapoint(datapointId: PairingIds, value: string) {
         const { freeAtHome, channelNumber, serialNumber } = this;
         freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void {
+    dataPointChanged(channel: number, id: PairingIds, value: string): void {
     }
 
     parameterChanged(id: ParameterIds, value: string): void {

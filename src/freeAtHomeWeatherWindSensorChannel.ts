@@ -1,6 +1,6 @@
-import { FreeAtHomeApi, DatapointIds, ParameterIds } from './freeAtHomeApi';
+import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
 import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { DeviceType } from '.';
+import { VirtualDeviceType } from '.';
 
 export declare interface FreeAtHomeWeatherWindSensorDelegateInterface extends FreeAtHomeDelegateInterface {
 
@@ -26,7 +26,7 @@ const windAlarmLevels = [
 ]
 
 export class FreeAtHomeWeatherWindSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.weatherWindSensor;
+    deviceType: VirtualDeviceType = "Weather-WindSensor";
     serialNumber: string;
     name: string;
     channelNumber: number;
@@ -49,27 +49,27 @@ export class FreeAtHomeWeatherWindSensorChannel implements FreeAtHomeChannelInte
 
     delegateWindSpeedChanged(windSpeed: number): void {
         const { freeAtHome } = this;
-        this.setDatapoint(freeAtHome, DatapointIds.windSpeed, <string><unknown>windSpeed);
+        this.setDatapoint(freeAtHome, PairingIds.windSpeed, <string><unknown>windSpeed);
 
         const alarmLevel = windAlarmLevels.binaryIndexOf(windSpeed);
         console.log("wind alarm level: %s", alarmLevel);
-        this.setDatapoint(freeAtHome, DatapointIds.windForce, <string><unknown>alarmLevel);
+        this.setDatapoint(freeAtHome, PairingIds.windForce, <string><unknown>alarmLevel);
 
         if (this.windAlarmLevel !== undefined) {
             if (this.windAlarmLevel <= alarmLevel) {
-                this.setDatapoint(freeAtHome, DatapointIds.windAlarm, "1");
+                this.setDatapoint(freeAtHome, PairingIds.windAlarm, "1");
             } else {
-                this.setDatapoint(freeAtHome, DatapointIds.windAlarm, "0");
+                this.setDatapoint(freeAtHome, PairingIds.windAlarm, "0");
             }
         }
     }
 
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: DatapointIds, value: string) {
+    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
         const { channelNumber, serialNumber } = this;
         freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void {
+    dataPointChanged(channel: number, id: PairingIds, value: string): void {
     }
 
     parameterChanged(id: ParameterIds, value: string): void {

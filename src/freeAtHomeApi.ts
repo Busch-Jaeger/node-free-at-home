@@ -1,75 +1,13 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import WebSocket from 'ws';
+import * as api from "./api";
+import nodeFetch from "node-fetch";
 
+import { PairingIds } from "./pairingIds";
+import { ParameterIds } from "./parameterIds";
 
-
-
-export enum DatapointIds {
-    switchOnOff = 0x0001,
-    timedStartStop = 0x0002,
-    forced = 0x0003,
-    timedMovement = 0x0006,
-
-    relativeSetValue = 0x0010,
-    absoluteSetValue = 0x0011,
-    night = 0x0012,
-
-    moveUpDown = 0x20,
-    adjustUpDown = 0x21,
-    setAbsolutePositionBlinds = 0x23,
-    setAbsolutePositionSlats = 0x24,
-    forcePositionBlind = 0x28,
-    windAlarm = 0x25,
-    rainAlarm = 0x27,
-    frostAlarm = 0x26,
-    sceneControl = 0x4,
-    windowDoorPosition = 0x0029,
-    windowDoor = 0x0035,
-
-
-    infoOnOff = 0x0100,
-
-    infoActualDimmingValue = 0x0110,
-    infoMoveUpDown = 0x120,
-    currentAbsolutePositionBlindsPercentage = 0x121,
-    currentAbsolutePositionSlatsPercentage = 0x122,
-    infoError = 0x111,
-    forcePositionInfo = 0x101,
-
-    outdoorTemperature = 0x0400,
-    windForce = 0x0401,
-    brightnessAlarm = 0x0402,
-    brightnessLevel = 0x0403,
-    windSpeed = 0x0404,
-    rainSensorActivation_Percentage = 0x0405,
-    rainSensorFrequency = 0x0406,
-
-}
-
-export enum ParameterIds {
-    dummy = 0x01,
-
-    dimmingActuatorMinBrightness = 0x0004,
-    dimmingActuatorMaxBrightnessDay = 0x0005,
-    dimmingActuatorMaxBrightnessNight = 0x0012,
-    autonomousSwitchOffTimeDuration = 0x0015,
-    dimmerSwitchOnMode = 0x0029,
-
-    biContactType = 0x0010,
-    sensorType = 0x0043,
-
-    brightnessAlertActivationLevel = 0x002B,
-    /** Hysteresis brightness alert **/
-    hysteresis = 0x002C,
-    /** Frost Alarm activation level **/
-    frostAlarmActivationLevel = 0x002D,
-    windForce = 0x002E,
-
-    alertActivationDelay = 0x0047,
-    /** Alert deactivation delay **/
-    dealertActivationDelay = 0x0048,
-}
+export { PairingIds, ParameterIds };
 
 interface Packet {
     type: string,
@@ -80,7 +18,7 @@ interface Packet {
 export interface Datapoint {
     nativeId: string,
     channelId: number,
-    pairingId: DatapointIds,
+    pairingId: PairingIds,
     value: string
 }
 
@@ -92,67 +30,20 @@ export interface Parameter {
 
 interface CreateDevice {
     nativeId: string,
-    deviceType: DeviceType,
+    deviceType: api.VirtualDevice,
     displayName: string
 }
 
-export enum DeviceType {
-    binarySensor = "BinarySensor",
-    blindActuator = "BlindActuator",
-    ceilingFanActuator = "CeilingFanActuator",
-    cODetector = "CODetector",
-    dimActuator = "DimActuator",
-    entity_4A00_0001 = "entity_4A00_0001",
-    entity_4A01_0001 = "entity_4A01_0001",
-    evcharging = "evcharging",
-    fireDetector = "FireDetector",
-    group_4000_0001 = "group_4000_0001",
-    group_4000_0002 = "group_4000_0002",
-    group_4001_0001 = "group_4001_0001",
-    group_4001_0002 = "group_4001_0002",
-    group_4001_0003 = "group_4001_0003",
-    group_4002_0001 = "group_4002_0001",
-    group_4002_0002 = "group_4002_0002",
-    group_4003_0001 = "group_4003_0001",
-    group_4003_0002 = "group_4003_0002",
-    group_4003_0003 = "group_4003_0003",
-    group_4003_0004 = "group_4003_0004",
-    group_4004_0001 = "group_4004_0001",
-    homeApplianceCoffeeMachine = "HomeAppliance-CoffeeMachine",
-    homeApplianceDishwasher = "HomeAppliance-Dishwasher",
-    homeApplianceDryer = "HomeAppliance-Dryer",
-    homeApplianceFreezer = "HomeAppliance-Freezer",
-    homeApplianceFridgeFreezer = "HomeAppliance-FridgeFreezer",
-    homeApplianceFridge = "HomeAppliance-Fridge",
-    homeApplianceHob = "HomeAppliance-Hob",
-    homeApplianceHood = "HomeAppliance-Hood",
-    homeApplianceLaundry = "HomeAppliance-Laundry",
-    homeApplianceOven = "HomeAppliance-Oven",
-    knxDimActuator = "KNX-DimActuator",
-    knxDimSensor = "KNX-DimSensor",
-    knxSwitchingActuator = "KNX-SwitchingActuator",
-    knxSwitchSensor = "KNX-SwitchSensor",
-    powerone_v2 = "powerone_v2",
-    poweroneWoBattery_v2 = "powerone-wo-battery_v2",
-    poweroneWoBattery = "powerone-wo-battery",
-    powerone = "powerone",
-    redarrowXX = "redarrow-x-x",
-    rTC = "RTC",
-    scene_4800_0001 = "scene_4800_0001",
-    scene_4801_0001 = "scene_4801_0001",
-    scene_4802_0001 = "scene_4802_0001",
-    scene_4803_0001 = "scene_4803_0001",
-    scene_4804_0001 = "scene_4804_0001",
-    shutterActuator = "ShutterActuator",
-    switchingActuator = "SwitchingActuator",
-    weatherBrightnessSensor = "Weather-BrightnessSensor",
-    weatherRainSensor = "Weather-RainSensor",
-    weatherStation = "WeatherStation",
-    weatherTemperatureSensor = "Weather-TemperatureSensor",
-    weatherWindSensor = "Weather-WindSensor",
-    windowActuator = "WindowActuator",
-    windowSensor = "WindowSensor",
+interface DatapointObject {
+    device: string;
+    channel: number;
+    dataPoint: number;
+    datapointType: "input" | "output" | undefined;
+    value: any;
+    sysapId: string;
 }
+
+export { VirtualDeviceType } from './api';
 
 export enum ConnectionStates {
     connecting,
@@ -172,33 +63,108 @@ interface Events {
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
 type MyEmitter = StrictEventEmitter<EventEmitter, Events>;
 
+class Device extends EventEmitter {
+    inputPairingToPosition: Map<PairingIds, number> = new Map();
+    inputPositionToPairing: Map<number, PairingIds> = new Map();
+    outputPairingToPosition: Map<PairingIds, number> = new Map();
+    outputPositionToPairing: Map<number, PairingIds> = new Map();
+
+    nativeId: string;
+    serialNumber: string;
+    deviceType: api.VirtualDeviceType;
+
+    constructor(apiDevice: api.Device, serialNumber: string, deviceType: api.VirtualDeviceType) {
+        super();
+
+        this.nativeId = apiDevice.nativeId || "";
+        this.serialNumber = serialNumber;
+        this.deviceType = deviceType;
+
+        const channel = apiDevice.channels?.["ch0000"];
+        {
+            const inputs = channel?.inputs;
+            let i = 0;
+            for (const input in inputs) {
+                const pairingId = inputs[input].pairingID;
+                if (undefined === pairingId)
+                    break;
+                this.inputPairingToPosition.set(pairingId as PairingIds, i);
+                this.inputPositionToPairing.set(i, pairingId as PairingIds);
+                i++;
+            }
+        }
+
+        {
+            const outputs = channel?.outputs;
+            let i = 0;
+            for (const output in outputs) {
+                const pairingId = outputs[output].pairingID;
+                if (undefined === pairingId)
+                    break;
+                this.outputPairingToPosition.set(pairingId as PairingIds, i);
+                this.outputPositionToPairing.set(i, pairingId as PairingIds);
+                i++;
+            }
+        }
+    }
+
+    onDatapointChange(data: DatapointObject) {
+        if ("input" === data.datapointType) {
+            const pairingId = this.inputPositionToPairing.get(data.dataPoint);
+            if (undefined === pairingId)
+                return;
+            const datapoint: Datapoint = {
+                nativeId: this.nativeId,
+                channelId: data.channel,
+                pairingId: pairingId,
+                value: data.value,
+            }
+            this.emit("datapointChanged", datapoint);
+        }
+    }
+}
+
 export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
     websocket: WebSocket;
     pingTimer: NodeJS.Timeout;
+    watchdogTimer: NodeJS.Timeout;
 
-    constructor(host: string) {
+    devicesBySerial: Map<string, Device> = new Map();
+    devicesByNativeId: Map<string, Device> = new Map();
+
+    constructor(baseUrl: string, authentificationHeader: object = {}) {
         super();
-        this.websocket = new WebSocket(host, {
+
+
+        api.defaults.baseUrl = baseUrl
+
+        api.defaults.headers = {
+            ...authentificationHeader
+        };
+
+        api.defaults.fetch = nodeFetch;
+
+        const websocketBaseUrl = baseUrl.replace(/^(http)/, "ws");
+        this.websocket = new WebSocket(websocketBaseUrl + "/api/ws", {
             rejectUnauthorized: false,
-            headers : {
-                Authorization: 'Basic ' + new Buffer("installer"+ ':' + "12345").toString('base64')
+            headers: {
+                ...authentificationHeader
             }
         });
-
-        // this.websocket.on('error', (err: any) => {
-        // })
 
         this.websocket.on('open', this.onOpen.bind(this));
         this.websocket.on('close', this.onClose.bind(this));
         this.websocket.on('error', this.onError.bind(this));
 
-        this.websocket.on('message', this.incoming.bind(this));
+        this.websocket.on('message', this.parseWebsocketData.bind(this));
 
         this.pingTimer = setInterval(() => {
-            if(  this.websocket.OPEN == this.websocket.readyState) {
+            if (this.websocket.OPEN == this.websocket.readyState) {
                 this.websocket.ping();
             }
-        },5000);
+        }, 5000);
+
+        this.watchdogTimer = setInterval(this.onWatchdogTimer.bind(this), 1000 * 120);
     }
 
     disconnect() {
@@ -240,60 +206,133 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         this.websocket.close();
     }
 
-    incoming(data: WebSocket.Data) {
-        // console.log(data);
-        const obj = JSON.parse(data as string);
-        // console.log(obj);
-        const packet = obj as Packet;
-        switch (packet.name) {
-            case "DatapointChanged": {
-                let datapoint = packet.payload as Datapoint;
-                datapoint.pairingId = <number>parseInt((<string><unknown>(datapoint.pairingId)));
-                console.log(datapoint);
-                this.emit("dataPointChanged", datapoint);
-                break;
-            }
-            case "ParameterChanged": {
-                console.log(packet.payload);
-                let parameter = packet.payload as Parameter;
-                parameter.parameterId = <number>parseInt((<string><unknown>(parameter.parameterId)));
-                console.log(parameter.parameterId);
-                this.emit("parameterChanged", parameter);
-                break;
+    parseWebsocketData(data: WebSocket.Data) {
+        const dataObject = JSON.parse(data as string);
+        for (const sysApId in dataObject) {
+            const datapoints = dataObject[sysApId].datapoints;
+            for (const element in datapoints) {
+                const value = datapoints[element];
+                const pathElements = element.split("/");
+                const deviceId = pathElements[0];
+
+                const channel = parseInt(pathElements[1].substring(2), 16);
+
+                const datapoint = pathElements[2];
+
+                const dataPointTypeString = datapoint.substring(0, 3);
+                const dataPointType =
+                    (dataPointTypeString === "idp") ? "input" :
+                        (dataPointTypeString === "odp") ? "output" :
+                            undefined;
+
+
+                const dataPoint = parseInt(datapoint.substring(3), 16);
+
+                const datapointObject: DatapointObject = {
+                    device: deviceId,
+                    channel: channel,
+                    dataPoint: dataPoint,
+                    datapointType: dataPointType,
+                    value: value,
+                    sysapId: sysApId,
+                }
+
+                const device = this.devicesBySerial.get(deviceId);
+                if (undefined !== device) {
+                    device.onDatapointChange(datapointObject);
+                }
             }
         }
     }
 
     setDatapoint(nativeId: string, channel: number, pairingId: number, value: string) {
-        if (this.getConnectionState() !== ConnectionStates.open)
-            return;
-        const packet: Packet = {
-            name: "setDatapoint",
-            type: "rpc",
-            payload: {
-                nativeId: nativeId,
-                channelId: channel,
-                pairingId: pairingId,
-                value: value,
-            }
+        const device = this.devicesByNativeId.get(nativeId);
+        if (undefined !== device) {
+            const channelString = channel.toString(16).padStart(6, "ch0000");
+            const outputPosition = device.outputPairingToPosition.get(pairingId);
+            if (undefined === outputPosition)
+                return;
+            const datapointString = outputPosition.toString(16).padStart(7, "odp0000")
+
+            channelString + "." + datapointString;
+            api.putdatapoint(
+                "00000000-0000-0000-0000-000000000000",
+                device.serialNumber + "." + channelString + "." + datapointString,
+                value
+            );
         }
-        const jsonString = JSON.stringify(packet);
-        this.websocket.send(jsonString);
     }
 
-    createDevice(deviceType: DeviceType, nativeId: string, displayName: string) {
-        if (this.getConnectionState() !== ConnectionStates.open)
-            return;
-        const rpc: Packet = {
-            type: "rpc",
-            name: "createDevice",
-            payload: {
-                deviceType: deviceType,
-                nativeId: nativeId,
-                displayName: displayName
+    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string) {
+        const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
+            "00000000-0000-0000-0000-000000000000",
+            nativeId,
+            {
+                type: deviceType,
+                properties: {
+                    ttl: "180",
+                    displayname: displayName
+                }
+            }
+        );
+        if (res.status === 200) {
+            const dataObject = res.data;
+            console.log(dataObject);
+            for (const sysApId in dataObject) {
+                const devices = dataObject[sysApId].devices;
+                for (const deviceId in devices) {
+                    const responseNativeId = devices[deviceId].serial;
+                    if (responseNativeId === nativeId) {
+                        console.log("Found: " + deviceId);
+                        const deviceRequest = await api.getdevice(
+                            "00000000-0000-0000-0000-000000000000",
+                            deviceId
+                        );
+                        if (deviceRequest.status === 200) {
+                            const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
+                            console.log(device);
+                            if (device !== undefined) {
+                                this.addDevice(deviceId, nativeId, device, deviceType);
+                            }
+                            else {
+                                //error
+                            }
+                        }
+                    }
+                }
             }
         }
-        this.websocket.send(JSON.stringify(rpc));
+    }
+
+    private onDatapointChanged(datapoint: Datapoint) {
+        this.emit("dataPointChanged", datapoint);
+    }
+
+    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType) {
+        const device = new Device(apiDevice, deviceId, deviceType);
+        this.devicesBySerial.set(deviceId, device);
+        this.devicesByNativeId.set(nativeId, device);
+        device.on('datapointChanged', this.onDatapointChanged.bind(this))
+    }
+
+
+
+    private async onWatchdogTimer() {
+        for (const deviceId in this.devicesBySerial) {
+            const device = this.devicesBySerial.get(deviceId);
+            if (undefined === device)
+                return;
+            await api.putApiRestVirtualdeviceBySysapAndSerial(
+                "00000000-0000-0000-0000-000000000000",
+                device.nativeId,
+                {
+                    type: device.deviceType,
+                    properties: {
+                        ttl: "180"
+                    }
+                }
+            );
+        }
     }
 
 }

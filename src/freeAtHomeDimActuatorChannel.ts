@@ -1,6 +1,6 @@
-import { FreeAtHomeApi, DatapointIds, ParameterIds } from './freeAtHomeApi';
+import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
 import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { DeviceType } from '.';
+import { VirtualDeviceType } from '.';
 
 export declare interface FreeAtHomeDimActuatorDelegateInterface extends FreeAtHomeDelegateInterface {
     setAbsoluteValue(value: number): void;
@@ -16,7 +16,7 @@ enum DimmerSwitchOnMode {
 }
 
 export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.dimActuator;
+    deviceType: VirtualDeviceType = "DimActuator";
     channelNumber: number;
     serialNumber: string;
     name: string;
@@ -76,17 +76,17 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
 
             this.delegate.setAbsoluteValue(brightness);
             if (this.isAutoConfirm) {
-                this.setDatapoint(this.freeAtHome, DatapointIds.infoActualDimmingValue, brightness.toString());
+                this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, brightness.toString());
             }
         } else if (value === "0") {
             this.isOn = false;
             this.delegate.setIsOn(false);
             if (this.isAutoConfirm) {
-                this.setDatapoint(this.freeAtHome, DatapointIds.infoActualDimmingValue, "0");
+                this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, "0");
             }
         }
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, DatapointIds.infoOnOff, value);
+            this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, value);
 
         }
     }
@@ -97,7 +97,7 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
                 if (false === this.isOn) {
                     this.isOn = true;
                     this.brightness = this.minBrightness;
-                    this.setDatapoint(this.freeAtHome, DatapointIds.infoOnOff, "1");
+                    this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, "1");
                 }
                 this.brightness += 2;
                 if (this.brightness > 100)
@@ -121,7 +121,7 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
                 if (false === this.isOn) {
                     this.isOn = true;
                     this.brightness = this.minBrightness;
-                    this.setDatapoint(this.freeAtHome, DatapointIds.infoOnOff, "1");
+                    this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, "1");
                 }
                 if (this.intervalTimer !== undefined)
                     clearInterval(this.intervalTimer);
@@ -147,7 +147,7 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
         }
         this.delegate.setAbsoluteValue(this.brightness);
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, DatapointIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
     }
 
@@ -160,57 +160,57 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
             this.brightness = this.minBrightness;
         this.delegate.setAbsoluteValue(this.brightness);
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, DatapointIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
     }
 
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void {
+    dataPointChanged(channel: number, id: PairingIds, value: string): void {
         switch (id) {
-            case DatapointIds.switchOnOff:
+            case PairingIds.switchOnOff:
                 if (false === this.isForced)
                     this.handleSwitchOnOff(value);
                 break;
-            case DatapointIds.relativeSetValue:
+            case PairingIds.relativeSetValue:
                 if (false === this.isForced)
                     this.handleRelativeSetValue(value);
                 break;
-            case DatapointIds.absoluteSetValue:
+            case PairingIds.absoluteSetValue:
                 if (false === this.isForced)
                     this.handleAbsoluteSetValue(value);
                 break;
-            case DatapointIds.timedStartStop:
+            case PairingIds.timedStartStop:
                 break;
-            case DatapointIds.forced:
+            case PairingIds.forced:
                 console.log("forced %s", value);
                 switch (value) {
                     case "0":
                         this.isForced = false;
                         if (undefined !== this.timedMovementTimer)
                             this.handleSwitchOnOff("1");
-                        this.setDatapoint(this.freeAtHome, DatapointIds.forcePositionInfo, "0");
+                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "0");
                         break;
                     case "1":
                         this.isForced = false;
                         if (undefined === this.timedMovementTimer)
                             this.handleSwitchOnOff("0");
-                        this.setDatapoint(this.freeAtHome, DatapointIds.forcePositionInfo, "0");
+                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "0");
                         break;
                     case "2": //forced off
                         this.isForced = true;
-                        this.setDatapoint(this.freeAtHome, DatapointIds.forcePositionInfo, "2");
+                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "2");
                         this.handleSwitchOnOff("0");
                         break;
                     case "3": //forced on
                         this.isForced = true;
-                        this.setDatapoint(this.freeAtHome, DatapointIds.forcePositionInfo, "3");
+                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "3");
                         this.handleSwitchOnOff("1");
                         break;
                 }
                 break;
-            case DatapointIds.night:
+            case PairingIds.night:
                 this.isNight = (value === "1");
                 break;
-            case DatapointIds.timedMovement:
+            case PairingIds.timedMovement:
                 console.log("timedMovement %s", value);
                 if (undefined !== this.timedMovementTimer)
                     clearTimeout(this.timedMovementTimer);
@@ -220,7 +220,7 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
                 this.timedMovementTimer = setTimeout(this.timedMovement.bind(this), this.autonomousSwitchOffTimeDuration);
 
                 break;
-            case DatapointIds.infoActualDimmingValue: { //this is a input datapoint, used for scenes
+            case PairingIds.infoActualDimmingValue: { //this is a input datapoint, used for scenes
                 if (false === this.isForced) {
                     if (value === "0")
                         this.handleSwitchOnOff("0");
@@ -282,7 +282,7 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
             this.brightness = 100;
         this.delegate.setAbsoluteValue(this.brightness);
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, DatapointIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
         console.log("test2" + this.brightness);
     }
@@ -295,7 +295,7 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
             this.brightness = this.minBrightness;
         this.delegate.setAbsoluteValue(this.brightness);
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, DatapointIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
     }
 
@@ -306,14 +306,14 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
     }
 
     delegateValueChanged(value: number): void {
-        this.setDatapoint(this.freeAtHome, DatapointIds.infoActualDimmingValue, <string><unknown>value);
+        this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, <string><unknown>value);
     }
 
     delegateIsOnChanged(isOn: boolean): void {
-        this.setDatapoint(this.freeAtHome, DatapointIds.infoOnOff, (isOn) ? "1" : "0");
+        this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, (isOn) ? "1" : "0");
     }
 
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: DatapointIds, value: string) {
+    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
         const { channelNumber, serialNumber } = this;
         freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }

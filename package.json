@@ -9,22 +9,26 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "npx tsc -p .",
-    "spellcheck": "npx cspell 'src/**/*.ts'"
+    "build": "node_modules/.bin/tsc -p .",
+    "spellcheck": "node_modules/.bin/cspell 'src/**/*.ts'",
+    "generateApi": "node_modules/.bin/oazapfts http://localhost/fhapi/v1/openapi.yaml src/api.ts"
   },
   "keywords": [],
   "author": "Stefan Guelland <Stefan.Guelland@de.abb.com>",
   "license": "ISC",
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^1.0.18-4.3.1",
     "@types/node": "^12.6.8",
     "@types/ws": "^6.0.2",
     "cspell": "^4.0.55",
     "nodemon": "^1.19.1",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "bufferutil": "^4.0.1",
+    "node-fetch": "^2.6.1",
+    "oazapfts": "^3.1.2",
     "strict-event-emitter-types": "^2.0.0",
     "utf-8-validate": "^5.0.2",
     "ws": "^7.1.1"

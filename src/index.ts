@@ -1,9 +1,8 @@
-import { FreeAtHome } from './freeAtHome';
-import { FreeAtHomeApi, DeviceType, Datapoint, Parameter } from './freeAtHomeApi';
-import { FreeAtHomeChannelInterface, FreeAtHomeOnOffDelegateInterface, FreeAtHomeRawDelegateInterface, FreeAtHomeWeatherBrightnessSensorDelegateInterface, NodeState, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
+export { FreeAtHome } from './freeAtHome';
+export { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
+export { FreeAtHomeChannelInterface, FreeAtHomeOnOffDelegateInterface, FreeAtHomeRawDelegateInterface, FreeAtHomeWeatherBrightnessSensorDelegateInterface, NodeState, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
 
-import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface } from './freeAtHomeSwitchSensor';
-export { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface };
+export { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface } from './freeAtHomeSwitchSensor';
 
 export { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface } from './freeAtHomeWeatherTemperatureSensorChannel';
 export { freeAtHomeWeatherRainSensorChannel, FreeAtHomeWeatherRainSensorDelegateInterface } from './freeAtHomeWeatherRainSensorChannel';
@@ -14,12 +13,5 @@ export { FreeAtHomeWindowSensorChannel, FreeAtHomeWindowSensorDelegateInterface,
 export { FreeAtHomeBlindActuatorChannel, FreeAtHomeBlindActuatorDelegateInterface } from './freeAtHomeBlindActuatorChannel'
 export { FreeAtHomeWindowActuatorChannel, FreeAtHomeWindowActuatorDelegateInterface } from './freeAtHomeWindowActuatorChannel';
 
-export { FreeAtHome };
-export { FreeAtHomeApi, Datapoint, Parameter, DeviceType };
-export { FreeAtHomeDelegateInterface };
-export { FreeAtHomeChannelInterface, FreeAtHomeOnOffDelegateInterface, FreeAtHomeRawDelegateInterface, FreeAtHomeWeatherBrightnessSensorDelegateInterface, NodeState };
-
-
-import { ParameterIds, DatapointIds } from './freeAtHomeApi';
-
-export { ParameterIds, DatapointIds };
+export { ParameterIds } from './parameterIds';
+export { PairingIds } from './pairingIds';

@@ -1,4 +1,4 @@
-import { DatapointIds, ParameterIds, FreeAtHomeApi, DeviceType } from "./freeAtHomeApi"
+import { PairingIds, ParameterIds, FreeAtHomeApi, VirtualDeviceType } from "./freeAtHomeApi"
 
 export declare interface FreeAtHomeDelegateInterface {
 }
@@ -10,6 +10,8 @@ export enum NodeState {
 
 export declare interface FreeAtHomeOnOffDelegateInterface extends FreeAtHomeDelegateInterface {
     setOn(value: boolean): void;
+
+    on(event: 'isOnChanged', listener: (isOn: boolean) => void): this;
 }
 
 export declare interface FreeAtHomeWeatherBrightnessSensorDelegateInterface extends FreeAtHomeDelegateInterface {
@@ -18,20 +20,20 @@ export declare interface FreeAtHomeWeatherBrightnessSensorDelegateInterface exte
 }
 
 export declare interface FreeAtHomeRawDelegateInterface extends FreeAtHomeDelegateInterface {
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void;
+    dataPointChanged(channel: number, id: PairingIds, value: string): void;
     parameterChanged(id: ParameterIds, value: string): void;
 
-    on(event: 'datapointChanged', listener: (datapointId: DatapointIds, value: string) => void): this;
+    on(event: 'datapointChanged', listener: (datapointId: PairingIds, value: string) => void): this;
 }
 
 export declare interface FreeAtHomeChannelInterface {
     delegate: FreeAtHomeDelegateInterface;
     freeAtHome: FreeAtHomeApi;
-    deviceType: DeviceType;
+    deviceType: VirtualDeviceType;
 
     serialNumber: string;
     name: string;
 
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void;
+    dataPointChanged(channel: number, id: PairingIds, value: string): void;
     parameterChanged(id: ParameterIds, value: string): void;
 }

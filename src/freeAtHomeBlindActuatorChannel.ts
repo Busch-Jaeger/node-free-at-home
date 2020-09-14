@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, DatapointIds, ParameterIds, DeviceType } from './freeAtHomeApi';
+import { FreeAtHomeApi, PairingIds, ParameterIds, VirtualDeviceType } from './freeAtHomeApi';
 import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
 
 enum ForcePositionBlind {
@@ -20,7 +20,7 @@ export declare interface FreeAtHomeBlindActuatorDelegateInterface extends FreeAt
 }
 
 export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.blindActuator;
+    deviceType: VirtualDeviceType = "BlindActuator";
     serialNumber: string;
     name: string;
     channelNumber: number;
@@ -46,15 +46,15 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
         delegate.on("isMovingChanged", this.delegateIsMovingChanged.bind(this));
     }
 
-    setDatapoint(datapointId: DatapointIds, value: string) {
+    setDatapoint(datapointId: PairingIds, value: string) {
         const { channelNumber, serialNumber, freeAtHome } = this;
         freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void {
+    dataPointChanged(channel: number, id: PairingIds, value: string): void {
         const { delegate, preForcedPosition } = this;
-        switch (<DatapointIds>id) {
-            case DatapointIds.moveUpDown: {
+        switch (<PairingIds>id) {
+            case PairingIds.moveUpDown: {
                 if (true === this.isForced)
                     break;
                 if (true === this.isAutoConfirm)
@@ -63,20 +63,20 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                     case "1": {
                         delegate.setRelativeValue(100);
                         if (true === this.isAutoConfirm) {
-                            this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "100");
+                            this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "100");
                             this.position = 100;
                         } else {
-                            this.setDatapoint(DatapointIds.infoMoveUpDown, "3");
+                            this.setDatapoint(PairingIds.infoMoveUpDown, "3");
                         }
                         break;
                     }
                     case "0": {
                         delegate.setRelativeValue(0);
                         if (true === this.isAutoConfirm) {
-                            this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "0");
+                            this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "0");
                             this.position = 0;
                         } else {
-                            this.setDatapoint(DatapointIds.infoMoveUpDown, "2");
+                            this.setDatapoint(PairingIds.infoMoveUpDown, "2");
                         }
                         break;
                     }
@@ -84,7 +84,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
 
                 break;
             }
-            case DatapointIds.adjustUpDown: {
+            case PairingIds.adjustUpDown: {
                 if (true === this.isForced)
                     break;
                 if (true === this.isMoving) {
@@ -98,22 +98,22 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                         case "1": {
                             delegate.setRelativeValue(100);
                             if (true === this.isAutoConfirm) {
-                                this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "100");
+                                this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "100");
                                 this.position = 100;
                                 this.isMoving = true;
                             } else {
-                                this.setDatapoint(DatapointIds.infoMoveUpDown, "3");
+                                this.setDatapoint(PairingIds.infoMoveUpDown, "3");
                             }
                             break;
                         }
                         case "0": {
                             delegate.setRelativeValue(0);
                             if (true === this.isAutoConfirm) {
-                                this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, "0");
+                                this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "0");
                                 this.position = 0;
                                 this.isMoving = true;
                             } else {
-                                this.setDatapoint(DatapointIds.infoMoveUpDown, "2");
+                                this.setDatapoint(PairingIds.infoMoveUpDown, "2");
                             }
                             break;
 
@@ -122,8 +122,8 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                 }
                 break;
             }
-            case DatapointIds.currentAbsolutePositionBlindsPercentage: // for scene playback
-            case DatapointIds.setAbsolutePositionBlinds: {
+            case PairingIds.currentAbsolutePositionBlindsPercentage: // for scene playback
+            case PairingIds.setAbsolutePositionBlinds: {
                 if (true === this.isForced)
                     break;
                 const position = parseInt(value);
@@ -131,26 +131,26 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                     break;
                 if (true === this.isAutoConfirm) {
                     this.position = position;
-                    this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, value);
+                    this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, value);
                 } else {
                     if (this.position <= position) {
-                        this.setDatapoint(DatapointIds.infoMoveUpDown, "3");
+                        this.setDatapoint(PairingIds.infoMoveUpDown, "3");
                     } else {
-                        this.setDatapoint(DatapointIds.infoMoveUpDown, "2");
+                        this.setDatapoint(PairingIds.infoMoveUpDown, "2");
                     }
                 }
                 delegate.setRelativeValue(position);
                 break;
             }
-            case DatapointIds.forcePositionBlind: {
-                this.setDatapoint(DatapointIds.forcePositionInfo, value);
+            case PairingIds.forcePositionBlind: {
+                this.setDatapoint(PairingIds.forcePositionInfo, value);
                 switch (<ForcePositionBlind>value) {
                     case ForcePositionBlind.forceUp:
                         this.preForcedPosition = this.position;
                         if (this.isAutoConfirm)
                             this.position = 0;
                         delegate.setRelativeValue(0);
-                        this.setDatapoint(DatapointIds.infoError, "32");
+                        this.setDatapoint(PairingIds.infoError, "32");
                         this.isForced = true;
                         break;
                     case ForcePositionBlind.forceDown:
@@ -158,18 +158,18 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                         if (this.isAutoConfirm)
                             this.position = 100;
                         delegate.setRelativeValue(100);
-                        this.setDatapoint(DatapointIds.infoError, "32");
+                        this.setDatapoint(PairingIds.infoError, "32");
                         this.isForced = true;
                         break;
                     case ForcePositionBlind.oldPositionAndOff:
                         delegate.setRelativeValue(preForcedPosition);
                         if (this.isAutoConfirm)
                             this.position = this.preForcedPosition;
-                        this.setDatapoint(DatapointIds.infoError, "0");
-                        this.setDatapoint(DatapointIds.forcePositionInfo, "0");
+                        this.setDatapoint(PairingIds.infoError, "0");
+                        this.setDatapoint(PairingIds.forcePositionInfo, "0");
                         this.isForced = false;
                     case ForcePositionBlind.off:
-                        this.setDatapoint(DatapointIds.infoError, "0");
+                        this.setDatapoint(PairingIds.infoError, "0");
                         this.isForced = false;
                         break;
                 }
@@ -185,19 +185,19 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
 
     delegatePositionChanged(position: number): void {
         console.log(position);
-        this.setDatapoint(DatapointIds.currentAbsolutePositionBlindsPercentage, position.toString());
+        this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, position.toString());
         this.position = position;
     }
 
     delegateStateChanged(state: NodeState): void {
         const { freeAtHome } = this;
         if (state === NodeState.inactive)
-            this.setDatapoint(DatapointIds.infoMoveUpDown, "0");
+            this.setDatapoint(PairingIds.infoMoveUpDown, "0");
     }
 
     delegateIsMovingChanged(isMoving: boolean): void {
         this.isMoving = isMoving;
         if (isMoving === false)
-            this.setDatapoint(DatapointIds.infoMoveUpDown, "0");
+            this.setDatapoint(PairingIds.infoMoveUpDown, "0");
     }
 }

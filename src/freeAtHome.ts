@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { FreeAtHomeApi, DeviceType, Datapoint, Parameter } from './freeAtHomeApi';
+import { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
 
 import { FreeAtHomeBlindActuatorChannel, FreeAtHomeBlindActuatorDelegateInterface } from './freeAtHomeBlindActuatorChannel';
 import { FreeAtHomeDimActuatorChannel, FreeAtHomeDimActuatorDelegateInterface } from './freeAtHomeDimActuatorChannel'
@@ -8,11 +8,11 @@ import { FreeAtHomeOnOffChannel } from './freeAtHomeOnOffChannel';
 import { FreeAtHomeRawChannel } from './freeAtHomeRawChannel';
 
 import { FreeAtHomeWeatherBrightnessSensorChannel } from './freeAtHomeWeatherBrightnessSensorChannel';
-import { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface} from './freeAtHomeWeatherTemperatureSensorChannel';
+import { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface } from './freeAtHomeWeatherTemperatureSensorChannel';
 import { freeAtHomeWeatherRainSensorChannel, FreeAtHomeWeatherRainSensorDelegateInterface } from './freeAtHomeWeatherRainSensorChannel';
 import { FreeAtHomeWeatherWindSensorChannel, FreeAtHomeWeatherWindSensorDelegateInterface } from './freeAtHomeWeatherWindSensorChannel'
-import { FreeAtHomeWindowSensorChannel, FreeAtHomeWindowSensorDelegateInterface} from './freeAtHomeWindowSensorChannel';
-import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface} from './freeAtHomeSwitchSensor';
+import { FreeAtHomeWindowSensorChannel, FreeAtHomeWindowSensorDelegateInterface } from './freeAtHomeWindowSensorChannel';
+import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface } from './freeAtHomeSwitchSensor';
 import {
     FreeAtHomeChannelInterface,
     FreeAtHomeOnOffDelegateInterface,
@@ -22,14 +22,21 @@ import {
 
 export class FreeAtHome extends EventEmitter {
     freeAtHomeApi: FreeAtHomeApi;
-    host: string;
+    baseUrl: string;
+    authentificationHeader: object;
     nodesBySerial: Map<string, FreeAtHomeChannelInterface>
 
-    constructor(host: string | undefined = process.env.FREEATHOME_API_HOST) {
+
+    constructor(baseUrl: string | undefined = undefined) {
         super();
-        if ("undefined" === typeof host)
-            host = "  ws+unix:///run/api/vdev/v1/websocket.socket ";
-        this.host = host;
+
+        this.baseUrl = baseUrl || process.env.FREEATHOME_API_BASE_URL || "http://localhost/fhapi/v1";
+        const username: string = process.env.FREEATHOME_API_USERNAME || "installer";
+        const password: string = process.env.FREEATHOME_API_PASSWORD || "12345";
+        this.authentificationHeader = {
+            Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64')
+        };
+
         this.freeAtHomeApi = this.connectToFreeAtHomeApi();
 
         this.nodesBySerial = new Map();
@@ -38,7 +45,8 @@ export class FreeAtHome extends EventEmitter {
 
 
     connectToFreeAtHomeApi(): FreeAtHomeApi {
-        this.freeAtHomeApi = new FreeAtHomeApi(this.host);
+
+        this.freeAtHomeApi = new FreeAtHomeApi(this.baseUrl, this.authentificationHeader);
 
         this.freeAtHomeApi.on('close', this.onClose.bind(this));
         this.freeAtHomeApi.on('open', this.onOpen.bind(this));
@@ -91,14 +99,14 @@ export class FreeAtHome extends EventEmitter {
         this.addDevice(device);
     }
 
-    createOnOffDevice(serialNumber: string, name: string, delegate: FreeAtHomeOnOffDelegateInterface) {
+    createOnOffDevice(serialNumber: string, name: string, delegate: FreeAtHomeOnOffDelegateInterface, isAutoConfirm: boolean = false) {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
-        const device = new FreeAtHomeOnOffChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+        const device = new FreeAtHomeOnOffChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate, isAutoConfirm);
         this.addDevice(device);
     }
 
-    createRawDevice(serialNumber: string, name: string, deviceType: DeviceType, delegate: FreeAtHomeRawDelegateInterface) {
+    createRawDevice(serialNumber: string, name: string, deviceType: VirtualDeviceType, delegate: FreeAtHomeRawDelegateInterface) {
         if (true === this.nodesBySerial.has(serialNumber))
             return;
         const device = new FreeAtHomeRawChannel(this.freeAtHomeApi, 0, serialNumber, name, deviceType, delegate);
@@ -148,7 +156,7 @@ export class FreeAtHome extends EventEmitter {
     }
 
     addDevice(device: FreeAtHomeChannelInterface) {
-        const {serialNumber, name, deviceType } = device;
+        const { serialNumber, name, deviceType } = device;
         this.freeAtHomeApi.createDevice(deviceType, serialNumber, name);
         this.nodesBySerial.set(serialNumber, device);
     }

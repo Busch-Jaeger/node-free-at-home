@@ -1,6 +1,6 @@
-import { FreeAtHomeApi, DatapointIds, ParameterIds } from './freeAtHomeApi';
+import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
 import { FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { DeviceType } from '.';
+import { VirtualDeviceType } from '.';
 
 export declare interface FreeAtHomeWeatherRainSensorDelegateInterface extends FreeAtHomeDelegateInterface {
 
@@ -8,7 +8,7 @@ export declare interface FreeAtHomeWeatherRainSensorDelegateInterface extends Fr
 }
 
 export class freeAtHomeWeatherRainSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.weatherRainSensor;
+    deviceType: VirtualDeviceType = "Weather-RainSensor";
     serialNumber: string;
     name: string;
     channelNumber: number;
@@ -31,15 +31,15 @@ export class freeAtHomeWeatherRainSensorChannel implements FreeAtHomeChannelInte
     delegateIsRainingChanged(isRaining: boolean): void {
         const { freeAtHome } = this;
         const value = (true === isRaining) ? "1" : "0";
-        this.setDatapoint(DatapointIds.rainAlarm, value);
+        this.setDatapoint(PairingIds.rainAlarm, value);
     }
 
-    setDatapoint(datapointId: DatapointIds, value: string) {
+    setDatapoint(datapointId: PairingIds, value: string) {
         const { channelNumber, serialNumber, freeAtHome } = this;
         freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void {
+    dataPointChanged(channel: number, id: PairingIds, value: string): void {
     }
 
     parameterChanged(id: ParameterIds, value: string): void {

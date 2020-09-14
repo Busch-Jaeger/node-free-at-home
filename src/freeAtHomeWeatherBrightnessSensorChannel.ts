@@ -1,9 +1,9 @@
-import { FreeAtHomeApi, DatapointIds, ParameterIds } from './freeAtHomeApi';
+import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
 import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeWeatherBrightnessSensorDelegateInterface } from './freeAtHomeDeviceInterface';
-import { DeviceType } from '.';
+import { VirtualDeviceType } from '.';
 
 export class FreeAtHomeWeatherBrightnessSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: DeviceType = DeviceType.weatherBrightnessSensor;
+    deviceType: VirtualDeviceType = "Weather-BrightnessSensor";
     serialNumber: string;
     name: string;
     channelNumber: number;
@@ -26,23 +26,23 @@ export class FreeAtHomeWeatherBrightnessSensorChannel implements FreeAtHomeChann
 
     delegateBrightnessChanged(brightness: number): void {
         const { freeAtHome } = this;
-        this.setDatapoint(freeAtHome, DatapointIds.brightnessLevel, <string><unknown>brightness);
+        this.setDatapoint(freeAtHome, PairingIds.brightnessLevel, <string><unknown>brightness);
         console.log("new brightness %s", brightness);
 
         if (this.alertActivationLevel !== undefined) {
             if (this.alertActivationLevel <= brightness)
-                this.setDatapoint(freeAtHome, DatapointIds.brightnessAlarm, "1");
+                this.setDatapoint(freeAtHome, PairingIds.brightnessAlarm, "1");
             else
-                this.setDatapoint(freeAtHome, DatapointIds.brightnessAlarm, "0");
+                this.setDatapoint(freeAtHome, PairingIds.brightnessAlarm, "0");
         }
     }
 
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: DatapointIds, value: string) {
+    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
         const { channelNumber, serialNumber } = this;
         freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
-    dataPointChanged(channel: number, id: DatapointIds, value: string): void {
+    dataPointChanged(channel: number, id: PairingIds, value: string): void {
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
