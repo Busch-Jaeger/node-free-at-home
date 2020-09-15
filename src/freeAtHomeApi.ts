@@ -132,14 +132,14 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
     devicesBySerial: Map<string, Device> = new Map();
     devicesByNativeId: Map<string, Device> = new Map();
 
-    constructor(baseUrl: string, authentificationHeader: object = {}) {
+    constructor(baseUrl: string, authenticationHeader: object = {}) {
         super();
 
 
         api.defaults.baseUrl = baseUrl
 
         api.defaults.headers = {
-            ...authentificationHeader
+            ...authenticationHeader
         };
 
         api.defaults.fetch = nodeFetch;
@@ -148,7 +148,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         this.websocket = new WebSocket(websocketBaseUrl + "/api/ws", {
             rejectUnauthorized: false,
             headers: {
-                ...authentificationHeader
+                ...authenticationHeader
             }
         });
 
@@ -276,7 +276,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         );
     }
 
-    async setDEviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string) {
+    async setDeviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string) {
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
             "00000000-0000-0000-0000-000000000000",
             nativeId,

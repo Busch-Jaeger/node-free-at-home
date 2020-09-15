@@ -59,6 +59,6 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
     }
 
     public triggerKeepAlive() {
-        this.freeAtHome.setDEviceToResponsive(this.deviceType, this.serialNumber);
+        this.freeAtHome.setDeviceToResponsive(this.deviceType, this.serialNumber);
     }
 }

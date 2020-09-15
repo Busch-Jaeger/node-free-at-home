@@ -102,7 +102,7 @@ export enum PairingIds {
     AL_BOOL_VALUE_3 = 0x0282,	//	Proximity status
     AL_SCALING_VALUE_1 = 0x0290,	//	Brightness sensor
     AL_SCALING_VALUE_2 = 0x0291,	//	Last touch
-    AL_SCALING_VALUE_3 = 0x0292,	//	LED backlighting night mode
+    AL_SCALING_VALUE_3 = 0x0292,	//	LED backlight night mode
     AL_LOCATOR_BEEP = 0x02C0,	//	Locator beep
     AL_SWITCH_TEST_ALARM = 0x02C1,	//	Switch test alarm
     AL_FIRE_ALARM_ACTIVE = 0x02C3,	//	Fire alarm active
@@ -149,8 +149,8 @@ export enum PairingIds {
     AL_SOC = 0x04AC,	//	Battery level
     AL_BATTERY_POWER = 0x04AD,	//	Battery power
     AL_BOOST_ENABLE_REQUEST = 0x04B0,	//	Boost
-    AL_STOP_CHARGING_SESSIONS_REQUEST = 0x04B1,	//	Stop charging reuqest
-    AL_STOP_ENABLE_CHARGING_REQUEST = 0x04B2,	//	Enable charging reuqest
+    AL_STOP_CHARGING_SESSIONS_REQUEST = 0x04B1,	//	Stop charging request
+    AL_STOP_ENABLE_CHARGING_REQUEST = 0x04B2,	//	Enable charging request
     AL_INFO_BOOST = 0x04B3,	//	Info boost
     AL_INFO_WALLBOX_STATUS = 0x04B4,	//	Info wallbox status
     AL_INFO_CHARGING = 0x04B5,	//	Info charging
