@@ -4,7 +4,7 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "https://tfsb.abb.com/tfs/EPBP/AccessPoint/_git/node-free-at-home"
+    "url": "https://dev.azure.com/ABB-BHC-BHAS/DEBJE-FreeAtHomeExtensions/_git/node-free-at-home"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
