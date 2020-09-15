@@ -15,5 +15,7 @@ export { FreeAtHomeWeatherWindSensorChannel } from './freeAtHomeWeatherWindSenso
 export { FreeAtHomeWindowSensorChannel } from './freeAtHomeWindowSensorChannel';
 export { FreeAtHomeSwitchSensorChannel } from './freeAtHomeSwitchSensor';
 
+export { MediaPlayerChannel } from './mediaPlayerChannel';
+
 export { ParameterIds } from './parameterIds';
 export { PairingIds } from './pairingIds';

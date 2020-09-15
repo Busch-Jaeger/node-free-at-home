@@ -13,6 +13,9 @@ import { freeAtHomeWeatherRainSensorChannel } from './freeAtHomeWeatherRainSenso
 import { FreeAtHomeWeatherWindSensorChannel } from './freeAtHomeWeatherWindSensorChannel'
 import { FreeAtHomeWindowSensorChannel } from './freeAtHomeWindowSensorChannel';
 import { FreeAtHomeSwitchSensorChannel } from './freeAtHomeSwitchSensor';
+
+import { MediaPlayerChannel } from '.'
+
 import { Channel } from './channel';
 
 export class FreeAtHome extends EventEmitter {
@@ -164,6 +167,15 @@ export class FreeAtHome extends EventEmitter {
         if (exsistingDevice !== undefined)
             return <FreeAtHomeSwitchSensorChannel>exsistingDevice;
         const device = new FreeAtHomeSwitchSensorChannel(this.freeAtHomeApi, 0, serialNumber, name);
+        this.addDevice(device);
+        return device;
+    }
+
+    createMediaPlayerDevice(serialNumber: string, name: string): MediaPlayerChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <MediaPlayerChannel>exsistingDevice;
+        const device = new MediaPlayerChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
         return device;
     }
