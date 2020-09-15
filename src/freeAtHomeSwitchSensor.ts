@@ -1,55 +1,37 @@
 import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { VirtualDeviceType } from '.';
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
 
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
 
-export declare interface FreeAtHomeSwitchSensorDelegateInterface extends FreeAtHomeDelegateInterface {
-    setInfoOnOff(value: boolean): void;
-    on(event: 'onOffChanged', listener: (isOn: boolean) => void): this;
+interface ChannelEvents {
+    infoOnOffChanged(value: boolean);
 }
 
-export class FreeAtHomeSwitchSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType = "KNX-SwitchSensor";
-    serialNumber: string;
-    name: string;
-    channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
-    delegate: FreeAtHomeSwitchSensorDelegateInterface;
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeSwitchSensorDelegateInterface) {
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-
-        this.delegate = delegate;
-
-        delegate.on("onOffChanged", this.delegateOnOffChanged.bind(this));
+export class FreeAtHomeSwitchSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
+        super(freeAtHome, channelNumber, serialNumber, name, "KNX-SwitchSensor");
     }
 
-    delegateOnOffChanged(isOn: boolean): void {
+    onOffChanged(isOn: boolean): void {
         const { freeAtHome } = this;
         const value = (true === isOn) ? "1" : "0";
-        this.setDatapoint(freeAtHome, PairingIds.switchOnOff, value);
-    }
-
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
+        this.setDatapoint(PairingIds.switchOnOff, value);
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {
-        const { delegate } = this;
         switch (<PairingIds>id) {
             case PairingIds.infoOnOff: {
                 switch (value) {
                     case "1": {
-                        delegate.setInfoOnOff(true);
+                        this.emit("infoOnOffChanged", true);
                         break;
                     }
                     case "0": {
-                        delegate.setInfoOnOff(false);
+                        this.emit("infoOnOffChanged", true);
                         break;
                     }
                 }
@@ -59,22 +41,6 @@ export class FreeAtHomeSwitchSensorChannel implements FreeAtHomeChannelInterface
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
-
-        // switch (id) {
-        //     case ParameterIds.brightnessAlertActivationLevel:
-        //         this.alertActivationLevel = <number>parseInt(value);
-        //         console.log("Parameter brightness changed %s", this.alertActivationLevel);
-        //         break;
-        //     case ParameterIds.hysteresis:
-        //         break;
-        //     case ParameterIds.alertActivationDelay:
-
-        //         break;
-        //     case ParameterIds.dealertActivationDelay:
-
-        //         break;
-        //     default:
-        //         console.log("unexpected Parameter id: %s value: %s", id, value);
-        // }
     }
+
 }

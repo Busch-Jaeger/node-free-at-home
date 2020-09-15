@@ -1,41 +1,36 @@
 import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
-import { FreeAtHomeChannelInterface, FreeAtHomeRawDelegateInterface } from './freeAtHomeDeviceInterface';
 import { VirtualDeviceType } from '.';
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
 
-export class FreeAtHomeRawChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType;
-    serialNumber: string;
-    name: string;
-    channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
-    delegate: FreeAtHomeRawDelegateInterface;
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, deviceType: VirtualDeviceType, delegate: FreeAtHomeRawDelegateInterface,) {
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-        this.deviceType = deviceType;
+interface ChannelEvents {
+    datapointChanged(id: PairingIds, value: string): void;
+    parameterChanged(id: ParameterIds, value: string): void;
+}
 
-        this.delegate = delegate;
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-        delegate.on("datapointChanged", this.delegateDatapointChanged.bind(this));
+export class FreeAtHomeRawChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, deviceType: VirtualDeviceType) {
+        super(freeAtHome, channelNumber, serialNumber, name, deviceType);
     }
 
-    delegateDatapointChanged(datapointId: PairingIds, value: string): void {
-        const { delegate, channelNumber, serialNumber } = this;
-        this.freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
+    public setOutputDatapoint(datapointId: PairingIds, value: string): void {
+        this.setDatapoint(datapointId, value);
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {
-        const { delegate } = this;
+        // const { delegate } = this;
         console.log("datapoint changed %s %s", channel, id);
-        delegate.dataPointChanged(channel, id, value);
+        this.emit("datapointChanged", id, value);
+        // delegate.dataPointChanged(channel, id, value);
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
-        const { delegate } = this;
         console.log("debug: %s %s", id, value);
-        delegate.parameterChanged(id, value);
+        this.emit("parameterChanged", id, value);
     }
 }

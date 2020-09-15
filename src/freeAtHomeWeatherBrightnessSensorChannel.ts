@@ -1,45 +1,32 @@
 import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeWeatherBrightnessSensorDelegateInterface } from './freeAtHomeDeviceInterface';
-import { VirtualDeviceType } from '.';
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
 
-export class FreeAtHomeWeatherBrightnessSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType = "Weather-BrightnessSensor";
-    serialNumber: string;
-    name: string;
-    channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
-    delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface;
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
 
-    alertActivationLevel: number | undefined;
+interface ChannelEvents {
+}
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface) {
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-        this.alertActivationLevel = undefined
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-        this.delegate = delegate;
-
-        delegate.on("brightnessChanged", this.delegateBrightnessChanged.bind(this));
+export class FreeAtHomeWeatherBrightnessSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
+        super(freeAtHome, channelNumber, serialNumber, name, "Weather-TemperatureSensor");
     }
 
-    delegateBrightnessChanged(brightness: number): void {
-        const { freeAtHome } = this;
-        this.setDatapoint(freeAtHome, PairingIds.brightnessLevel, <string><unknown>brightness);
+    alertActivationLevel: number | undefined = undefined;
+
+    setBrightnessLevel(brightness: number): void {
+        this.setDatapoint(PairingIds.brightnessLevel, <string><unknown>brightness);
         console.log("new brightness %s", brightness);
 
         if (this.alertActivationLevel !== undefined) {
             if (this.alertActivationLevel <= brightness)
-                this.setDatapoint(freeAtHome, PairingIds.brightnessAlarm, "1");
+                this.setDatapoint(PairingIds.brightnessAlarm, "1");
             else
-                this.setDatapoint(freeAtHome, PairingIds.brightnessAlarm, "0");
+                this.setDatapoint(PairingIds.brightnessAlarm, "0");
         }
-    }
-
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {

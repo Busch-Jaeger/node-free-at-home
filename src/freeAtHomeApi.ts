@@ -263,6 +263,32 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         }
     }
 
+    async setDeviceToUnresponsive(deviceType: api.VirtualDeviceType, nativeId: string) {
+        const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
+            "00000000-0000-0000-0000-000000000000",
+            nativeId,
+            {
+                type: deviceType,
+                properties: {
+                    ttl: "0",
+                }
+            }
+        );
+    }
+
+    async setDEviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string) {
+        const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
+            "00000000-0000-0000-0000-000000000000",
+            nativeId,
+            {
+                type: deviceType,
+                properties: {
+                    ttl: "180",
+                }
+            }
+        );
+    }
+
     async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string) {
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
             "00000000-0000-0000-0000-000000000000",

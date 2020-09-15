@@ -1,30 +1,25 @@
 import { EventEmitter } from 'events';
 import { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
 
-import { FreeAtHomeBlindActuatorChannel, FreeAtHomeBlindActuatorDelegateInterface } from './freeAtHomeBlindActuatorChannel';
-import { FreeAtHomeDimActuatorChannel, FreeAtHomeDimActuatorDelegateInterface } from './freeAtHomeDimActuatorChannel'
-import { FreeAtHomeWindowActuatorChannel, FreeAtHomeWindowActuatorDelegateInterface } from './freeAtHomeWindowActuatorChannel';
+import { FreeAtHomeBlindActuatorChannel } from './freeAtHomeBlindActuatorChannel';
+import { FreeAtHomeDimActuatorChannel } from './freeAtHomeDimActuatorChannel'
+import { FreeAtHomeWindowActuatorChannel } from './freeAtHomeWindowActuatorChannel';
 import { FreeAtHomeOnOffChannel } from './freeAtHomeOnOffChannel';
 import { FreeAtHomeRawChannel } from './freeAtHomeRawChannel';
 
 import { FreeAtHomeWeatherBrightnessSensorChannel } from './freeAtHomeWeatherBrightnessSensorChannel';
-import { FreeAtHomeWeatherTemperatureSensorChannel, FreeAtHomeWeatherTemperatureSensorDelegateInterface } from './freeAtHomeWeatherTemperatureSensorChannel';
-import { freeAtHomeWeatherRainSensorChannel, FreeAtHomeWeatherRainSensorDelegateInterface } from './freeAtHomeWeatherRainSensorChannel';
-import { FreeAtHomeWeatherWindSensorChannel, FreeAtHomeWeatherWindSensorDelegateInterface } from './freeAtHomeWeatherWindSensorChannel'
-import { FreeAtHomeWindowSensorChannel, FreeAtHomeWindowSensorDelegateInterface } from './freeAtHomeWindowSensorChannel';
-import { FreeAtHomeSwitchSensorChannel, FreeAtHomeSwitchSensorDelegateInterface } from './freeAtHomeSwitchSensor';
-import {
-    FreeAtHomeChannelInterface,
-    FreeAtHomeOnOffDelegateInterface,
-    FreeAtHomeRawDelegateInterface,
-    FreeAtHomeWeatherBrightnessSensorDelegateInterface,
-} from './freeAtHomeDeviceInterface';
+import { FreeAtHomeWeatherTemperatureSensorChannel } from './freeAtHomeWeatherTemperatureSensorChannel';
+import { freeAtHomeWeatherRainSensorChannel } from './freeAtHomeWeatherRainSensorChannel';
+import { FreeAtHomeWeatherWindSensorChannel } from './freeAtHomeWeatherWindSensorChannel'
+import { FreeAtHomeWindowSensorChannel } from './freeAtHomeWindowSensorChannel';
+import { FreeAtHomeSwitchSensorChannel } from './freeAtHomeSwitchSensor';
+import { Channel } from './channel';
 
 export class FreeAtHome extends EventEmitter {
     freeAtHomeApi: FreeAtHomeApi;
     baseUrl: string;
     authentificationHeader: object;
-    nodesBySerial: Map<string, FreeAtHomeChannelInterface>
+    nodesBySerial: Map<string, Channel> = new Map();;
 
 
     constructor(baseUrl: string | undefined = undefined) {
@@ -38,11 +33,7 @@ export class FreeAtHome extends EventEmitter {
         };
 
         this.freeAtHomeApi = this.connectToFreeAtHomeApi();
-
-        this.nodesBySerial = new Map();
     }
-
-
 
     connectToFreeAtHomeApi(): FreeAtHomeApi {
 
@@ -78,84 +69,106 @@ export class FreeAtHome extends EventEmitter {
         this.emit("open");
     }
 
-    createBlindDevice(serialNumber: string, name: string, delegate: FreeAtHomeBlindActuatorDelegateInterface, isAutoConfirm: boolean = false) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeBlindActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate, isAutoConfirm);
+    createBlindDevice(serialNumber: string, name: string): FreeAtHomeBlindActuatorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeBlindActuatorChannel>exsistingDevice;
+        const device = new FreeAtHomeBlindActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createDimActuatorDevice(serialNumber: string, name: string, delegate: FreeAtHomeDimActuatorDelegateInterface, isAutoConfirm: boolean = false) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeDimActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate, isAutoConfirm);
+    createDimActuatorDevice(serialNumber: string, name: string): FreeAtHomeDimActuatorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeDimActuatorChannel>exsistingDevice;
+        const device = new FreeAtHomeDimActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createWindowDevice(serialNumber: string, name: string, delegate: FreeAtHomeWindowActuatorDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeWindowActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+    createWindowDevice(serialNumber: string, name: string): FreeAtHomeWindowActuatorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeWindowActuatorChannel>exsistingDevice;
+        const device = new FreeAtHomeWindowActuatorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createOnOffDevice(serialNumber: string, name: string, delegate: FreeAtHomeOnOffDelegateInterface, isAutoConfirm: boolean = false) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeOnOffChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate, isAutoConfirm);
+    createOnOffDevice(serialNumber: string, name: string): FreeAtHomeOnOffChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeOnOffChannel>exsistingDevice;
+        const device = new FreeAtHomeOnOffChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createRawDevice(serialNumber: string, name: string, deviceType: VirtualDeviceType, delegate: FreeAtHomeRawDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeRawChannel(this.freeAtHomeApi, 0, serialNumber, name, deviceType, delegate);
+    createRawDevice(serialNumber: string, name: string, deviceType: VirtualDeviceType): FreeAtHomeRawChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeRawChannel>exsistingDevice;
+        const device = new FreeAtHomeRawChannel(this.freeAtHomeApi, 0, serialNumber, name, deviceType);
         this.addDevice(device);
+        return device;
     }
 
-    createWeatherBrightnessSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWeatherBrightnessSensorDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeWeatherBrightnessSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+    createWeatherBrightnessSensorDevice(serialNumber: string, name: string): FreeAtHomeWeatherBrightnessSensorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeWeatherBrightnessSensorChannel>exsistingDevice;
+        const device = new FreeAtHomeWeatherBrightnessSensorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createWeatherTemperatureSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWeatherTemperatureSensorDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeWeatherTemperatureSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+    createWeatherTemperatureSensorDevice(serialNumber: string, name: string): FreeAtHomeWeatherTemperatureSensorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeWeatherTemperatureSensorChannel>exsistingDevice;
+        const device = new FreeAtHomeWeatherTemperatureSensorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createWeatherRainSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWeatherRainSensorDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new freeAtHomeWeatherRainSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+    createWeatherRainSensorDevice(serialNumber: string, name: string): freeAtHomeWeatherRainSensorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <freeAtHomeWeatherRainSensorChannel>exsistingDevice;
+        const device = new freeAtHomeWeatherRainSensorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createWeatherWindSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWeatherWindSensorDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeWeatherWindSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+    createWeatherWindSensorDevice(serialNumber: string, name: string): FreeAtHomeWeatherWindSensorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeWeatherWindSensorChannel>exsistingDevice;
+        const device = new FreeAtHomeWeatherWindSensorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createWindowSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeWindowSensorDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeWindowSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+    createWindowSensorDevice(serialNumber: string, name: string): FreeAtHomeWindowSensorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeWindowSensorChannel>exsistingDevice;
+        const device = new FreeAtHomeWindowSensorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    createSwitchSensorDevice(serialNumber: string, name: string, delegate: FreeAtHomeSwitchSensorDelegateInterface) {
-        if (true === this.nodesBySerial.has(serialNumber))
-            return;
-        const device = new FreeAtHomeSwitchSensorChannel(this.freeAtHomeApi, 0, serialNumber, name, delegate);
+    createSwitchSensorDevice(serialNumber: string, name: string): FreeAtHomeSwitchSensorChannel {
+        const exsistingDevice = this.nodesBySerial.get(serialNumber);
+        if (exsistingDevice !== undefined)
+            return <FreeAtHomeSwitchSensorChannel>exsistingDevice;
+        const device = new FreeAtHomeSwitchSensorChannel(this.freeAtHomeApi, 0, serialNumber, name);
         this.addDevice(device);
+        return device;
     }
 
-    addDevice(device: FreeAtHomeChannelInterface) {
+    addDevice(device: Channel) {
         const { serialNumber, name, deviceType } = device;
         this.freeAtHomeApi.createDevice(deviceType, serialNumber, name);
         this.nodesBySerial.set(serialNumber, device);
@@ -175,4 +188,3 @@ export class FreeAtHome extends EventEmitter {
         node.parameterChanged(parameter.parameterId, parameter.value);
     }
 }
-

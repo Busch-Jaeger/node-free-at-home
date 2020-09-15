@@ -1,11 +1,15 @@
 import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { VirtualDeviceType } from '.';
 
-export declare interface FreeAtHomeWeatherWindSensorDelegateInterface extends FreeAtHomeDelegateInterface {
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
 
-    on(event: 'windSpeedChanged', listener: (windSpeed: number) => void): this;
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
+
+interface ChannelEvents {
 }
+
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 import './utilities';
 
@@ -25,48 +29,28 @@ const windAlarmLevels = [
     32.7, // 12
 ]
 
-export class FreeAtHomeWeatherWindSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType = "Weather-WindSensor";
-    serialNumber: string;
-    name: string;
-    channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
-    delegate: FreeAtHomeWeatherWindSensorDelegateInterface;
-
-    windAlarmLevel: number | undefined;
-
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeWeatherWindSensorDelegateInterface) {
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-        this.windAlarmLevel = undefined
-
-        this.delegate = delegate;
-
-        delegate.on("windSpeedChanged", this.delegateWindSpeedChanged.bind(this));
+export class FreeAtHomeWeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
+        super(freeAtHome, channelNumber, serialNumber, name, "Weather-WindSensor");
     }
 
-    delegateWindSpeedChanged(windSpeed: number): void {
+    windAlarmLevel: number | undefined = undefined;
+
+    setWindSpeed(windSpeed: number): void {
         const { freeAtHome } = this;
-        this.setDatapoint(freeAtHome, PairingIds.windSpeed, <string><unknown>windSpeed);
+        this.setDatapoint(PairingIds.windSpeed, <string><unknown>windSpeed);
 
         const alarmLevel = windAlarmLevels.binaryIndexOf(windSpeed);
         console.log("wind alarm level: %s", alarmLevel);
-        this.setDatapoint(freeAtHome, PairingIds.windForce, <string><unknown>alarmLevel);
+        this.setDatapoint(PairingIds.windForce, <string><unknown>alarmLevel);
 
         if (this.windAlarmLevel !== undefined) {
             if (this.windAlarmLevel <= alarmLevel) {
-                this.setDatapoint(freeAtHome, PairingIds.windAlarm, "1");
+                this.setDatapoint(PairingIds.windAlarm, "1");
             } else {
-                this.setDatapoint(freeAtHome, PairingIds.windAlarm, "0");
+                this.setDatapoint(PairingIds.windAlarm, "0");
             }
         }
-    }
-
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {

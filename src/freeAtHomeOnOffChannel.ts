@@ -1,52 +1,41 @@
 import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeOnOffDelegateInterface } from './freeAtHomeDeviceInterface';
-import { VirtualDeviceType } from '.';
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
 
-export class FreeAtHomeOnOffChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType = "SwitchingActuator";
-    serialNumber: string;
-    name: string;
-    channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
-    delegate: FreeAtHomeOnOffDelegateInterface;
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
 
+interface ChannelEvents {
+    isOnChanged(value: boolean);
+}
 
-    isAutoConfirm: boolean;
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeOnOffDelegateInterface, isAutoConfirm: boolean = false) {
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-
-        this.delegate = delegate;
-
-        this.isAutoConfirm = isAutoConfirm;
-
-        delegate.on("isOnChanged", this.delegateIsOnChanged.bind(this));
+export class FreeAtHomeOnOffChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
+        super(freeAtHome, channelNumber, serialNumber, name, "SwitchingActuator");
     }
 
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
+    setOn(isOn: boolean) {
+        this.setDatapoint(PairingIds.infoOnOff, (isOn) ? "1" : "0");
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {
-        const { delegate, freeAtHome } = this;
+        const { freeAtHome } = this;
 
         switch (<PairingIds>id) {
             case PairingIds.switchOnOff: {
                 switch (value) {
                     case "1": {
-                        delegate.setOn(true);
+                        this.emit("isOnChanged", true);
                         if (this.isAutoConfirm)
-                            this.setDatapoint(freeAtHome, PairingIds.infoOnOff, value);
+                            this.setDatapoint(PairingIds.infoOnOff, value);
                         break;
                     }
                     case "0": {
-                        delegate.setOn(false);
+                        this.emit("isOnChanged", false);
                         if (this.isAutoConfirm)
-                            this.setDatapoint(freeAtHome, PairingIds.infoOnOff, value);
+                            this.setDatapoint(PairingIds.infoOnOff, value);
                         break;
                     }
                 }
@@ -56,9 +45,5 @@ export class FreeAtHomeOnOffChannel implements FreeAtHomeChannelInterface {
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
-    }
-
-    delegateIsOnChanged(isOn: boolean): void {
-        this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, (isOn) ? "1" : "0");
     }
 }

@@ -1,5 +1,21 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds, VirtualDeviceType } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
+import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { NodeState } from './freeAtHomeDeviceInterface';
+
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
+
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
+
+interface ChannelEvents {
+    relativeValueChanged(value: number): void;
+    stopMovement(): void;
+    isForcedChanged(isForced: boolean): void;
+
+    silentModeChanged(silentMode: boolean): void;
+}
+
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 enum ForcePositionBlind {
     off = "0",
@@ -8,42 +24,15 @@ enum ForcePositionBlind {
     forceDown = "3",
 }
 
-export declare interface FreeAtHomeBlindActuatorDelegateInterface extends FreeAtHomeDelegateInterface {
-    setRelativeValue(value: number): void;
-    stopMovement(): void;
-    setIsForced(isForced: boolean): void;
-
-    setSilentMode(silentMode: boolean): void;
-
-    on(event: 'positionChanged', listener: (position: number) => void): this;
-    on(event: 'isMovingChanged', listener: (isMoving: boolean) => void): this;
-}
-
-export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType = "BlindActuator";
-    serialNumber: string;
-    name: string;
-    channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
-    preForcedPosition: number;
-    delegate: FreeAtHomeBlindActuatorDelegateInterface;
+export class FreeAtHomeBlindActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    preForcedPosition: number = 0;
 
     position = 0;
     isMoving = false;
     isForced = false;
-    isAutoConfirm: boolean;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeBlindActuatorDelegateInterface, isAutoConfirm: boolean = false) {
-        this.preForcedPosition = 0;
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-        this.isAutoConfirm = isAutoConfirm;
-
-        this.delegate = delegate;
-        delegate.on("positionChanged", this.delegatePositionChanged.bind(this));
-        delegate.on("isMovingChanged", this.delegateIsMovingChanged.bind(this));
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
+        super(freeAtHome, channelNumber, serialNumber, name, "BlindActuator");
     }
 
     setDatapoint(datapointId: PairingIds, value: string) {
@@ -52,7 +41,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {
-        const { delegate, preForcedPosition } = this;
+        const { preForcedPosition } = this;
         switch (<PairingIds>id) {
             case PairingIds.moveUpDown: {
                 if (true === this.isForced)
@@ -61,7 +50,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                     this.isMoving = true;
                 switch (value) {
                     case "1": {
-                        delegate.setRelativeValue(100);
+                        this.emit("relativeValueChanged", 100);
                         if (true === this.isAutoConfirm) {
                             this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "100");
                             this.position = 100;
@@ -71,7 +60,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                         break;
                     }
                     case "0": {
-                        delegate.setRelativeValue(0);
+                        this.emit("relativeValueChanged", 0);
                         if (true === this.isAutoConfirm) {
                             this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "0");
                             this.position = 0;
@@ -90,13 +79,13 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                 if (true === this.isMoving) {
                     if (true === this.isAutoConfirm)
                         this.isMoving = false;
-                    delegate.stopMovement();
+                    this.emit("stopMovement");
                     return;
                 }
                 else {
                     switch (value) {
                         case "1": {
-                            delegate.setRelativeValue(100);
+                            this.emit("relativeValueChanged", 100);
                             if (true === this.isAutoConfirm) {
                                 this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "100");
                                 this.position = 100;
@@ -107,7 +96,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                             break;
                         }
                         case "0": {
-                            delegate.setRelativeValue(0);
+                            this.emit("relativeValueChanged", 0);
                             if (true === this.isAutoConfirm) {
                                 this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "0");
                                 this.position = 0;
@@ -139,7 +128,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                         this.setDatapoint(PairingIds.infoMoveUpDown, "2");
                     }
                 }
-                delegate.setRelativeValue(position);
+                this.emit("relativeValueChanged", position);
                 break;
             }
             case PairingIds.forcePositionBlind: {
@@ -149,7 +138,7 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                         this.preForcedPosition = this.position;
                         if (this.isAutoConfirm)
                             this.position = 0;
-                        delegate.setRelativeValue(0);
+                        this.emit("relativeValueChanged", 0);
                         this.setDatapoint(PairingIds.infoError, "32");
                         this.isForced = true;
                         break;
@@ -157,12 +146,12 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                         this.preForcedPosition = this.position;
                         if (this.isAutoConfirm)
                             this.position = 100;
-                        delegate.setRelativeValue(100);
+                        this.emit("relativeValueChanged", 100);
                         this.setDatapoint(PairingIds.infoError, "32");
                         this.isForced = true;
                         break;
                     case ForcePositionBlind.oldPositionAndOff:
-                        delegate.setRelativeValue(preForcedPosition);
+                        this.emit("relativeValueChanged", preForcedPosition);
                         if (this.isAutoConfirm)
                             this.position = this.preForcedPosition;
                         this.setDatapoint(PairingIds.infoError, "0");
@@ -173,14 +162,14 @@ export class FreeAtHomeBlindActuatorChannel implements FreeAtHomeChannelInterfac
                         this.isForced = false;
                         break;
                 }
-                this.delegate.setIsForced(this.isForced);
+                this.emit("isForcedChanged", this.isForced);
             }
         }
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
         const silentMode = (value === "02") ? true : false;
-        this.delegate.setSilentMode(silentMode);
+        this.emit("silentModeChanged", silentMode);
     }
 
     delegatePositionChanged(position: number): void {

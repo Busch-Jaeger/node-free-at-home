@@ -1,6 +1,16 @@
 import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { VirtualDeviceType } from '.';
+
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
+
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
+
+interface ChannelEvents {
+}
+
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
+
 
 export enum WindowState {
     closed,
@@ -8,34 +18,12 @@ export enum WindowState {
     opened,
 }
 
-export declare interface FreeAtHomeWindowSensorDelegateInterface extends FreeAtHomeDelegateInterface {
-
-    on(event: 'windowStateChanged', listener: (state: WindowState) => void): this;
-}
-
-export class FreeAtHomeWindowSensorChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType = "WindowSensor";
-    serialNumber: string;
-    name: string;
-    channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
-    delegate: FreeAtHomeWindowSensorDelegateInterface;
-
-    alertActivationLevel: number | undefined;
-
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeWindowSensorDelegateInterface) {
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-        this.alertActivationLevel = undefined
-
-        this.delegate = delegate;
-
-        delegate.on("windowStateChanged", this.delegateWindowStateChanged.bind(this));
+export class FreeAtHomeWindowSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
+        super(freeAtHome, channelNumber, serialNumber, name, "WindowSensor");
     }
 
-    delegateWindowStateChanged(state: WindowState): void {
+    setWindowState(state: WindowState): void {
         switch (state) {
             case WindowState.closed:
                 this.setDatapoint(PairingIds.windowDoor, "0");
@@ -52,11 +40,6 @@ export class FreeAtHomeWindowSensorChannel implements FreeAtHomeChannelInterface
             default:
                 console.error("unknown window state: %s", state);
         }
-    }
-
-    setDatapoint(datapointId: PairingIds, value: string) {
-        const { freeAtHome, channelNumber, serialNumber } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {

@@ -1,32 +1,26 @@
 import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
-import { NodeState, FreeAtHomeChannelInterface, FreeAtHomeDelegateInterface } from './freeAtHomeDeviceInterface';
-import { VirtualDeviceType } from '.';
 
-export declare interface FreeAtHomeDimActuatorDelegateInterface extends FreeAtHomeDelegateInterface {
-    setAbsoluteValue(value: number): void;
-    setIsOn(isOn: boolean): void;
+import { Channel } from './channel';
+import { Mixin } from 'ts-mixer';
 
-    on(event: 'valueChanged', listener: (position: number) => void): this;
-    on(event: 'isOnChanged', listener: (isOn: boolean) => void): this;
+import { EventEmitter } from 'events';
+import { StrictEventEmitter } from 'strict-event-emitter-types';
+
+interface ChannelEvents {
+    absoluteValueChanged(value: number): void;
+    isOnChanged(isOn: boolean): void;
 }
+
+type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 enum DimmerSwitchOnMode {
     previousBrightness = "01",
     maxBrightness = "02",
 }
-
-export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface {
-    deviceType: VirtualDeviceType = "DimActuator";
-    channelNumber: number;
-    serialNumber: string;
-    name: string;
-    freeAtHome: FreeAtHomeApi;
-    delegate: FreeAtHomeDimActuatorDelegateInterface;
-
+export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     brightness: number = 0;
     isOn: boolean = false;
-    isNight: boolean;
-    isAutoConfirm: boolean;
+    isNight: boolean = false;
 
     minBrightness = 0;
     maxBrightnessDay = 0;
@@ -39,25 +33,14 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
     intervalTimer: NodeJS.Timeout | undefined = undefined;
     timedMovementTimer: NodeJS.Timeout | undefined = undefined;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, delegate: FreeAtHomeDimActuatorDelegateInterface, isAutoConfirm: boolean = false) {
-        this.freeAtHome = freeAtHome;
-        this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-        this.isAutoConfirm = isAutoConfirm;
-
-        this.isNight = false;
-
-        this.delegate = delegate;
-
-        delegate.on("valueChanged", this.delegateValueChanged.bind(this));
-        delegate.on("isOnChanged", this.delegateIsOnChanged.bind(this));
+    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
+        super(freeAtHome, channelNumber, serialNumber, name, "DimActuator");
     }
 
-    handleSwitchOnOff(value: string) {
+    private handleSwitchOnOff(value: string) {
         if (value === "1") {
             this.isOn = true;
-            this.delegate.setIsOn(true);
+            this.emit("isOnChanged", true);
 
             const maxTurnOnBrightness = (true === this.isNight) ? this.maxBrightnessNight : this.maxBrightnessDay;
             let brightness = 0;
@@ -74,30 +57,29 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
             }
             this.brightness = brightness;
 
-            this.delegate.setAbsoluteValue(brightness);
+            this.emit("absoluteValueChanged", brightness)
             if (this.isAutoConfirm) {
-                this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, brightness.toString());
+                this.setDatapoint(PairingIds.infoActualDimmingValue, brightness.toString());
             }
         } else if (value === "0") {
             this.isOn = false;
-            this.delegate.setIsOn(false);
+            this.emit("isOnChanged", false);
             if (this.isAutoConfirm) {
-                this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, "0");
+                this.setDatapoint(PairingIds.infoActualDimmingValue, "0");
             }
         }
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, value);
-
+            this.setDatapoint(PairingIds.infoOnOff, value);
         }
     }
 
-    handleRelativeSetValue(value: string) {
+    private handleRelativeSetValue(value: string) {
         switch (value) {
             case "15": //dim up
                 if (false === this.isOn) {
                     this.isOn = true;
                     this.brightness = this.minBrightness;
-                    this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, "1");
+                    this.setDatapoint(PairingIds.infoOnOff, "1");
                 }
                 this.brightness += 2;
                 if (this.brightness > 100)
@@ -121,7 +103,7 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
                 if (false === this.isOn) {
                     this.isOn = true;
                     this.brightness = this.minBrightness;
-                    this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, "1");
+                    this.setDatapoint(PairingIds.infoOnOff, "1");
                 }
                 if (this.intervalTimer !== undefined)
                     clearInterval(this.intervalTimer);
@@ -145,22 +127,22 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
                 }
                 return;
         }
-        this.delegate.setAbsoluteValue(this.brightness);
+        this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
     }
 
-    handleAbsoluteSetValue(value: string) {
+    private handleAbsoluteSetValue(value: string) {
         const parsedValue = parseInt(value);
         if (parsedValue === undefined)
             return;
         this.brightness = parsedValue;
         if (this.brightness < this.minBrightness)
             this.brightness = this.minBrightness;
-        this.delegate.setAbsoluteValue(this.brightness);
+        this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
     }
 
@@ -187,22 +169,22 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
                         this.isForced = false;
                         if (undefined !== this.timedMovementTimer)
                             this.handleSwitchOnOff("1");
-                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "0");
+                        this.setDatapoint(PairingIds.forcePositionInfo, "0");
                         break;
                     case "1":
                         this.isForced = false;
                         if (undefined === this.timedMovementTimer)
                             this.handleSwitchOnOff("0");
-                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "0");
+                        this.setDatapoint(PairingIds.forcePositionInfo, "0");
                         break;
                     case "2": //forced off
                         this.isForced = true;
-                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "2");
+                        this.setDatapoint(PairingIds.forcePositionInfo, "2");
                         this.handleSwitchOnOff("0");
                         break;
                     case "3": //forced on
                         this.isForced = true;
-                        this.setDatapoint(this.freeAtHome, PairingIds.forcePositionInfo, "3");
+                        this.setDatapoint(PairingIds.forcePositionInfo, "3");
                         this.handleSwitchOnOff("1");
                         break;
                 }
@@ -233,7 +215,6 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
                 console.log("unknown id: %s", id);
                 break;
         }
-        // throw new Error("Method not implemented.");
     }
 
     parameterChanged(id: ParameterIds, value: string): void {
@@ -274,47 +255,42 @@ export class FreeAtHomeDimActuatorChannel implements FreeAtHomeChannelInterface 
         }
     }
 
-    intervalUp() {
+    private intervalUp() {
         console.log("test" + this.brightness);
         this.brightness += 8;
         console.log("test" + this.brightness);
         if (this.brightness > 100)
             this.brightness = 100;
-        this.delegate.setAbsoluteValue(this.brightness);
+        this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
         console.log("test2" + this.brightness);
     }
 
-    intervalDown() {
+    private intervalDown() {
         this.brightness -= 8;
         if (this.brightness < 0)
             this.brightness = 0;
         if (this.brightness < this.minBrightness)
             this.brightness = this.minBrightness;
-        this.delegate.setAbsoluteValue(this.brightness);
+        this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
         }
     }
 
-    timedMovement() {
+    private timedMovement() {
         this.timedMovementTimer = undefined;
         if (false === this.isForced)
             this.handleSwitchOnOff("0");
     }
 
-    delegateValueChanged(value: number): void {
-        this.setDatapoint(this.freeAtHome, PairingIds.infoActualDimmingValue, <string><unknown>value);
+    setValue(value: number): void {
+        this.setDatapoint(PairingIds.infoActualDimmingValue, <string><unknown>value);
     }
 
-    delegateIsOnChanged(isOn: boolean): void {
-        this.setDatapoint(this.freeAtHome, PairingIds.infoOnOff, (isOn) ? "1" : "0");
-    }
-
-    setDatapoint(freeAtHome: FreeAtHomeApi, datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
+    setOnOff(isOn: boolean): void {
+        this.setDatapoint(PairingIds.infoOnOff, (isOn) ? "1" : "0");
     }
 }
