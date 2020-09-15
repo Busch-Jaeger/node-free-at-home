@@ -38,17 +38,17 @@ export class FreeAtHomeWeatherWindSensorChannel extends Mixin(Channel, (EventEmi
 
     setWindSpeed(windSpeed: number): void {
         const { freeAtHome } = this;
-        this.setDatapoint(PairingIds.windSpeed, <string><unknown>windSpeed);
+        this.setDatapoint(PairingIds.AL_WIND_SPEED, <string><unknown>windSpeed);
 
         const alarmLevel = windAlarmLevels.binaryIndexOf(windSpeed);
         console.log("wind alarm level: %s", alarmLevel);
-        this.setDatapoint(PairingIds.windForce, <string><unknown>alarmLevel);
+        this.setDatapoint(PairingIds.AL_WIND_FORCE, <string><unknown>alarmLevel);
 
         if (this.windAlarmLevel !== undefined) {
             if (this.windAlarmLevel <= alarmLevel) {
-                this.setDatapoint(PairingIds.windAlarm, "1");
+                this.setDatapoint(PairingIds.AL_WIND_ALARM, "1");
             } else {
-                this.setDatapoint(PairingIds.windAlarm, "0");
+                this.setDatapoint(PairingIds.AL_WIND_ALARM, "0");
             }
         }
     }

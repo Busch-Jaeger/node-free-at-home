@@ -20,14 +20,14 @@ export class FreeAtHomeWeatherTemperatureSensorChannel extends Mixin(Channel, (E
 
     setTemperature(temperature: number): void {
         const { freeAtHome } = this;
-        this.setDatapoint(PairingIds.outdoorTemperature, <string><unknown>temperature);
+        this.setDatapoint(PairingIds.AL_OUTDOOR_TEMPERATURE, <string><unknown>temperature);
         console.log("new temperature %s", temperature);
 
         if (this.alertActivationLevel !== undefined) {
             if (this.alertActivationLevel <= temperature)
-                this.setDatapoint(PairingIds.frostAlarm, "1");
+                this.setDatapoint(PairingIds.AL_FROST_ALARM, "1");
             else
-                this.setDatapoint(PairingIds.frostAlarm, "0");
+                this.setDatapoint(PairingIds.AL_FROST_ALARM, "0");
         }
     }
 

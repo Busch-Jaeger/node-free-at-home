@@ -18,14 +18,14 @@ export class FreeAtHomeWeatherBrightnessSensorChannel extends Mixin(Channel, (Ev
     alertActivationLevel: number | undefined = undefined;
 
     setBrightnessLevel(brightness: number): void {
-        this.setDatapoint(PairingIds.brightnessLevel, <string><unknown>brightness);
+        this.setDatapoint(PairingIds.AL_BRIGHTNESS_LEVEL, <string><unknown>brightness);
         console.log("new brightness %s", brightness);
 
         if (this.alertActivationLevel !== undefined) {
             if (this.alertActivationLevel <= brightness)
-                this.setDatapoint(PairingIds.brightnessAlarm, "1");
+                this.setDatapoint(PairingIds.AL_BRIGHTNESS_ALARM, "1");
             else
-                this.setDatapoint(PairingIds.brightnessAlarm, "0");
+                this.setDatapoint(PairingIds.AL_BRIGHTNESS_ALARM, "0");
         }
     }
 

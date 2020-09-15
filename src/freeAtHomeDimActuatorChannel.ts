@@ -59,17 +59,17 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
 
             this.emit("absoluteValueChanged", brightness)
             if (this.isAutoConfirm) {
-                this.setDatapoint(PairingIds.infoActualDimmingValue, brightness.toString());
+                this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, brightness.toString());
             }
         } else if (value === "0") {
             this.isOn = false;
             this.emit("isOnChanged", false);
             if (this.isAutoConfirm) {
-                this.setDatapoint(PairingIds.infoActualDimmingValue, "0");
+                this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, "0");
             }
         }
         if (this.isAutoConfirm) {
-            this.setDatapoint(PairingIds.infoOnOff, value);
+            this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
         }
     }
 
@@ -79,7 +79,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
                 if (false === this.isOn) {
                     this.isOn = true;
                     this.brightness = this.minBrightness;
-                    this.setDatapoint(PairingIds.infoOnOff, "1");
+                    this.setDatapoint(PairingIds.AL_INFO_ON_OFF, "1");
                 }
                 this.brightness += 2;
                 if (this.brightness > 100)
@@ -103,7 +103,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
                 if (false === this.isOn) {
                     this.isOn = true;
                     this.brightness = this.minBrightness;
-                    this.setDatapoint(PairingIds.infoOnOff, "1");
+                    this.setDatapoint(PairingIds.AL_INFO_ON_OFF, "1");
                 }
                 if (this.intervalTimer !== undefined)
                     clearInterval(this.intervalTimer);
@@ -129,7 +129,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
         }
         this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, this.brightness.toString());
         }
     }
 
@@ -142,57 +142,57 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
             this.brightness = this.minBrightness;
         this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, this.brightness.toString());
         }
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {
         switch (id) {
-            case PairingIds.switchOnOff:
+            case PairingIds.AL_SWITCH_ON_OFF:
                 if (false === this.isForced)
                     this.handleSwitchOnOff(value);
                 break;
-            case PairingIds.relativeSetValue:
+            case PairingIds.AL_RELATIVE_SET_VALUE_CONTROL:
                 if (false === this.isForced)
                     this.handleRelativeSetValue(value);
                 break;
-            case PairingIds.absoluteSetValue:
+            case PairingIds.AL_ABSOLUTE_SET_VALUE_CONTROL:
                 if (false === this.isForced)
                     this.handleAbsoluteSetValue(value);
                 break;
-            case PairingIds.timedStartStop:
+            case PairingIds.AL_TIMED_START_STOP:
                 break;
-            case PairingIds.forced:
+            case PairingIds.AL_FORCED:
                 console.log("forced %s", value);
                 switch (value) {
                     case "0":
                         this.isForced = false;
                         if (undefined !== this.timedMovementTimer)
                             this.handleSwitchOnOff("1");
-                        this.setDatapoint(PairingIds.forcePositionInfo, "0");
+                        this.setDatapoint(PairingIds.AL_INFO_FORCE, "0");
                         break;
                     case "1":
                         this.isForced = false;
                         if (undefined === this.timedMovementTimer)
                             this.handleSwitchOnOff("0");
-                        this.setDatapoint(PairingIds.forcePositionInfo, "0");
+                        this.setDatapoint(PairingIds.AL_INFO_FORCE, "0");
                         break;
                     case "2": //forced off
                         this.isForced = true;
-                        this.setDatapoint(PairingIds.forcePositionInfo, "2");
+                        this.setDatapoint(PairingIds.AL_INFO_FORCE, "2");
                         this.handleSwitchOnOff("0");
                         break;
                     case "3": //forced on
                         this.isForced = true;
-                        this.setDatapoint(PairingIds.forcePositionInfo, "3");
+                        this.setDatapoint(PairingIds.AL_INFO_FORCE, "3");
                         this.handleSwitchOnOff("1");
                         break;
                 }
                 break;
-            case PairingIds.night:
+            case PairingIds.AL_NIGHT:
                 this.isNight = (value === "1");
                 break;
-            case PairingIds.timedMovement:
+            case PairingIds.AL_TIMED_MOVEMENT:
                 console.log("timedMovement %s", value);
                 if (undefined !== this.timedMovementTimer)
                     clearTimeout(this.timedMovementTimer);
@@ -202,7 +202,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
                 this.timedMovementTimer = setTimeout(this.timedMovement.bind(this), this.autonomousSwitchOffTimeDuration);
 
                 break;
-            case PairingIds.infoActualDimmingValue: { //this is a input datapoint, used for scenes
+            case PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE: { //this is a input datapoint, used for scenes
                 if (false === this.isForced) {
                     if (value === "0")
                         this.handleSwitchOnOff("0");
@@ -263,7 +263,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
             this.brightness = 100;
         this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, this.brightness.toString());
         }
         console.log("test2" + this.brightness);
     }
@@ -276,7 +276,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
             this.brightness = this.minBrightness;
         this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
-            this.setDatapoint(PairingIds.infoActualDimmingValue, this.brightness.toString());
+            this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, this.brightness.toString());
         }
     }
 
@@ -287,10 +287,10 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
     }
 
     setValue(value: number): void {
-        this.setDatapoint(PairingIds.infoActualDimmingValue, <string><unknown>value);
+        this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, <string><unknown>value);
     }
 
     setOnOff(isOn: boolean): void {
-        this.setDatapoint(PairingIds.infoOnOff, (isOn) ? "1" : "0");
+        this.setDatapoint(PairingIds.AL_INFO_ON_OFF, (isOn) ? "1" : "0");
     }
 }

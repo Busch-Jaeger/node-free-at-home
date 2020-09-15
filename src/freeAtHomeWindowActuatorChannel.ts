@@ -38,7 +38,7 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
     dataPointChanged(channel: number, id: PairingIds, value: string): void {
         const { preForcedPosition } = this;
         switch (<PairingIds>id) {
-            case PairingIds.moveUpDown: {
+            case PairingIds.AL_MOVE_UP_DOWN: {
                 if (true === this.isForced)
                     break;
                 if (true === this.isAutoConfirm)
@@ -47,20 +47,20 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
                     case "1": {
                         this.emit("relativeValueChanged", 100);
                         if (true === this.isAutoConfirm) {
-                            this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "100");
+                            this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, "100");
                             this.position = 100;
                         } else {
-                            this.setDatapoint(PairingIds.infoMoveUpDown, "3");
+                            this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "3");
                         }
                         break;
                     }
                     case "0": {
                         this.emit("relativeValueChanged", 0);
                         if (true === this.isAutoConfirm) {
-                            this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "0");
+                            this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, "0");
                             this.position = 0;
                         } else {
-                            this.setDatapoint(PairingIds.infoMoveUpDown, "2");
+                            this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "2");
                         }
                         break;
                     }
@@ -68,7 +68,7 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
 
                 break;
             }
-            case PairingIds.adjustUpDown: {
+            case PairingIds.AL_STOP_STEP_UP_DOWN: {
                 if (true === this.isForced)
                     break;
                 if (true === this.isMoving) {
@@ -82,22 +82,22 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
                         case "1": {
                             this.emit("relativeValueChanged", 100);
                             if (true === this.isAutoConfirm) {
-                                this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "100");
+                                this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, "100");
                                 this.position = 100;
                                 this.isMoving = true;
                             } else {
-                                this.setDatapoint(PairingIds.infoMoveUpDown, "3");
+                                this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "3");
                             }
                             break;
                         }
                         case "0": {
                             this.emit("relativeValueChanged", 0);
                             if (true === this.isAutoConfirm) {
-                                this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, "0");
+                                this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, "0");
                                 this.position = 0;
                                 this.isMoving = true;
                             } else {
-                                this.setDatapoint(PairingIds.infoMoveUpDown, "2");
+                                this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "2");
                             }
                             break;
 
@@ -106,8 +106,8 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
                 }
                 break;
             }
-            case PairingIds.currentAbsolutePositionBlindsPercentage: // for scene playback
-            case PairingIds.setAbsolutePositionBlinds: {
+            case PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE: // for scene playback
+            case PairingIds.AL_SET_ABSOLUTE_POSITION_BLINDS_PERCENTAGE: {
                 if (true === this.isForced)
                     break;
                 const position = parseInt(value);
@@ -115,26 +115,26 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
                     break;
                 if (true === this.isAutoConfirm) {
                     this.position = position;
-                    this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, value);
+                    this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, value);
                 } else {
                     if (this.position <= position) {
-                        this.setDatapoint(PairingIds.infoMoveUpDown, "3");
+                        this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "3");
                     } else {
-                        this.setDatapoint(PairingIds.infoMoveUpDown, "2");
+                        this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "2");
                     }
                 }
                 this.emit("relativeValueChanged", position);
                 break;
             }
-            case PairingIds.forcePositionBlind: {
-                this.setDatapoint(PairingIds.forcePositionInfo, value);
+            case PairingIds.AL_FORCED_UP_DOWN: {
+                this.setDatapoint(PairingIds.AL_INFO_FORCE, value);
                 switch (<ForcePositionBlind>value) {
                     case ForcePositionBlind.forceUp:
                         this.preForcedPosition = this.position;
                         if (this.isAutoConfirm)
                             this.position = 0;
                         this.emit("relativeValueChanged", 0);
-                        this.setDatapoint(PairingIds.infoError, "32");
+                        this.setDatapoint(PairingIds.AL_INFO_ERROR, "32");
                         this.isForced = true;
                         break;
                     case ForcePositionBlind.forceDown:
@@ -142,18 +142,18 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
                         if (this.isAutoConfirm)
                             this.position = 100;
                         this.emit("relativeValueChanged", 100);
-                        this.setDatapoint(PairingIds.infoError, "32");
+                        this.setDatapoint(PairingIds.AL_INFO_ERROR, "32");
                         this.isForced = true;
                         break;
                     case ForcePositionBlind.oldPositionAndOff:
                         this.emit("relativeValueChanged", preForcedPosition);
                         if (this.isAutoConfirm)
                             this.position = this.preForcedPosition;
-                        this.setDatapoint(PairingIds.infoError, "0");
-                        this.setDatapoint(PairingIds.forcePositionInfo, "0");
+                        this.setDatapoint(PairingIds.AL_INFO_ERROR, "0");
+                        this.setDatapoint(PairingIds.AL_INFO_FORCE, "0");
                         this.isForced = false;
                     case ForcePositionBlind.off:
-                        this.setDatapoint(PairingIds.infoError, "0");
+                        this.setDatapoint(PairingIds.AL_INFO_ERROR, "0");
                         this.isForced = false;
                         break;
                 }
@@ -169,19 +169,19 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
 
     delegatePositionChanged(position: number): void {
         console.log(position);
-        this.setDatapoint(PairingIds.currentAbsolutePositionBlindsPercentage, position.toString());
+        this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, position.toString());
         this.position = position;
     }
 
     delegateStateChanged(state: NodeState): void {
         const { freeAtHome } = this;
         if (state === NodeState.inactive)
-            this.setDatapoint(PairingIds.infoMoveUpDown, "0");
+            this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "0");
     }
 
     delegateIsMovingChanged(isMoving: boolean): void {
         this.isMoving = isMoving;
         if (isMoving === false)
-            this.setDatapoint(PairingIds.infoMoveUpDown, "0");
+            this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "0");
     }
 }

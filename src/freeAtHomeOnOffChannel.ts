@@ -17,25 +17,25 @@ export class FreeAtHomeOnOffChannel extends Mixin(Channel, (EventEmitter as { ne
     }
 
     setOn(isOn: boolean) {
-        this.setDatapoint(PairingIds.infoOnOff, (isOn) ? "1" : "0");
+        this.setDatapoint(PairingIds.AL_INFO_ON_OFF, (isOn) ? "1" : "0");
     }
 
     dataPointChanged(channel: number, id: PairingIds, value: string): void {
         const { freeAtHome } = this;
 
         switch (<PairingIds>id) {
-            case PairingIds.switchOnOff: {
+            case PairingIds.AL_SWITCH_ON_OFF: {
                 switch (value) {
                     case "1": {
                         this.emit("isOnChanged", true);
                         if (this.isAutoConfirm)
-                            this.setDatapoint(PairingIds.infoOnOff, value);
+                            this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
                         break;
                     }
                     case "0": {
                         this.emit("isOnChanged", false);
                         if (this.isAutoConfirm)
-                            this.setDatapoint(PairingIds.infoOnOff, value);
+                            this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
                         break;
                     }
                 }

@@ -26,16 +26,16 @@ export class FreeAtHomeWindowSensorChannel extends Mixin(Channel, (EventEmitter 
     setWindowState(state: WindowState): void {
         switch (state) {
             case WindowState.closed:
-                this.setDatapoint(PairingIds.windowDoor, "0");
-                this.setDatapoint(PairingIds.windowDoorPosition, "0");
+                this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "0");
+                this.setDatapoint(PairingIds.AL_WINDOW_DOOR_POSITION, "0");
                 break;
             case WindowState.tilted:
-                this.setDatapoint(PairingIds.windowDoor, "1");
-                this.setDatapoint(PairingIds.windowDoorPosition, "1");
+                this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "1");
+                this.setDatapoint(PairingIds.AL_WINDOW_DOOR_POSITION, "1");
                 break;
             case WindowState.opened:
-                this.setDatapoint(PairingIds.windowDoor, "1");
-                this.setDatapoint(PairingIds.windowDoorPosition, "0");
+                this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "1");
+                this.setDatapoint(PairingIds.AL_WINDOW_DOOR_POSITION, "0");
                 break;
             default:
                 console.error("unknown window state: %s", state);

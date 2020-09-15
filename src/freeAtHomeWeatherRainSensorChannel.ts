@@ -22,7 +22,7 @@ export class freeAtHomeWeatherRainSensorChannel extends Mixin(Channel, (EventEmi
     setIsRaining(isRaining: boolean): void {
         const { freeAtHome } = this;
         const value = (true === isRaining) ? "1" : "0";
-        this.setDatapoint(PairingIds.rainAlarm, value);
+        this.setDatapoint(PairingIds.AL_RAIN_ALARM, value);
     }
 
     setDatapoint(datapointId: PairingIds, value: string) {
