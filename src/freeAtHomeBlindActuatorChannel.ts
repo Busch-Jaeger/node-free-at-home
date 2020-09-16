@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 import { NodeState } from './freeAtHomeDeviceInterface';
 
 import { Channel } from './channel';
@@ -31,16 +31,13 @@ export class FreeAtHomeBlindActuatorChannel extends Mixin(Channel, (EventEmitter
     isMoving = false;
     isForced = false;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "BlindActuator");
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
-    setDatapoint(datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber, freeAtHome } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
-    }
-
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
+    protected dataPointChanged(id: PairingIds, value: string): void {
         const { preForcedPosition } = this;
         switch (<PairingIds>id) {
             case PairingIds.AL_MOVE_UP_DOWN: {
@@ -167,7 +164,7 @@ export class FreeAtHomeBlindActuatorChannel extends Mixin(Channel, (EventEmitter
         }
     }
 
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
         const silentMode = (value === "02") ? true : false;
         this.emit("silentModeChanged", silentMode);
     }
@@ -179,7 +176,6 @@ export class FreeAtHomeBlindActuatorChannel extends Mixin(Channel, (EventEmitter
     }
 
     delegateStateChanged(state: NodeState): void {
-        const { freeAtHome } = this;
         if (state === NodeState.inactive)
             this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "0");
     }

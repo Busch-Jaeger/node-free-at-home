@@ -1,23 +1,20 @@
-import {
-    FreeAtHome,
-    FreeAtHomeOnOffChannel
-} from '.';
+import { FreeAtHome } from '.';
 
 const freeAtHome = new FreeAtHome("http://192.168.0.132/fhapi/v1");
 
-class SwitchActuator {
-    onOffChannel: FreeAtHomeOnOffChannel;
 
-    constructor(onOffChannel: FreeAtHomeOnOffChannel) {
-        this.onOffChannel = onOffChannel;
-        this.onOffChannel.isAutoConfirm = false;
-        this.onOffChannel.on("isOnChanged", this.onIsOnChanged.bind(this));
-    }
+async function main() {
+    const switchActuatorChannel = await freeAtHome.createSwitchingActuatorDevice("mySerialNumber", "Switching Actuator");
 
-    private onIsOnChanged(value: boolean): void {
-        console.log((value) ? "on" : "off");
-        this.onOffChannel.setOn(value)
-    }
+    switchActuatorChannel.setAutoKeepAlive(true);
+    switchActuatorChannel.on('isOnChanged', (value: boolean) => {
+        switchActuatorChannel.setOn(value);
+    })
 }
 
-const switchActuator = new SwitchActuator(freeAtHome.createOnOffDevice("444555888", "test22"));
+
+try{
+    main();
+} catch(error) {
+    console.error(error);
+}

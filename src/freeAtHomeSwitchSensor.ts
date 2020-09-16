@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { FreeAtHomeApi, PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 import { Channel } from './channel';
 import { Mixin } from 'ts-mixer';
 
@@ -12,17 +12,18 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class FreeAtHomeSwitchSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "KNX-SwitchSensor");
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
     onOffChanged(isOn: boolean): void {
-        const { freeAtHome } = this;
         const value = (true === isOn) ? "1" : "0";
         this.setDatapoint(PairingIds.AL_SWITCH_ON_OFF, value);
     }
 
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
+    protected dataPointChanged(id: PairingIds, value: string): void {
         switch (<PairingIds>id) {
             case PairingIds.AL_INFO_ON_OFF: {
                 switch (value) {
@@ -40,7 +41,7 @@ export class FreeAtHomeSwitchSensorChannel extends Mixin(Channel, (EventEmitter 
         }
     }
 
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
     }
 
 }

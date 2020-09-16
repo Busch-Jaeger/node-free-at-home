@@ -5,7 +5,7 @@ export { NodeState } from './freeAtHomeDeviceInterface';
 export { FreeAtHomeBlindActuatorChannel } from './freeAtHomeBlindActuatorChannel';
 export { FreeAtHomeDimActuatorChannel } from './freeAtHomeDimActuatorChannel'
 export { FreeAtHomeWindowActuatorChannel } from './freeAtHomeWindowActuatorChannel';
-export { FreeAtHomeOnOffChannel } from './freeAtHomeOnOffChannel';
+export { SwitchingActuatorChannel as FreeAtHomeOnOffChannel } from './switchingActuatorChannel';
 export { FreeAtHomeRawChannel } from './freeAtHomeRawChannel';
 
 export { FreeAtHomeWeatherBrightnessSensorChannel } from './freeAtHomeWeatherBrightnessSensorChannel';

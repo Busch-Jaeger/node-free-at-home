@@ -63,7 +63,18 @@ interface Events {
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
 type MyEmitter = StrictEventEmitter<EventEmitter, Events>;
 
-class Device extends EventEmitter {
+interface DeviceEvents {
+    datapointChanged(id: PairingIds, value: string): void,
+    parameterChanged(id: ParameterIds, value: string): void,
+}
+
+// Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
+type DeviceEventEmitter = StrictEventEmitter<EventEmitter, DeviceEvents>;
+
+
+export class Device extends (EventEmitter as { new(): DeviceEventEmitter }) {
+    freeAtHomeApi: FreeAtHomeApi;
+
     inputPairingToPosition: Map<PairingIds, number> = new Map();
     inputPositionToPairing: Map<number, PairingIds> = new Map();
     outputPairingToPosition: Map<PairingIds, number> = new Map();
@@ -73,9 +84,9 @@ class Device extends EventEmitter {
     serialNumber: string;
     deviceType: api.VirtualDeviceType;
 
-    constructor(apiDevice: api.Device, serialNumber: string, deviceType: api.VirtualDeviceType) {
+    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, deviceType: api.VirtualDeviceType) {
         super();
-
+        this.freeAtHomeApi = freeAtHomeApi;
         this.nativeId = apiDevice.nativeId || "";
         this.serialNumber = serialNumber;
         this.deviceType = deviceType;
@@ -113,30 +124,38 @@ class Device extends EventEmitter {
             const pairingId = this.inputPositionToPairing.get(data.dataPoint);
             if (undefined === pairingId)
                 return;
-            const datapoint: Datapoint = {
-                nativeId: this.nativeId,
-                channelId: data.channel,
-                pairingId: pairingId,
-                value: data.value,
-            }
-            this.emit("datapointChanged", datapoint);
+            this.emit("datapointChanged", pairingId, data.value);
         }
+    }
+
+    public setUnresponsive() {
+        this.freeAtHomeApi.setDeviceToUnresponsive(this.deviceType, this.nativeId);
+    }
+
+    public triggerKeepAlive() {
+        this.freeAtHomeApi.setDeviceToResponsive(this.deviceType, this.nativeId);
+    }
+
+    public setOutputDatapoint(channelNumber: number, id: PairingIds, value: string) {
+        this.freeAtHomeApi.setOutputDatapoint(this.serialNumber, channelNumber, id, value);
     }
 }
 
 export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
-    websocket: WebSocket;
+    websocketBaseUrl: string;
+    authenticationHeader: object;
+    websocket: WebSocket | undefined = undefined;
     pingTimer: NodeJS.Timeout;
-    watchdogTimer: NodeJS.Timeout;
 
     devicesBySerial: Map<string, Device> = new Map();
-    devicesByNativeId: Map<string, Device> = new Map();
 
     constructor(baseUrl: string, authenticationHeader: object = {}) {
         super();
 
+        this.websocketBaseUrl = baseUrl.replace(/^(http)/, "ws");
+        this.authenticationHeader = authenticationHeader;
 
-        api.defaults.baseUrl = baseUrl
+        api.defaults.baseUrl = baseUrl;
 
         api.defaults.headers = {
             ...authenticationHeader
@@ -144,36 +163,50 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
 
         api.defaults.fetch = nodeFetch;
 
-        const websocketBaseUrl = baseUrl.replace(/^(http)/, "ws");
-        this.websocket = new WebSocket(websocketBaseUrl + "/api/ws", {
-            rejectUnauthorized: false,
-            headers: {
-                ...authenticationHeader
-            }
-        });
-
-        this.websocket.on('open', this.onOpen.bind(this));
-        this.websocket.on('close', this.onClose.bind(this));
-        this.websocket.on('error', this.onError.bind(this));
-
-        this.websocket.on('message', this.parseWebsocketData.bind(this));
+        this.connectWebsocket();
 
         this.pingTimer = setInterval(() => {
-            if (this.websocket.OPEN == this.websocket.readyState) {
+            if (this.websocket !== undefined && this.websocket.OPEN == this.websocket.readyState) {
                 this.websocket.ping();
             }
         }, 5000);
+    }
 
-        this.watchdogTimer = setInterval(this.onWatchdogTimer.bind(this), 1000 * 120);
+    private connectWebsocket() {
+        try {
+            this.websocket = new WebSocket(this.websocketBaseUrl + "/api/ws", {
+                rejectUnauthorized: false,
+                headers: {
+                    ...this.authenticationHeader
+                }
+            });
+
+            this.websocket.on('open', this.onOpen.bind(this));
+            this.websocket.on('close', this.onClose.bind(this));
+            this.websocket.on('error', this.onError.bind(this));
+
+            this.websocket.on('message', this.parseWebsocketData.bind(this));
+        }
+        catch (error) {
+            setTimeout(
+                () => {
+                    console.log("reconnecting...");
+                    this.connectWebsocket();
+                }, 10000);
+        }
     }
 
     disconnect() {
         clearInterval(this.pingTimer);
-        this.websocket.removeAllListeners('close');
-        this.websocket.close();
+        if(undefined !== this.websocket) {
+            this.websocket.removeAllListeners('close');
+            this.websocket.close();
+        }
     }
 
     getConnectionState(): ConnectionStates {
+        if(undefined === this.websocket)
+            return ConnectionStates.closed;
         const state = this.websocket.readyState;
         switch (state) {
             case WebSocket.CONNECTING:
@@ -189,24 +222,32 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         }
     }
 
-    onOpen() {
+    private onOpen() {
         this.emit("open", this);
     }
 
-    onClose(code: number, reason: string) {
+    private onClose(code: number, reason: string) {
+        console.log("try to reconnect in 10 seconds...");
+        setTimeout(
+            () => {
+                console.log("reconnecting...");
+                this.connectWebsocket();
+            }, 10000);
         this.emit('close', code, reason);
     }
 
-    onError(err: Error) {
+    private onError(err: Error) {
         console.error('❌', err.toString())
     }
 
     end() {
-        this.websocket.removeAllListeners();
-        this.websocket.close();
+        if(undefined !== this.websocket) {
+            this.websocket.removeAllListeners();
+            this.websocket.close();
+        }
     }
 
-    parseWebsocketData(data: WebSocket.Data) {
+    private parseWebsocketData(data: WebSocket.Data) {
         const dataObject = JSON.parse(data as string);
         for (const sysApId in dataObject) {
             const datapoints = dataObject[sysApId].datapoints;
@@ -245,8 +286,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         }
     }
 
-    setDatapoint(nativeId: string, channel: number, pairingId: number, value: string) {
-        const device = this.devicesByNativeId.get(nativeId);
+    setOutputDatapoint(serialNumber: string, channel: number, pairingId: number, value: string) {
+        const device = this.devicesBySerial.get(serialNumber);
         if (undefined !== device) {
             const channelString = channel.toString(16).padStart(6, "ch0000");
             const outputPosition = device.outputPairingToPosition.get(pairingId);
@@ -289,7 +330,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         );
     }
 
-    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string) {
+    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string): Promise<Device> {
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
             "00000000-0000-0000-0000-000000000000",
             nativeId,
@@ -303,62 +344,43 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         );
         if (res.status === 200) {
             const dataObject = res.data;
-            console.log(dataObject);
             for (const sysApId in dataObject) {
                 const devices = dataObject[sysApId].devices;
                 for (const deviceId in devices) {
                     const responseNativeId = devices[deviceId].serial;
                     if (responseNativeId === nativeId) {
-                        console.log("Found: " + deviceId);
+                        console.log("Found device: " + deviceId);
                         const deviceRequest = await api.getdevice(
                             "00000000-0000-0000-0000-000000000000",
                             deviceId
                         );
                         if (deviceRequest.status === 200) {
                             const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
-                            console.log(device);
                             if (device !== undefined) {
-                                this.addDevice(deviceId, nativeId, device, deviceType);
+                                const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType);
+                                return deviceObject;
                             }
                             else {
-                                //error
+                                throw new Error("device not found in response");
                             }
+                        }
+                        else {
+                            throw new Error("Could not read device from ata model error code: " + res.status);
                         }
                     }
                 }
             }
+            throw new Error("data in response not found");
+        }
+        else {
+            throw new Error("Could not create virtual device error code: " + res.status);
         }
     }
 
-    private onDatapointChanged(datapoint: Datapoint) {
-        this.emit("dataPointChanged", datapoint);
-    }
-
-    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType) {
-        const device = new Device(apiDevice, deviceId, deviceType);
+    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType): Device {
+        const device = new Device(this, apiDevice, deviceId, deviceType);
         this.devicesBySerial.set(deviceId, device);
-        this.devicesByNativeId.set(nativeId, device);
-        device.on('datapointChanged', this.onDatapointChanged.bind(this))
-    }
-
-
-
-    private async onWatchdogTimer() {
-        for (const deviceId in this.devicesBySerial) {
-            const device = this.devicesBySerial.get(deviceId);
-            if (undefined === device)
-                return;
-            await api.putApiRestVirtualdeviceBySysapAndSerial(
-                "00000000-0000-0000-0000-000000000000",
-                device.nativeId,
-                {
-                    type: device.deviceType,
-                    properties: {
-                        ttl: "180"
-                    }
-                }
-            );
-        }
+        return device;
     }
 
 }

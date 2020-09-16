@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 import { NodeState } from './freeAtHomeDeviceInterface';
 
 import { Channel } from './channel';
@@ -31,11 +31,13 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
     isMoving = false;
     isForced = false;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "WindowActuator");
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
+    protected dataPointChanged(id: PairingIds, value: string): void {
         const { preForcedPosition } = this;
         switch (<PairingIds>id) {
             case PairingIds.AL_MOVE_UP_DOWN: {
@@ -162,24 +164,23 @@ export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitte
         }
     }
 
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
         const silentMode = (value === "02") ? true : false;
         this.emit("silentModeChanged", silentMode);
     }
 
-    delegatePositionChanged(position: number): void {
+    setPosition(position: number): void {
         console.log(position);
         this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, position.toString());
         this.position = position;
     }
 
-    delegateStateChanged(state: NodeState): void {
-        const { freeAtHome } = this;
+    setState(state: NodeState): void {
         if (state === NodeState.inactive)
             this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "0");
     }
 
-    delegateIsMovingChanged(isMoving: boolean): void {
+    setIsMoving(isMoving: boolean): void {
         this.isMoving = isMoving;
         if (isMoving === false)
             this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "0");

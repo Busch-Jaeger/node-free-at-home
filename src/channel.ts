@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
-import { FreeAtHomeApi, PairingIds, VirtualDeviceType } from '.';
-import { ParameterIds } from './parameterIds';
+import { PairingIds } from '.';
+import { Device } from './freeAtHomeApi';
 
 interface ChannelEvents {
 }
@@ -10,31 +10,18 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
-    deviceType: VirtualDeviceType;
-    serialNumber: string;
-    name: string;
+    serialNumber: string = "";
     channelNumber: number;
-    freeAtHome: FreeAtHomeApi;
+    device: Device;
 
     private autoKeepAliveTimer: NodeJS.Timeout | undefined = undefined;
 
     public isAutoConfirm: boolean = false;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string, deviceType: VirtualDeviceType) {
+    constructor(device: Device, channelNumber: number) {
         super();
-        this.freeAtHome = freeAtHome;
+        this.device = device;
         this.channelNumber = channelNumber;
-        this.serialNumber = serialNumber;
-        this.name = name;
-        this.deviceType = deviceType;
-    }
-
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
-        throw new Error("Method not implemented.");
-    }
-
-    parameterChanged(id: ParameterIds, value: string): void {
-        throw new Error("Method not implemented.");
     }
 
     public setAutoKeepAlive(value: boolean) {
@@ -49,16 +36,16 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         }
     }
 
-    protected setDatapoint(datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber } = this;
-        this.freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
+    protected setDatapoint(id: PairingIds, value: string) {
+        const { channelNumber } = this;
+        this.device.setOutputDatapoint(channelNumber, id, value);
     }
 
     public setUnresponsive() {
-        this.freeAtHome.setDeviceToUnresponsive(this.deviceType, this.serialNumber);
+        this.device.setUnresponsive();
     }
 
     public triggerKeepAlive() {
-        this.freeAtHome.setDeviceToResponsive(this.deviceType, this.serialNumber);
+        this.device.triggerKeepAlive();
     }
 }

@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 import { Channel } from './channel';
 import { Mixin } from 'ts-mixer';
 
@@ -11,18 +11,18 @@ interface ChannelEvents {
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-export class FreeAtHomeOnOffChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "SwitchingActuator");
+export class SwitchingActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
     setOn(isOn: boolean) {
         this.setDatapoint(PairingIds.AL_INFO_ON_OFF, (isOn) ? "1" : "0");
     }
 
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
-        const { freeAtHome } = this;
-
+    protected dataPointChanged(id: PairingIds, value: string): void{
         switch (<PairingIds>id) {
             case PairingIds.AL_SWITCH_ON_OFF: {
                 switch (value) {
@@ -44,6 +44,6 @@ export class FreeAtHomeOnOffChannel extends Mixin(Channel, (EventEmitter as { ne
         }
     }
 
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
     }
 }

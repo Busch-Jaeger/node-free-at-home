@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import {  PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 import { Channel } from './channel';
 import { Mixin } from 'ts-mixer';
 
@@ -19,11 +19,13 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "MediaPlayer");
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
+    dataPointChanged(id: PairingIds, value: string): void {
         switch (id) {
             case PairingIds.AL_MEDIA_PLAY: // play
                 this.emit("playModeChanged", PlayMode.playing);

@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 
 import { Channel } from './channel';
 import { Mixin } from 'ts-mixer';
@@ -12,14 +12,15 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class FreeAtHomeWeatherTemperatureSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "Weather-TemperatureSensor");
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
     alertActivationLevel: number | undefined = undefined;
 
     setTemperature(temperature: number): void {
-        const { freeAtHome } = this;
         this.setDatapoint(PairingIds.AL_OUTDOOR_TEMPERATURE, <string><unknown>temperature);
         console.log("new temperature %s", temperature);
 
@@ -31,10 +32,10 @@ export class FreeAtHomeWeatherTemperatureSensorChannel extends Mixin(Channel, (E
         }
     }
 
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
+    protected dataPointChanged(id: PairingIds, value: string): void {
     }
 
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
 
         switch (id) {
             case ParameterIds.frostAlarmActivationLevel:

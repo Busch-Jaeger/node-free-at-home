@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 
 import { Channel } from './channel';
 import { Mixin } from 'ts-mixer';
@@ -12,27 +12,23 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class freeAtHomeWeatherRainSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "Weather-RainSensor");
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
     alertActivationLevel: number | undefined = undefined;
 
 
     setIsRaining(isRaining: boolean): void {
-        const { freeAtHome } = this;
         const value = (true === isRaining) ? "1" : "0";
         this.setDatapoint(PairingIds.AL_RAIN_ALARM, value);
     }
 
-    setDatapoint(datapointId: PairingIds, value: string) {
-        const { channelNumber, serialNumber, freeAtHome } = this;
-        freeAtHome.setDatapoint(serialNumber, channelNumber, datapointId, value);
+    protected dataPointChanged(id: PairingIds, value: string): void {
     }
 
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
-    }
-
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
     }
 }

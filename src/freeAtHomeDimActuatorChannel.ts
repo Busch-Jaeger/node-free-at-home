@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from './freeAtHomeApi';
+import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
 
 import { Channel } from './channel';
 import { Mixin } from 'ts-mixer';
@@ -33,8 +33,10 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
     intervalTimer: NodeJS.Timeout | undefined = undefined;
     timedMovementTimer: NodeJS.Timeout | undefined = undefined;
 
-    constructor(freeAtHome: FreeAtHomeApi, channelNumber: number, serialNumber: string, name: string) {
-        super(freeAtHome, channelNumber, serialNumber, name, "DimActuator");
+    constructor(device: Device, channelNumber: number){
+        super(device, channelNumber);
+        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
     private handleSwitchOnOff(value: string) {
@@ -146,7 +148,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
         }
     }
 
-    dataPointChanged(channel: number, id: PairingIds, value: string): void {
+    protected dataPointChanged(id: PairingIds, value: string): void {
         switch (id) {
             case PairingIds.AL_SWITCH_ON_OFF:
                 if (false === this.isForced)
@@ -217,7 +219,7 @@ export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter a
         }
     }
 
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
         // throw new Error("Method not implemented.");
         switch (id) {
             case ParameterIds.dimmingActuatorMinBrightness: {
