@@ -14,7 +14,7 @@ type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 export class WeatherRainSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     constructor(device: Device, channelNumber: number){
         super(device, channelNumber);
-        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 

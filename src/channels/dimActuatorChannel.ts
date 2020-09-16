@@ -35,7 +35,7 @@ export class DimActuatorChannel extends Mixin(Channel, (EventEmitter as { new():
 
     constructor(device: Device, channelNumber: number){
         super(device, channelNumber);
-        device.on("datapointChanged", this.dataPointChanged.bind(this));
+        device.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 

@@ -9,38 +9,20 @@ import { ParameterIds } from "./parameterIds";
 
 export { PairingIds, ParameterIds };
 
-interface Packet {
-    type: string,
-    name: string,
-    payload: Datapoint | Parameter | CreateDevice,
-}
-
 export interface Datapoint {
-    nativeId: string,
-    channelId: number,
     pairingId: PairingIds,
     value: string
 }
 
 export interface Parameter {
-    nativeId: string,
     parameterId: ParameterIds,
     value: string
 }
 
-interface CreateDevice {
-    nativeId: string,
-    deviceType: api.VirtualDevice,
-    displayName: string
-}
 
-interface DatapointObject {
-    device: string;
-    channel: number;
-    dataPoint: number;
-    datapointType: "input" | "output" | undefined;
-    value: any;
-    sysapId: string;
+interface IndexedDatapoint {
+    index: number,
+    value: string
 }
 
 export { VirtualDeviceType } from './api';
@@ -56,15 +38,14 @@ export enum ConnectionStates {
 interface Events {
     open: FreeAtHomeApi,
     close: (code: number, reason: string) => void,
-    dataPointChanged: Datapoint,
-    parameterChanged: Parameter,
 }
 
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
 type MyEmitter = StrictEventEmitter<EventEmitter, Events>;
 
 interface DeviceEvents {
-    datapointChanged(id: PairingIds, value: string): void,
+    inputDatapointChanged(id: PairingIds, value: string): void,
+    outputDatapointChanged(id: PairingIds, value: string): void,
     parameterChanged(id: ParameterIds, value: string): void,
 }
 
@@ -119,13 +100,18 @@ export class Device extends (EventEmitter as { new(): DeviceEventEmitter }) {
         }
     }
 
-    onDatapointChange(data: DatapointObject) {
-        if ("input" === data.datapointType) {
-            const pairingId = this.inputPositionToPairing.get(data.dataPoint);
-            if (undefined === pairingId)
-                return;
-            this.emit("datapointChanged", pairingId, data.value);
-        }
+    onInputDatapointChange(channel: number, data: IndexedDatapoint) {
+        const pairingId = this.inputPositionToPairing.get(data.index);
+        if (undefined === pairingId)
+            return;
+        this.emit("inputDatapointChanged", pairingId, data.value);
+    }
+
+    onOutputDatapointChange(data: IndexedDatapoint) {
+        const pairingId = this.outputPositionToPairing.get(data.index);
+        if (undefined === pairingId)
+            return;
+        this.emit("outputDatapointChanged", pairingId, data.value);
     }
 
     public setUnresponsive() {
@@ -198,14 +184,14 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
 
     disconnect() {
         clearInterval(this.pingTimer);
-        if(undefined !== this.websocket) {
+        if (undefined !== this.websocket) {
             this.websocket.removeAllListeners('close');
             this.websocket.close();
         }
     }
 
     getConnectionState(): ConnectionStates {
-        if(undefined === this.websocket)
+        if (undefined === this.websocket)
             return ConnectionStates.closed;
         const state = this.websocket.readyState;
         switch (state) {
@@ -241,7 +227,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
     }
 
     end() {
-        if(undefined !== this.websocket) {
+        if (undefined !== this.websocket) {
             this.websocket.removeAllListeners();
             this.websocket.close();
         }
@@ -258,29 +244,23 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
 
                 const channel = parseInt(pathElements[1].substring(2), 16);
 
-                const datapoint = pathElements[2];
+                const dataPointTypeAndIndex = pathElements[2];
 
-                const dataPointTypeString = datapoint.substring(0, 3);
-                const dataPointType =
-                    (dataPointTypeString === "idp") ? "input" :
-                        (dataPointTypeString === "odp") ? "output" :
-                            undefined;
+                const dataPointTypeString = dataPointTypeAndIndex.substring(0, 3);
 
+                const dataPointIndex = parseInt(dataPointTypeAndIndex.substring(3), 16);
 
-                const dataPoint = parseInt(datapoint.substring(3), 16);
-
-                const datapointObject: DatapointObject = {
-                    device: deviceId,
-                    channel: channel,
-                    dataPoint: dataPoint,
-                    datapointType: dataPointType,
+                const datapointObject: IndexedDatapoint = {
+                    index: dataPointIndex,
                     value: value,
-                    sysapId: sysApId,
                 }
 
                 const device = this.devicesBySerial.get(deviceId);
                 if (undefined !== device) {
-                    device.onDatapointChange(datapointObject);
+                    if (dataPointTypeString === "idp")
+                        device.onInputDatapointChange(channel, datapointObject);
+                    else if (dataPointTypeString === "odp")
+                        device.onInputDatapointChange(channel, datapointObject);
                 }
             }
         }
