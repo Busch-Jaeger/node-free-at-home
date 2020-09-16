@@ -6,7 +6,7 @@ This api is unstable.
 
 Npm packages for this project are available [here](https://dev.azure.com/ABB-BHC-BHAS/DEBJE-FreeAtHomeExtensions/_packaging?_a=feed&feed=DEBJE-FreeAtHomeExtensions).
 
-To use this registry, add a .npmrc to the project directory.
+To use this registry, add a .npmrc file to the project directory.
 
 ```
 registry=https://pkgs.dev.azure.com/ABB-BHC-BHAS/DEBJE-FreeAtHomeExtensions/_packaging/DEBJE-FreeAtHomeExtensions/npm/registry/ 
