@@ -24,7 +24,7 @@ enum ForcePositionBlind {
     forceDown = "3",
 }
 
-export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+export class WindowActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     preForcedPosition: number = 0;
 
     position = 0;
