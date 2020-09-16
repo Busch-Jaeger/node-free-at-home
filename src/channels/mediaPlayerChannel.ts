@@ -1,5 +1,5 @@
-import {  PairingIds, ParameterIds, Device } from './freeAtHomeApi';
-import { Channel } from './channel';
+import {  PairingIds, ParameterIds, Device } from '../freeAtHomeApi';
+import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
 
 import { EventEmitter } from 'events';

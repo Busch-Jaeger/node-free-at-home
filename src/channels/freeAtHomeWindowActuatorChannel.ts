@@ -1,7 +1,7 @@
-import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
-import { NodeState } from './freeAtHomeDeviceInterface';
+import { PairingIds, ParameterIds, Device } from '../freeAtHomeApi';
+import { NodeState } from '../freeAtHomeDeviceInterface';
 
-import { Channel } from './channel';
+import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
 
 import { EventEmitter } from 'events';
@@ -24,7 +24,7 @@ enum ForcePositionBlind {
     forceDown = "3",
 }
 
-export class FreeAtHomeBlindActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+export class FreeAtHomeWindowActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     preForcedPosition: number = 0;
 
     position = 0;
@@ -169,18 +169,18 @@ export class FreeAtHomeBlindActuatorChannel extends Mixin(Channel, (EventEmitter
         this.emit("silentModeChanged", silentMode);
     }
 
-    delegatePositionChanged(position: number): void {
+    setPosition(position: number): void {
         console.log(position);
         this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, position.toString());
         this.position = position;
     }
 
-    delegateStateChanged(state: NodeState): void {
+    setState(state: NodeState): void {
         if (state === NodeState.inactive)
             this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "0");
     }
 
-    delegateIsMovingChanged(isMoving: boolean): void {
+    setIsMoving(isMoving: boolean): void {
         this.isMoving = isMoving;
         if (isMoving === false)
             this.setDatapoint(PairingIds.AL_INFO_MOVE_UP_DOWN, "0");

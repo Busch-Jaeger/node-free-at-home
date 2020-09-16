@@ -1,18 +1,18 @@
 import { EventEmitter } from 'events';
 import { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
 
-import { FreeAtHomeBlindActuatorChannel } from './freeAtHomeBlindActuatorChannel';
-import { FreeAtHomeDimActuatorChannel } from './freeAtHomeDimActuatorChannel'
-import { FreeAtHomeWindowActuatorChannel } from './freeAtHomeWindowActuatorChannel';
-import { SwitchingActuatorChannel } from './switchingActuatorChannel';
-import { FreeAtHomeRawChannel } from './freeAtHomeRawChannel';
+import { FreeAtHomeBlindActuatorChannel } from './channels/freeAtHomeBlindActuatorChannel';
+import { FreeAtHomeDimActuatorChannel } from './channels/freeAtHomeDimActuatorChannel'
+import { FreeAtHomeWindowActuatorChannel } from './channels/freeAtHomeWindowActuatorChannel';
+import { SwitchingActuatorChannel } from './channels/switchingActuatorChannel';
+import { FreeAtHomeRawChannel } from './channels/freeAtHomeRawChannel';
 
-import { FreeAtHomeWeatherBrightnessSensorChannel } from './freeAtHomeWeatherBrightnessSensorChannel';
-import { FreeAtHomeWeatherTemperatureSensorChannel } from './freeAtHomeWeatherTemperatureSensorChannel';
-import { freeAtHomeWeatherRainSensorChannel } from './freeAtHomeWeatherRainSensorChannel';
-import { FreeAtHomeWeatherWindSensorChannel } from './freeAtHomeWeatherWindSensorChannel'
-import { FreeAtHomeWindowSensorChannel } from './freeAtHomeWindowSensorChannel';
-import { FreeAtHomeSwitchSensorChannel } from './freeAtHomeSwitchSensor';
+import { FreeAtHomeWeatherBrightnessSensorChannel } from './channels/freeAtHomeWeatherBrightnessSensorChannel';
+import { FreeAtHomeWeatherTemperatureSensorChannel } from './channels/freeAtHomeWeatherTemperatureSensorChannel';
+import { freeAtHomeWeatherRainSensorChannel } from './channels/freeAtHomeWeatherRainSensorChannel';
+import { FreeAtHomeWeatherWindSensorChannel } from './channels/freeAtHomeWeatherWindSensorChannel'
+import { FreeAtHomeWindowSensorChannel } from './channels/freeAtHomeWindowSensorChannel';
+import { FreeAtHomeSwitchSensorChannel } from './channels/freeAtHomeSwitchSensor';
 
 import { MediaPlayerChannel } from '.'
 

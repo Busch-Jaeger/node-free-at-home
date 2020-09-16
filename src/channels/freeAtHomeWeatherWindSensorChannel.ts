@@ -1,6 +1,6 @@
-import { PairingIds, ParameterIds, Device } from './freeAtHomeApi';
+import { PairingIds, ParameterIds, Device } from '../freeAtHomeApi';
 
-import { Channel } from './channel';
+import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
 
 import { EventEmitter } from 'events';
@@ -11,7 +11,7 @@ interface ChannelEvents {
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-import './utilities';
+import '../utilities';
 
 const windAlarmLevels = [
     0,    //  0
