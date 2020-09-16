@@ -1,4 +1,5 @@
-import { PairingIds, ParameterIds, Device } from '../freeAtHomeApi';
+import { PairingIds, ParameterIds } from '../freeAtHomeApi';
+import { VirtualDevice } from "../api/virtualDevice";
 import { NodeState } from '../freeAtHomeDeviceInterface';
 
 import { Channel } from '../channel';
@@ -31,7 +32,7 @@ export class WindowActuatorChannel extends Mixin(Channel, (EventEmitter as { new
     isMoving = false;
     isForced = false;
 
-    constructor(device: Device, channelNumber: number){
+    constructor(device: VirtualDevice, channelNumber: number){
         super(device, channelNumber);
         device.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         device.on("parameterChanged", this.parameterChanged.bind(this));

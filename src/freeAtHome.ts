@@ -17,6 +17,7 @@ import { SwitchSensorChannel } from './channels/switchSensor';
 import { MediaPlayerChannel } from '.'
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
+import { Device } from './api/device';
 
 interface Events {
     open(): void,
@@ -115,5 +116,9 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     async createMediaPlayerDevice(nativeId: string, name: string): Promise<MediaPlayerChannel> {
         const device = await this.freeAtHomeApi.createDevice("MediaPlayer", nativeId, name);
         return new MediaPlayerChannel(device, 0);
+    }
+
+    public async getAllDevices() : Promise<IterableIterator<Device>> {
+        return this.freeAtHomeApi.getAllDevices();
     }
 }

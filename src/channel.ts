@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
 import { PairingIds } from '.';
-import { Device } from './freeAtHomeApi';
+import { VirtualDevice } from "./api/virtualDevice";
 
 interface ChannelEvents {
 }
@@ -12,13 +12,13 @@ type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
     serialNumber: string = "";
     channelNumber: number;
-    device: Device;
+    device: VirtualDevice;
 
     private autoKeepAliveTimer: NodeJS.Timeout | undefined = undefined;
 
     public isAutoConfirm: boolean = false;
 
-    constructor(device: Device, channelNumber: number) {
+    constructor(device: VirtualDevice, channelNumber: number) {
         super();
         this.device = device;
         this.channelNumber = channelNumber;

@@ -6,6 +6,8 @@ import nodeFetch from "node-fetch";
 
 import { PairingIds } from "./pairingIds";
 import { ParameterIds } from "./parameterIds";
+import { VirtualDevice } from './api/virtualDevice';
+import { Device } from './api/device';
 
 export { PairingIds, ParameterIds };
 
@@ -20,7 +22,7 @@ export interface Parameter {
 }
 
 
-interface IndexedDatapoint {
+export interface IndexedDatapoint {
     index: number,
     value: string
 }
@@ -41,99 +43,17 @@ interface Events {
 }
 
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
-type MyEmitter = StrictEventEmitter<EventEmitter, Events>;
+type Emitter = StrictEventEmitter<EventEmitter, Events>;
 
-interface DeviceEvents {
-    inputDatapointChanged(id: PairingIds, value: string): void,
-    outputDatapointChanged(id: PairingIds, value: string): void,
-    parameterChanged(id: ParameterIds, value: string): void,
-}
-
-// Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
-type DeviceEventEmitter = StrictEventEmitter<EventEmitter, DeviceEvents>;
-
-
-export class Device extends (EventEmitter as { new(): DeviceEventEmitter }) {
-    freeAtHomeApi: FreeAtHomeApi;
-
-    inputPairingToPosition: Map<PairingIds, number> = new Map();
-    inputPositionToPairing: Map<number, PairingIds> = new Map();
-    outputPairingToPosition: Map<PairingIds, number> = new Map();
-    outputPositionToPairing: Map<number, PairingIds> = new Map();
-
-    nativeId: string;
-    serialNumber: string;
-    deviceType: api.VirtualDeviceType;
-
-    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, deviceType: api.VirtualDeviceType) {
-        super();
-        this.freeAtHomeApi = freeAtHomeApi;
-        this.nativeId = apiDevice.nativeId || "";
-        this.serialNumber = serialNumber;
-        this.deviceType = deviceType;
-
-        const channel = apiDevice.channels?.["ch0000"];
-        {
-            const inputs = channel?.inputs;
-            let i = 0;
-            for (const input in inputs) {
-                const pairingId = inputs[input].pairingID;
-                if (undefined === pairingId)
-                    break;
-                this.inputPairingToPosition.set(pairingId as PairingIds, i);
-                this.inputPositionToPairing.set(i, pairingId as PairingIds);
-                i++;
-            }
-        }
-
-        {
-            const outputs = channel?.outputs;
-            let i = 0;
-            for (const output in outputs) {
-                const pairingId = outputs[output].pairingID;
-                if (undefined === pairingId)
-                    break;
-                this.outputPairingToPosition.set(pairingId as PairingIds, i);
-                this.outputPositionToPairing.set(i, pairingId as PairingIds);
-                i++;
-            }
-        }
-    }
-
-    onInputDatapointChange(channel: number, data: IndexedDatapoint) {
-        const pairingId = this.inputPositionToPairing.get(data.index);
-        if (undefined === pairingId)
-            return;
-        this.emit("inputDatapointChanged", pairingId, data.value);
-    }
-
-    onOutputDatapointChange(data: IndexedDatapoint) {
-        const pairingId = this.outputPositionToPairing.get(data.index);
-        if (undefined === pairingId)
-            return;
-        this.emit("outputDatapointChanged", pairingId, data.value);
-    }
-
-    public setUnresponsive() {
-        this.freeAtHomeApi.setDeviceToUnresponsive(this.deviceType, this.nativeId);
-    }
-
-    public triggerKeepAlive() {
-        this.freeAtHomeApi.setDeviceToResponsive(this.deviceType, this.nativeId);
-    }
-
-    public setOutputDatapoint(channelNumber: number, id: PairingIds, value: string) {
-        this.freeAtHomeApi.setOutputDatapoint(this.serialNumber, channelNumber, id, value);
-    }
-}
-
-export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
+export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     websocketBaseUrl: string;
     authenticationHeader: object;
     websocket: WebSocket | undefined = undefined;
     pingTimer: NodeJS.Timeout;
 
+    virtualDevicesBySerial: Map<string, VirtualDevice> = new Map();
     devicesBySerial: Map<string, Device> = new Map();
+
 
     constructor(baseUrl: string, authenticationHeader: object = {}) {
         super();
@@ -255,19 +175,23 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
                     value: value,
                 }
 
+                const virtualDevice = this.virtualDevicesBySerial.get(deviceId);
+                if (undefined !== virtualDevice) {
+                    if (dataPointTypeString === "idp")
+                        virtualDevice.onInputDatapointChange(channel, datapointObject);
+                }
+
                 const device = this.devicesBySerial.get(deviceId);
                 if (undefined !== device) {
-                    if (dataPointTypeString === "idp")
-                        device.onInputDatapointChange(channel, datapointObject);
-                    else if (dataPointTypeString === "odp")
-                        device.onInputDatapointChange(channel, datapointObject);
+                    if (dataPointTypeString === "odp")
+                        device.onOutputDatapointChange(channel, datapointObject);
                 }
             }
         }
     }
 
-    setOutputDatapoint(serialNumber: string, channel: number, pairingId: number, value: string) {
-        const device = this.devicesBySerial.get(serialNumber);
+    async setOutputDatapoint(serialNumber: string, channel: number, pairingId: number, value: string) {
+        const device = this.virtualDevicesBySerial.get(serialNumber);
         if (undefined !== device) {
             const channelString = channel.toString(16).padStart(6, "ch0000");
             const outputPosition = device.outputPairingToPosition.get(pairingId);
@@ -276,7 +200,25 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
             const datapointString = outputPosition.toString(16).padStart(7, "odp0000")
 
             channelString + "." + datapointString;
-            api.putdatapoint(
+            await api.putdatapoint(
+                "00000000-0000-0000-0000-000000000000",
+                device.serialNumber + "." + channelString + "." + datapointString,
+                value
+            );
+        }
+    }
+
+    async setInputDatapoint(serialNumber: string, channel: number, pairingId: number, value: string) {
+        const device = this.virtualDevicesBySerial.get(serialNumber);
+        if (undefined !== device) {
+            const channelString = channel.toString(16).padStart(6, "ch0000");
+            const outputPosition = device.outputPairingToPosition.get(pairingId);
+            if (undefined === outputPosition)
+                return;
+            const datapointString = outputPosition.toString(16).padStart(7, "idp0000")
+
+            channelString + "." + datapointString;
+            await api.putdatapoint(
                 "00000000-0000-0000-0000-000000000000",
                 device.serialNumber + "." + channelString + "." + datapointString,
                 value
@@ -310,7 +252,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         );
     }
 
-    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string): Promise<Device> {
+    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string): Promise<VirtualDevice> {
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
             "00000000-0000-0000-0000-000000000000",
             nativeId,
@@ -357,11 +299,32 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): MyEmitter }) {
         }
     }
 
-    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType): Device {
-        const device = new Device(this, apiDevice, deviceId, deviceType);
-        this.devicesBySerial.set(deviceId, device);
+    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType): VirtualDevice {
+        const device = new VirtualDevice(this, apiDevice, deviceId, deviceType);
+        this.virtualDevicesBySerial.set(deviceId, device);
         return device;
     }
 
+    public async getAllDevices() : Promise<IterableIterator<Device>> {
+        const configurationRequest = await api.getconfiguration();
+        if (configurationRequest.status === 200) {
+            const configurationObject = configurationRequest.data;
+            for (const sysApId in configurationObject) {
+                const devices = configurationObject[sysApId].devices;
+                for (const deviceId in devices) {
+                    if( false == this.devicesBySerial.has(deviceId))
+                    {
+                        const device = devices[deviceId];
+                        const deviceObject = new Device(this, device, deviceId);
+                        this.devicesBySerial.set(deviceId, deviceObject);
+                    }
+                }
+            }
+        }
+        else {  
+            throw new Error("Could not read configuration from data model. Error code: " + configurationRequest.status);
+        }
+        return this.devicesBySerial.values();
+    }
 }
 

@@ -1,4 +1,5 @@
-import { PairingIds, ParameterIds, Device } from '../freeAtHomeApi';
+import { PairingIds, ParameterIds } from '../freeAtHomeApi';
+import { VirtualDevice } from "../api/virtualDevice";
 
 import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
@@ -33,7 +34,7 @@ export class DimActuatorChannel extends Mixin(Channel, (EventEmitter as { new():
     intervalTimer: NodeJS.Timeout | undefined = undefined;
     timedMovementTimer: NodeJS.Timeout | undefined = undefined;
 
-    constructor(device: Device, channelNumber: number){
+    constructor(device: VirtualDevice, channelNumber: number){
         super(device, channelNumber);
         device.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         device.on("parameterChanged", this.parameterChanged.bind(this));
