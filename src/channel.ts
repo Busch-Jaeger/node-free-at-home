@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
 import { PairingIds } from '.';
-import { VirtualDevice } from "./api/virtualDevice";
+import { ApiVirtualChannel } from "./api/apiVirtualChannel";
 
 interface ChannelEvents {
 }
@@ -10,25 +10,26 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
-    serialNumber: string = "";
-    channelNumber: number;
-    device: VirtualDevice;
+    channel: ApiVirtualChannel;
 
     private autoKeepAliveTimer: NodeJS.Timeout | undefined = undefined;
 
     public isAutoConfirm: boolean = false;
 
-    constructor(device: VirtualDevice, channelNumber: number) {
+    constructor(channel: ApiVirtualChannel) {
         super();
-        this.device = device;
-        this.channelNumber = channelNumber;
+        this.channel = channel;
     }
 
     public setAutoKeepAlive(value: boolean) {
         if (value == true) {
             if (this.autoKeepAliveTimer === undefined)
-                this.autoKeepAliveTimer = setInterval(() => {
-                    this.triggerKeepAlive();
+                this.autoKeepAliveTimer = setInterval( async() => {
+                    try {
+                        await this.triggerKeepAlive();
+                    } catch (error) {
+                        console.log(error);
+                    }
                 }, 1000 * 120);
         } else {
             if (this.autoKeepAliveTimer !== undefined)
@@ -36,16 +37,15 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         }
     }
 
-    protected setDatapoint(id: PairingIds, value: string) {
-        const { channelNumber } = this;
-        this.device.setOutputDatapoint(channelNumber, id, value);
+    protected async setDatapoint(id: PairingIds, value: string) {
+        return this.channel.setOutputDatapoint(id, value);
     }
 
-    public setUnresponsive() {
-        this.device.setUnresponsive();
+    public async setUnresponsive() {
+        return this.channel.setUnresponsive();
     }
 
-    public triggerKeepAlive() {
-        this.device.triggerKeepAlive();
+    public async triggerKeepAlive() {
+        return this.channel.triggerKeepAlive();
     }
 }

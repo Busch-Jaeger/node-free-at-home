@@ -1,5 +1,5 @@
 import { PairingIds, ParameterIds } from '../freeAtHomeApi';
-import { VirtualDevice } from "../api/virtualDevice";
+import { ApiVirtualChannel } from "../api/apiVirtualChannel";
 import { NodeState } from '../freeAtHomeDeviceInterface';
 
 import { Channel } from '../channel';
@@ -32,10 +32,10 @@ export class BlindActuatorChannel extends Mixin(Channel, (EventEmitter as { new(
     isMoving = false;
     isForced = false;
 
-    constructor(device: VirtualDevice, channelNumber: number){
-        super(device, channelNumber);
-        device.on("inputDatapointChanged", this.dataPointChanged.bind(this));
-        device.on("parameterChanged", this.parameterChanged.bind(this));
+    constructor(channel: ApiVirtualChannel){
+        super(channel);
+        channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
+        channel.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
     protected dataPointChanged(id: PairingIds, value: string): void {

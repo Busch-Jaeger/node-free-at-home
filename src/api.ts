@@ -22,6 +22,8 @@ export type InOutPut = {
 export type Channel = {
     displayName?: string;
     functionID?: string;
+    room?: string;
+    floor?: string;
     inputs?: {
         [key: string]: InOutPut;
     };

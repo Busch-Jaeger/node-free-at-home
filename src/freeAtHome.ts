@@ -1,23 +1,23 @@
 import { EventEmitter } from 'events';
 import { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
 
-import { BlindActuatorChannel } from './channels/blindActuatorChannel';
-import { DimActuatorChannel } from './channels/dimActuatorChannel'
-import { WindowActuatorChannel } from './channels/windowActuatorChannel';
-import { SwitchingActuatorChannel } from './channels/switchingActuatorChannel';
-import { RawChannel } from './channels/rawChannel';
+import { BlindActuatorChannel } from './virtualChannels/blindActuatorChannel';
+import { DimActuatorChannel } from './virtualChannels/dimActuatorChannel'
+import { WindowActuatorChannel } from './virtualChannels/windowActuatorChannel';
+import { SwitchingActuatorChannel } from './virtualChannels/switchingActuatorChannel';
+import { RawChannel } from './virtualChannels/rawChannel';
 
-import { WeatherBrightnessSensorChannel } from './channels/weatherBrightnessSensorChannel';
-import { WeatherTemperatureSensorChannel } from './channels/weatherTemperatureSensorChannel';
-import { WeatherRainSensorChannel } from './channels/weatherRainSensorChannel';
-import { WeatherWindSensorChannel } from './channels/weatherWindSensorChannel'
-import { WindowSensorChannel } from './channels/windowSensorChannel';
-import { SwitchSensorChannel } from './channels/switchSensor';
+import { WeatherBrightnessSensorChannel } from './virtualChannels/weatherBrightnessSensorChannel';
+import { WeatherTemperatureSensorChannel } from './virtualChannels/weatherTemperatureSensorChannel';
+import { WeatherRainSensorChannel } from './virtualChannels/weatherRainSensorChannel';
+import { WeatherWindSensorChannel } from './virtualChannels/weatherWindSensorChannel'
+import { WindowSensorChannel } from './virtualChannels/windowSensorChannel';
+import { SwitchSensorChannel } from './virtualChannels/switchSensor';
 
 import { MediaPlayerChannel } from '.'
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
-import { Device } from './api/device';
+import { ApiDevice } from './api/apiDevice';
 
 interface Events {
     open(): void,
@@ -60,65 +60,77 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
 
     async createBlindDevice(nativeId: string, name: string): Promise<BlindActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("BlindActuator", nativeId, name);
-        return new BlindActuatorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new BlindActuatorChannel(channel);
     }
 
     async createDimActuatorDevice(nativeId: string, name: string): Promise<DimActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("DimActuator", nativeId, name);
-        return new DimActuatorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new DimActuatorChannel(channel);
     }
 
     async createWindowDevice(nativeId: string, name: string): Promise<WindowActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("WindowActuator", nativeId, name);
-        return new WindowActuatorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new WindowActuatorChannel(channel);
     }
 
     async createSwitchingActuatorDevice(nativeId: string, name: string): Promise<SwitchingActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("SwitchingActuator", nativeId, name);
-        return new SwitchingActuatorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new SwitchingActuatorChannel(channel);
     }
 
     async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType): Promise<RawChannel> {
         const device = await this.freeAtHomeApi.createDevice(deviceType, nativeId, name);
-        return new RawChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new RawChannel(channel);
     }
 
     async createWeatherBrightnessSensorDevice(nativeId: string, name: string): Promise<WeatherBrightnessSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-BrightnessSensor", nativeId, name);
-        return new WeatherBrightnessSensorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new WeatherBrightnessSensorChannel(channel);
     }
 
     async createWeatherTemperatureSensorDevice(nativeId: string, name: string): Promise<WeatherTemperatureSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-TemperatureSensor", nativeId, name);
-        return new WeatherTemperatureSensorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new WeatherTemperatureSensorChannel(channel);
     }
 
     async createWeatherRainSensorDevice(nativeId: string, name: string): Promise<WeatherRainSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-RainSensor", nativeId, name);
-        return new WeatherRainSensorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new WeatherRainSensorChannel(channel);
     }
 
     async createWeatherWindSensorDevice(nativeId: string, name: string): Promise<WeatherWindSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-WindSensor", nativeId, name);
-        return new WeatherWindSensorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new WeatherWindSensorChannel(channel);
     }
 
     async createWindowSensorDevice(nativeId: string, name: string): Promise<WindowSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("WindowSensor", nativeId, name);
-        return new WindowSensorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new WindowSensorChannel(channel);
     }
 
     async createSwitchSensorDevice(nativeId: string, name: string): Promise<SwitchSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("KNX-SwitchSensor", nativeId, name);
-        return new SwitchSensorChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new SwitchSensorChannel(channel);
     }
 
     async createMediaPlayerDevice(nativeId: string, name: string): Promise<MediaPlayerChannel> {
         const device = await this.freeAtHomeApi.createDevice("MediaPlayer", nativeId, name);
-        return new MediaPlayerChannel(device, 0);
+        const channel = device.getChannels().next().value;
+        return new MediaPlayerChannel(channel);
     }
 
-    public async getAllDevices() : Promise<IterableIterator<Device>> {
+    public async getAllDevices(): Promise<IterableIterator<ApiDevice>> {
         return this.freeAtHomeApi.getAllDevices();
     }
 }

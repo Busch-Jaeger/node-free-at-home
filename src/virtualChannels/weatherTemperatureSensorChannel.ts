@@ -1,5 +1,6 @@
 import { PairingIds, ParameterIds } from '../freeAtHomeApi';
-import { VirtualDevice } from "../api/virtualDevice";
+import { ApiVirtualChannel } from "../api/apiVirtualChannel";
+
 import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
 
@@ -11,24 +12,24 @@ interface ChannelEvents {
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-export class WeatherBrightnessSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
-    constructor(device: VirtualDevice, channelNumber: number){
-        super(device, channelNumber);
-        device.on("inputDatapointChanged", this.dataPointChanged.bind(this));
-        device.on("parameterChanged", this.parameterChanged.bind(this));
+export class WeatherTemperatureSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    constructor(channel: ApiVirtualChannel){
+        super(channel);
+        channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
+        channel.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
     alertActivationLevel: number | undefined = undefined;
 
-    setBrightnessLevel(brightness: number): void {
-        this.setDatapoint(PairingIds.AL_BRIGHTNESS_LEVEL, <string><unknown>brightness);
-        console.log("new brightness %s", brightness);
+    setTemperature(temperature: number): void {
+        this.setDatapoint(PairingIds.AL_OUTDOOR_TEMPERATURE, <string><unknown>temperature);
+        console.log("new temperature %s", temperature);
 
         if (this.alertActivationLevel !== undefined) {
-            if (this.alertActivationLevel <= brightness)
-                this.setDatapoint(PairingIds.AL_BRIGHTNESS_ALARM, "1");
+            if (this.alertActivationLevel <= temperature)
+                this.setDatapoint(PairingIds.AL_FROST_ALARM, "1");
             else
-                this.setDatapoint(PairingIds.AL_BRIGHTNESS_ALARM, "0");
+                this.setDatapoint(PairingIds.AL_FROST_ALARM, "0");
         }
     }
 
@@ -38,9 +39,9 @@ export class WeatherBrightnessSensorChannel extends Mixin(Channel, (EventEmitter
     protected parameterChanged(id: ParameterIds, value: string): void {
 
         switch (id) {
-            case ParameterIds.brightnessAlertActivationLevel:
+            case ParameterIds.frostAlarmActivationLevel:
                 this.alertActivationLevel = <number>parseInt(value);
-                console.log("Parameter brightness changed %s", this.alertActivationLevel);
+                console.log("Parameter temperature alertActivationLevel changed %s", this.alertActivationLevel);
                 break;
             case ParameterIds.hysteresis:
                 break;
