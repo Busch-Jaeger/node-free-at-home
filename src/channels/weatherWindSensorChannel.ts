@@ -29,7 +29,7 @@ const windAlarmLevels = [
     32.7, // 12
 ]
 
-export class FreeAtHomeWeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     constructor(device: Device, channelNumber: number){
         super(device, channelNumber);
         device.on("datapointChanged", this.dataPointChanged.bind(this));

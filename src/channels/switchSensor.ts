@@ -11,7 +11,7 @@ interface ChannelEvents {
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-export class FreeAtHomeSwitchSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+export class SwitchSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     constructor(device: Device, channelNumber: number){
         super(device, channelNumber);
         device.on("datapointChanged", this.dataPointChanged.bind(this));

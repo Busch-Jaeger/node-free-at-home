@@ -17,7 +17,7 @@ enum DimmerSwitchOnMode {
     previousBrightness = "01",
     maxBrightness = "02",
 }
-export class FreeAtHomeDimActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+export class DimActuatorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     brightness: number = 0;
     isOn: boolean = false;
     isNight: boolean = false;

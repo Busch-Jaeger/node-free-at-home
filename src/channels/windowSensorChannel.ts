@@ -18,7 +18,7 @@ export enum WindowState {
     opened,
 }
 
-export class FreeAtHomeWindowSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+export class WindowSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     constructor(device: Device, channelNumber: number){
         super(device, channelNumber);
         device.on("datapointChanged", this.dataPointChanged.bind(this));

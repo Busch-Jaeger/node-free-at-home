@@ -1,18 +1,18 @@
 import { EventEmitter } from 'events';
 import { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
 
-import { FreeAtHomeBlindActuatorChannel } from './channels/freeAtHomeBlindActuatorChannel';
-import { FreeAtHomeDimActuatorChannel } from './channels/freeAtHomeDimActuatorChannel'
-import { FreeAtHomeWindowActuatorChannel } from './channels/freeAtHomeWindowActuatorChannel';
+import { BlindActuatorChannel } from './channels/blindActuatorChannel';
+import { DimActuatorChannel } from './channels/dimActuatorChannel'
+import { WindowActuatorChannel } from './channels/windowActuatorChannel';
 import { SwitchingActuatorChannel } from './channels/switchingActuatorChannel';
-import { FreeAtHomeRawChannel } from './channels/freeAtHomeRawChannel';
+import { RawChannel } from './channels/rawChannel';
 
-import { FreeAtHomeWeatherBrightnessSensorChannel } from './channels/freeAtHomeWeatherBrightnessSensorChannel';
-import { FreeAtHomeWeatherTemperatureSensorChannel } from './channels/freeAtHomeWeatherTemperatureSensorChannel';
-import { freeAtHomeWeatherRainSensorChannel } from './channels/freeAtHomeWeatherRainSensorChannel';
-import { FreeAtHomeWeatherWindSensorChannel } from './channels/freeAtHomeWeatherWindSensorChannel'
-import { FreeAtHomeWindowSensorChannel } from './channels/freeAtHomeWindowSensorChannel';
-import { FreeAtHomeSwitchSensorChannel } from './channels/freeAtHomeSwitchSensor';
+import { WeatherBrightnessSensorChannel } from './channels/weatherBrightnessSensorChannel';
+import { WeatherTemperatureSensorChannel } from './channels/weatherTemperatureSensorChannel';
+import { WeatherRainSensorChannel } from './channels/weatherRainSensorChannel';
+import { WeatherWindSensorChannel } from './channels/weatherWindSensorChannel'
+import { WindowSensorChannel } from './channels/windowSensorChannel';
+import { SwitchSensorChannel } from './channels/switchSensor';
 
 import { MediaPlayerChannel } from '.'
 
@@ -57,19 +57,19 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         this.emit("open");
     }
 
-    async createBlindDevice(nativeId: string, name: string): Promise<FreeAtHomeBlindActuatorChannel> {
+    async createBlindDevice(nativeId: string, name: string): Promise<BlindActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("BlindActuator", nativeId, name);
-        return new FreeAtHomeBlindActuatorChannel(device, 0);
+        return new BlindActuatorChannel(device, 0);
     }
 
-    async createDimActuatorDevice(nativeId: string, name: string): Promise<FreeAtHomeDimActuatorChannel> {
+    async createDimActuatorDevice(nativeId: string, name: string): Promise<DimActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("DimActuator", nativeId, name);
-        return new FreeAtHomeDimActuatorChannel(device, 0);
+        return new DimActuatorChannel(device, 0);
     }
 
-    async createWindowDevice(nativeId: string, name: string): Promise<FreeAtHomeWindowActuatorChannel> {
+    async createWindowDevice(nativeId: string, name: string): Promise<WindowActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("WindowActuator", nativeId, name);
-        return new FreeAtHomeWindowActuatorChannel(device, 0);
+        return new WindowActuatorChannel(device, 0);
     }
 
     async createSwitchingActuatorDevice(nativeId: string, name: string): Promise<SwitchingActuatorChannel> {
@@ -77,39 +77,39 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new SwitchingActuatorChannel(device, 0);
     }
 
-    async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType): Promise<FreeAtHomeRawChannel> {
+    async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType): Promise<RawChannel> {
         const device = await this.freeAtHomeApi.createDevice(deviceType, nativeId, name);
-        return new FreeAtHomeRawChannel(device, 0);
+        return new RawChannel(device, 0);
     }
 
-    async createWeatherBrightnessSensorDevice(nativeId: string, name: string): Promise<FreeAtHomeWeatherBrightnessSensorChannel> {
+    async createWeatherBrightnessSensorDevice(nativeId: string, name: string): Promise<WeatherBrightnessSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-BrightnessSensor", nativeId, name);
-        return new FreeAtHomeWeatherBrightnessSensorChannel(device, 0);
+        return new WeatherBrightnessSensorChannel(device, 0);
     }
 
-    async createWeatherTemperatureSensorDevice(nativeId: string, name: string): Promise<FreeAtHomeWeatherTemperatureSensorChannel> {
+    async createWeatherTemperatureSensorDevice(nativeId: string, name: string): Promise<WeatherTemperatureSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-TemperatureSensor", nativeId, name);
-        return new FreeAtHomeWeatherTemperatureSensorChannel(device, 0);
+        return new WeatherTemperatureSensorChannel(device, 0);
     }
 
-    async createWeatherRainSensorDevice(nativeId: string, name: string): Promise<freeAtHomeWeatherRainSensorChannel> {
+    async createWeatherRainSensorDevice(nativeId: string, name: string): Promise<WeatherRainSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-RainSensor", nativeId, name);
-        return new freeAtHomeWeatherRainSensorChannel(device, 0);
+        return new WeatherRainSensorChannel(device, 0);
     }
 
-    async createWeatherWindSensorDevice(nativeId: string, name: string): Promise<FreeAtHomeWeatherWindSensorChannel> {
+    async createWeatherWindSensorDevice(nativeId: string, name: string): Promise<WeatherWindSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-WindSensor", nativeId, name);
-        return new FreeAtHomeWeatherWindSensorChannel(device, 0);
+        return new WeatherWindSensorChannel(device, 0);
     }
 
-    async createWindowSensorDevice(nativeId: string, name: string): Promise<FreeAtHomeWindowSensorChannel> {
+    async createWindowSensorDevice(nativeId: string, name: string): Promise<WindowSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("WindowSensor", nativeId, name);
-        return new FreeAtHomeWindowSensorChannel(device, 0);
+        return new WindowSensorChannel(device, 0);
     }
 
-    async createSwitchSensorDevice(nativeId: string, name: string): Promise<FreeAtHomeSwitchSensorChannel> {
+    async createSwitchSensorDevice(nativeId: string, name: string): Promise<SwitchSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("KNX-SwitchSensor", nativeId, name);
-        return new FreeAtHomeSwitchSensorChannel(device, 0);
+        return new SwitchSensorChannel(device, 0);
     }
 
     async createMediaPlayerDevice(nativeId: string, name: string): Promise<MediaPlayerChannel> {

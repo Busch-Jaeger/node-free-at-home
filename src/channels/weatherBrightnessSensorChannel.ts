@@ -1,5 +1,4 @@
 import { PairingIds, ParameterIds, Device } from '../freeAtHomeApi';
-
 import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
 
@@ -11,7 +10,7 @@ interface ChannelEvents {
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
-export class FreeAtHomeWeatherTemperatureSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+export class WeatherBrightnessSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     constructor(device: Device, channelNumber: number){
         super(device, channelNumber);
         device.on("datapointChanged", this.dataPointChanged.bind(this));
@@ -20,15 +19,15 @@ export class FreeAtHomeWeatherTemperatureSensorChannel extends Mixin(Channel, (E
 
     alertActivationLevel: number | undefined = undefined;
 
-    setTemperature(temperature: number): void {
-        this.setDatapoint(PairingIds.AL_OUTDOOR_TEMPERATURE, <string><unknown>temperature);
-        console.log("new temperature %s", temperature);
+    setBrightnessLevel(brightness: number): void {
+        this.setDatapoint(PairingIds.AL_BRIGHTNESS_LEVEL, <string><unknown>brightness);
+        console.log("new brightness %s", brightness);
 
         if (this.alertActivationLevel !== undefined) {
-            if (this.alertActivationLevel <= temperature)
-                this.setDatapoint(PairingIds.AL_FROST_ALARM, "1");
+            if (this.alertActivationLevel <= brightness)
+                this.setDatapoint(PairingIds.AL_BRIGHTNESS_ALARM, "1");
             else
-                this.setDatapoint(PairingIds.AL_FROST_ALARM, "0");
+                this.setDatapoint(PairingIds.AL_BRIGHTNESS_ALARM, "0");
         }
     }
 
@@ -38,9 +37,9 @@ export class FreeAtHomeWeatherTemperatureSensorChannel extends Mixin(Channel, (E
     protected parameterChanged(id: ParameterIds, value: string): void {
 
         switch (id) {
-            case ParameterIds.frostAlarmActivationLevel:
+            case ParameterIds.brightnessAlertActivationLevel:
                 this.alertActivationLevel = <number>parseInt(value);
-                console.log("Parameter temperature alertActivationLevel changed %s", this.alertActivationLevel);
+                console.log("Parameter brightness changed %s", this.alertActivationLevel);
                 break;
             case ParameterIds.hysteresis:
                 break;
