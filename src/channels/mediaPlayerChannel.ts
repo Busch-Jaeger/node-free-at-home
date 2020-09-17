@@ -5,14 +5,14 @@ import { Mixin } from 'ts-mixer';
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
-export enum PlayMode {
+enum PlayMode {
     idle = 0,
     playing = 1,
     paused = 2,
     buffering = 3,
 }
 
-export enum PlayCommand {
+enum PlayCommand {
     Unmute = 0,
     Mute = 1,    
     Next = 2,
@@ -36,6 +36,9 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         device.on("datapointChanged", this.dataPointChanged.bind(this));
         device.on("parameterChanged", this.parameterChanged.bind(this));
     }
+
+    public static readonly PlayMode = PlayMode;
+    public static readonly PlayCommand = PlayCommand;
 
     protected dataPointChanged(id: PairingIds, value: string): void {
         console.log("ID:" + id);
