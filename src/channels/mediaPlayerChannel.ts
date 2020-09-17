@@ -25,7 +25,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         device.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
-    dataPointChanged(id: PairingIds, value: string): void {
+    protected dataPointChanged(id: PairingIds, value: string): void {
         switch (id) {
             case PairingIds.AL_MEDIA_PLAY: // play
                 this.emit("playModeChanged", PlayMode.playing);
@@ -36,7 +36,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         }
     }
 
-    parameterChanged(id: ParameterIds, value: string): void {
+    protected parameterChanged(id: ParameterIds, value: string): void {
 
     }
 
