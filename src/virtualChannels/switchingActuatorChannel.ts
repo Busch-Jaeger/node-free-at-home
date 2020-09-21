@@ -7,7 +7,7 @@ import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
 interface ChannelEvents {
-    isOnChanged(value: boolean);
+    isOnChanged(value: boolean): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
