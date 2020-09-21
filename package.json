@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "bufferutil": "^4.0.1",
-    "node-fetch": "^2.6.1",
+    "cross-fetch": "^3.0.6",
     "oazapfts": "^3.1.2",
     "strict-event-emitter-types": "^2.0.0",
     "ts-mixer": "^5.3.0",

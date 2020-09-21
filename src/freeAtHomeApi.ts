@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import WebSocket from 'ws';
 import * as api from "./api";
-import nodeFetch from "node-fetch";
+import fetch from 'cross-fetch';
 
 import { PairingIds } from "./pairingIds";
 import { ParameterIds } from "./parameterIds";
@@ -68,7 +68,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             ...authenticationHeader
         };
 
-        api.defaults.fetch = nodeFetch;
+        api.defaults.fetch = fetch;
 
         this.connectWebsocket();
 
