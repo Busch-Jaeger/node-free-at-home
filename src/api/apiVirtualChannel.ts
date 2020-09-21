@@ -63,20 +63,20 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
         this.emit("inputDatapointChanged", pairingId, data.value);
     }
 
-    public async setUnresponsive() {
+    public async setUnresponsive(): Promise<void> {
         return this.device.setUnresponsive();
     }
 
 
-    public async triggerKeepAlive() {
+    public async triggerKeepAlive(): Promise<void> {
         return this.device.triggerKeepAlive();
     }
 
 
-    public async setOutputDatapoint(id: PairingIds, value: string) {    
+    public async setOutputDatapoint(id: PairingIds, value: string): Promise<void> {    
         const index = this.outputPairingToPosition.get(id);
         if (undefined === index)
-            return;
+            throw new Error("Pairing id not found");
         return this.device.setOutputDatapoint(this.channelNumber, index, value);
     }
 }

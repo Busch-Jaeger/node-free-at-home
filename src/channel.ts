@@ -37,15 +37,15 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         }
     }
 
-    protected async setDatapoint(id: PairingIds, value: string) {
+    protected async setDatapoint(id: PairingIds, value: string): Promise<void> {
         return this.channel.setOutputDatapoint(id, value);
     }
 
-    public async setUnresponsive() {
+    public async setUnresponsive(): Promise<void>  {
         return this.channel.setUnresponsive();
     }
 
-    public async triggerKeepAlive() {
+    public async triggerKeepAlive(): Promise<void>  {
         return this.channel.triggerKeepAlive();
     }
 }
