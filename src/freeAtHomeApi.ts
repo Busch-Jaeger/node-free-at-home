@@ -220,7 +220,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
         await api.putdatapoint(
             "00000000-0000-0000-0000-000000000000",
-            serialNumber + "." + channelString + "." + datapointString,
+            serialNumber,
+            channelString,
+            datapointString,
             value
         );
     }
@@ -231,7 +233,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
         await api.putdatapoint(
             "00000000-0000-0000-0000-000000000000",
-            serialNumber + "." + channelString + "." + datapointString,
+            serialNumber,
+            channelString,
+            datapointString,
             value
         );
     }
