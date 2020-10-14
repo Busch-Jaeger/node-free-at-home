@@ -16,6 +16,8 @@ interface ChannelEvents {
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
 type ChannelEventEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
+type OutputDatapointCallback = (value: string) => void;
+
 export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }) {
     device: ApiDevice;
     channelNumber: number;
@@ -24,6 +26,9 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
     inputPositionToPairing: Map<number, PairingIds> = new Map();
     outputPairingToPosition: Map<PairingIds, number> = new Map();
     outputPositionToPairing: Map<number, PairingIds> = new Map();
+
+    outputDataPoints: Map<PairingIds, string> = new Map();
+    outputSubscribers: Map<PairingIds, OutputDatapointCallback[]> = new Map();
 
     floor: number | undefined = undefined;
     room: number | undefined = undefined;
@@ -63,16 +68,34 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
                     break;
                 this.outputPairingToPosition.set(pairingId as PairingIds, i);
                 this.outputPositionToPairing.set(i, pairingId as PairingIds);
+
+                const value = outputs[output].value;
+                if(undefined !== value) {
+                    this.outputDataPoints.set(pairingId, value);
+                }
                 i++;
             }
         }
     }
+
+    subscribeOutputDatapoint(outputDatapoint: PairingIds, callback: OutputDatapointCallback) {
+        let subscribers = this.outputSubscribers.get(outputDatapoint);
+        if(subscribers === undefined)
+            subscribers = new Array();
+        subscribers.push(callback);
+        this.outputSubscribers.set(outputDatapoint, subscribers);
+    };
 
     onOutputDatapointChange(data: IndexedDatapoint) {
         const pairingId = this.outputPositionToPairing.get(data.index);
         if (undefined === pairingId)
             return;
         this.emit("outputDatapointChanged", pairingId, data.value);
+        const subscribers = this.outputSubscribers.get(pairingId);
+        if(subscribers !== undefined)
+            subscribers.forEach( (callback) => {
+                callback(data.value);
+            });
     }
 
     public async setInputDatapoint(id: PairingIds, value: string) {
