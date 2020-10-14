@@ -8,6 +8,8 @@ import { PairingIds } from "./pairingIds";
 import { ParameterIds } from "./parameterIds";
 import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { ApiDevice } from './api/apiDevice';
+import { ApiChannel } from './api/apiChannel';
+import { ApiChannelIterator } from './api/apiChannelIterator';
 
 export { PairingIds, ParameterIds };
 
@@ -324,6 +326,11 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             throw new Error("Could not read configuration from data model. Error code: " + configurationRequest.status);
         }
         return this.devicesBySerial.values();
+    }
+
+    public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {
+        const devicesIterator = await this.getAllDevices();
+        return new ApiChannelIterator(devicesIterator);
     }
 }
 

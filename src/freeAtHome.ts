@@ -23,6 +23,7 @@ import { EnergyMeterChannel } from './virtualChannels/energyMeterChannel';
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
+import { ApiChannel } from './api/apiChannel';
 import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
 
 export interface WeatherStationChannels {
@@ -230,4 +231,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
+    public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {
+        return this.freeAtHomeApi.getAllChannels();
+    }
+    
 }
