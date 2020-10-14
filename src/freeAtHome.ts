@@ -19,6 +19,13 @@ import { MediaPlayerChannel } from '.'
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
 
+interface WeatherStationChannels {
+    brightness: WeatherBrightnessSensorChannel;
+    rain: WeatherRainSensorChannel;
+    temperature: WeatherTemperatureSensorChannel;
+    wind: WeatherWindSensorChannel;
+};
+
 interface Events {
     open(): void,
     close(reason: string): void,
@@ -110,6 +117,18 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("Weather-WindSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WeatherWindSensorChannel(channel);
+    }
+
+    async createWeatherStationDevice(nativeId: string, name: string): Promise<WeatherStationChannels> {
+        const device = await this.freeAtHomeApi.createDevice("WeatherStation", nativeId, name);
+        const channelIterator = device.getChannels();
+        const channels = {
+            brightness: new WeatherBrightnessSensorChannel(channelIterator.next().value),
+            rain: new WeatherRainSensorChannel(channelIterator.next().value),
+            temperature: new WeatherTemperatureSensorChannel(channelIterator.next().value),
+            wind: new WeatherWindSensorChannel(channelIterator.next().value),
+        }
+        return channels;
     }
 
     async createWindowSensorDevice(nativeId: string, name: string): Promise<WindowSensorChannel> {
