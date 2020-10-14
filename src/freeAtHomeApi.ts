@@ -371,3 +371,29 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     }
 }
 
+
+export class Response extends EventEmitter {
+    promise: Promise<ApiVirtualDevice>;
+
+    resolve: (value: ApiVirtualDevice) => any = function (value: ApiVirtualDevice) { };
+    reject: (reason: any) => any = function (reason: any) { };
+
+    timeout: NodeJS.Timeout;
+
+    constructor(timeout: number = 10_000) {
+        super();
+        this.timeout =  setTimeout(this.onTimeout.bind(this), timeout);
+        this.promise = new Promise<ApiVirtualDevice>((resolve, reject) => {
+            this.resolve = resolve;
+            this.reject = reject;
+        });
+    }
+
+    private onTimeout() {
+        this.emit("timeout");
+    }
+
+    clearTimeout() {
+        clearTimeout(this.timeout);
+    }
+}
