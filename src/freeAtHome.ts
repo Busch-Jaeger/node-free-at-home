@@ -18,6 +18,7 @@ import { MediaPlayerChannel } from '.'
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
+import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
 
 interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -147,6 +148,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("MediaPlayer", nativeId, name);
         const channel = device.getChannels().next().value;
         return new MediaPlayerChannel(channel);
+    }
+
+    async createRoomTemperatureControllerDevice(nativeId: string, name: string): Promise<RoomTemperatureControllerChannel> {
+        const device = await this.freeAtHomeApi.createDevice("RTC", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new RoomTemperatureControllerChannel(channel);
     }
 
     public async getAllDevices(): Promise<IterableIterator<ApiDevice>> {
