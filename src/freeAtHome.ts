@@ -14,7 +14,12 @@ import { WeatherWindSensorChannel } from './virtualChannels/weatherWindSensorCha
 import { WindowSensorChannel } from './virtualChannels/windowSensorChannel';
 import { SwitchSensorChannel } from './virtualChannels/switchSensor';
 
-import { MediaPlayerChannel } from '.'
+import { MediaPlayerChannel } from './virtualChannels/mediaPlayerChannel';
+
+import { EnergyBatteryChannel } from './virtualChannels/energyBatteryChannel';
+import { EnergyInverterChannel } from './virtualChannels/energyInverterChannel';
+import { EnergyMeterChannel } from './virtualChannels/energyMeterChannel';
+
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
@@ -26,6 +31,12 @@ interface WeatherStationChannels {
     temperature: WeatherTemperatureSensorChannel;
     wind: WeatherWindSensorChannel;
 };
+
+interface EnergyMeterChannels {
+    battery?: EnergyBatteryChannel;
+    inverter?: EnergyInverterChannel;
+    meter?: EnergyMeterChannel;
+}
 
 interface Events {
     open(): void,
@@ -158,5 +169,55 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
 
     public async getAllDevices(): Promise<IterableIterator<ApiDevice>> {
         return this.freeAtHomeApi.getAllDevices();
+    }    
+
+    async createEnergyBatteryDevice(nativeId: string, name: string): Promise<EnergyBatteryChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyBattery", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new EnergyBatteryChannel(channel);
     }
+
+    async createEnergyInverterDevice(nativeId: string, name: string): Promise<EnergyInverterChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverter", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new EnergyInverterChannel(channel);
+    }
+
+    async createEnergyMeterDevice(nativeId: string, name: string): Promise<EnergyMeterChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeter", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new EnergyMeterChannel(channel);
+    }
+
+    async createEnergyInverterMeter(nativeId: string, name: string): Promise<EnergyMeterChannels> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeter", nativeId, name);
+        const channelIterator = device.getChannels();
+        const channels = {
+            inverter: new EnergyInverterChannel(channelIterator.next().value),
+            meter: new EnergyMeterChannel(channelIterator.next().value),
+        }
+        return channels;
+    }
+
+    async createEnergyMeterBattery(nativeId: string, name: string): Promise<EnergyMeterChannels> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterBattery", nativeId, name);
+        const channelIterator = device.getChannels();
+        const channels = {
+            battery: new EnergyBatteryChannel(channelIterator.next().value),
+            meter: new EnergyMeterChannel(channelIterator.next().value),
+        }
+        return channels;
+    }
+
+    async createEnergyInverterMeterBattery(nativeId: string, name: string): Promise<EnergyMeterChannels> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeterBattery", nativeId, name);
+        const channelIterator = device.getChannels();
+        const channels = {
+            inverter: new EnergyInverterChannel(channelIterator.next().value),
+            meter: new EnergyMeterChannel(channelIterator.next().value),
+            battery: new EnergyBatteryChannel(channelIterator.next().value),
+        }
+        return channels;
+    }
+
 }

@@ -17,6 +17,10 @@ export { SwitchSensorChannel as FreeAtHomeSwitchSensorChannel } from './virtualC
 
 export { MediaPlayerChannel } from './virtualChannels/mediaPlayerChannel';
 
+export { EnergyBatteryChannel } from './virtualChannels/energyBatteryChannel';
+export { EnergyInverterChannel } from './virtualChannels/energyInverterChannel';
+export { EnergyMeterChannel } from './virtualChannels/energyMeterChannel';
+
 export { ParameterIds } from './parameterIds';
 export { PairingIds } from './pairingIds';
 export { FunctionIds } from './functionIds';
