@@ -25,18 +25,28 @@ import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
 import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
 
-interface WeatherStationChannels {
+export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
     rain: WeatherRainSensorChannel;
     temperature: WeatherTemperatureSensorChannel;
     wind: WeatherWindSensorChannel;
 };
 
-interface EnergyMeterChannels {
-    battery?: EnergyBatteryChannel;
-    inverter?: EnergyInverterChannel;
-    meter?: EnergyMeterChannel;
-}
+export interface EnergyInverterMeterBatteryChannels {
+    battery: EnergyBatteryChannel;
+    inverter: EnergyInverterChannel;
+    meter: EnergyMeterChannel;
+};
+
+export interface EnergyInverterMeterChannels {
+    inverter: EnergyInverterChannel;
+    meter: EnergyMeterChannel;
+};
+
+export interface EnergyMeterBatteryChannels {
+    battery: EnergyBatteryChannel;
+    meter: EnergyMeterChannel;
+};
 
 interface Events {
     open(): void,
@@ -189,7 +199,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new EnergyMeterChannel(channel);
     }
 
-    async createEnergyInverterMeter(nativeId: string, name: string): Promise<EnergyMeterChannels> {
+    async createEnergyInverterMeterDevice(nativeId: string, name: string): Promise<EnergyInverterMeterChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeter", nativeId, name);
         const channelIterator = device.getChannels();
         const channels = {
@@ -199,7 +209,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createEnergyMeterBattery(nativeId: string, name: string): Promise<EnergyMeterChannels> {
+    async createEnergyMeterBatteryDevice(nativeId: string, name: string): Promise<EnergyMeterBatteryChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterBattery", nativeId, name);
         const channelIterator = device.getChannels();
         const channels = {
@@ -209,7 +219,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createEnergyInverterMeterBattery(nativeId: string, name: string): Promise<EnergyMeterChannels> {
+    async createEnergyInverterMeterBatteryDevice(nativeId: string, name: string): Promise<EnergyInverterMeterBatteryChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeterBattery", nativeId, name);
         const channelIterator = device.getChannels();
         const channels = {

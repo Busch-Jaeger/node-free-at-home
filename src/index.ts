@@ -15,11 +15,19 @@ export { WeatherWindSensorChannel as FreeAtHomeWeatherWindSensorChannel } from '
 export { WindowSensorChannel as FreeAtHomeWindowSensorChannel } from './virtualChannels/windowSensorChannel';
 export { SwitchSensorChannel as FreeAtHomeSwitchSensorChannel } from './virtualChannels/switchSensor';
 
+export { WeatherStationChannels } from './freeAtHome';
+
 export { MediaPlayerChannel } from './virtualChannels/mediaPlayerChannel';
 
 export { EnergyBatteryChannel } from './virtualChannels/energyBatteryChannel';
 export { EnergyInverterChannel } from './virtualChannels/energyInverterChannel';
 export { EnergyMeterChannel } from './virtualChannels/energyMeterChannel';
+
+export { EnergyMeterBatteryChannels } from './freeAtHome';
+export { EnergyInverterMeterBatteryChannels } from './freeAtHome';
+export { EnergyInverterMeterChannels } from './freeAtHome';
+
+
 
 export { ParameterIds } from './parameterIds';
 export { PairingIds } from './pairingIds';
