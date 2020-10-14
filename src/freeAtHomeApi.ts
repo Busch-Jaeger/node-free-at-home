@@ -10,6 +10,7 @@ import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
 import { ApiChannelIterator } from './api/apiChannelIterator';
+import { WebsocketMessage } from './api';
 
 export { PairingIds, ParameterIds };
 
@@ -57,6 +58,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     virtualDevicesBySerial: Map<string, ApiVirtualDevice> = new Map();
     devicesBySerial: Map<string, ApiDevice> = new Map();
 
+    deviceAddedEmitter: EventEmitter = new EventEmitter();
 
     constructor(baseUrl: string, authenticationHeader: object = {}) {
         super();
@@ -166,7 +168,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     }
 
     private parseWebsocketData(data: WebSocket.Data) {
-        const dataObject = JSON.parse(data as string);
+        const dataObject = <WebsocketMessage> JSON.parse(data as string);
         for (const sysApId in dataObject) {
             const datapoints = dataObject[sysApId].datapoints;
             for (const element in datapoints) {
@@ -199,6 +201,16 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                         device.onOutputDatapointChange(channel, datapointObject);
                 }
             }
+            const devices = dataObject[sysApId].devices;
+            for(const deviceId in devices) {
+                const device = devices[deviceId];
+                if( false == this.devicesBySerial.has(deviceId))
+                {
+                    const deviceObject = new ApiDevice(this, device, deviceId);
+                    this.devicesBySerial.set(deviceId, deviceObject);
+        }
+                this.deviceAddedEmitter.emit(deviceId, device);
+    }
         }
     }
 
@@ -270,23 +282,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                     const responseNativeId = devices[deviceId].serial;
                     if (responseNativeId === nativeId) {
                         console.log("Found device: " + deviceId);
-                        const deviceRequest = await api.getdevice(
-                            "00000000-0000-0000-0000-000000000000",
-                            deviceId
-                        );
-                        if (deviceRequest.status === 200) {
-                            const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
-                            if (device !== undefined) {
-                                const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType);
-                                return deviceObject;
-                            }
-                            else {
-                                throw new Error("device not found in response");
-                            }
-                        }
-                        else {
-                            throw new Error("Could not read device from ata model error code: " + res.status);
-                        }
+                        return this.getCreatedDevice(deviceId, nativeId, deviceType);
                     }
                 }
             }
@@ -297,7 +293,48 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
     }
 
+    private async getCreatedDevice(deviceId: string, nativeId: string, deviceType: api.VirtualDeviceType): Promise<ApiVirtualDevice>  {
+        const devicePromiseWithTimeout = new Response();
+        const websocketDeviceAddedCallback = (device: api.Device) => {
+            const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType);
+            devicePromiseWithTimeout.clearTimeout();
+            this.deviceAddedEmitter.off(deviceId, websocketDeviceAddedCallback);
+            devicePromiseWithTimeout.resolve(deviceObject);
+        };
+        devicePromiseWithTimeout.on("timeout", () => {
+            devicePromiseWithTimeout.reject(new Error("timeout while waiting for device description from api"));
+            this.deviceAddedEmitter.off(deviceId, websocketDeviceAddedCallback);
+        });
+        this.deviceAddedEmitter.on(deviceId, websocketDeviceAddedCallback);
+
+                        const deviceRequest = await api.getdevice(
+                            "00000000-0000-0000-0000-000000000000",
+                            deviceId
+                        );
+                        if (deviceRequest.status === 200) {
+                            const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
+                            if (device !== undefined) {
+                if(undefined !== device.channels &&  0 == Object.keys(device.channels).length )
+                    return await devicePromiseWithTimeout.promise;
+                                const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType);
+                devicePromiseWithTimeout.clearTimeout();
+                this.deviceAddedEmitter.off(deviceId, websocketDeviceAddedCallback);
+                                return deviceObject;
+                            }
+                            else {
+                                throw new Error("device not found in response");
+                            }
+                        }
+                        else {
+            return await devicePromiseWithTimeout.promise;
+            // throw new Error("Could not read device from ata model error code: " + res.status);
+        }
+    }
+
     private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType): ApiVirtualDevice {
+        const existingDevice = this.virtualDevicesBySerial.get(deviceId);
+        if(undefined !== existingDevice)
+            return existingDevice;
         const device = new ApiVirtualDevice(this, apiDevice, deviceId, deviceType);
         this.virtualDevicesBySerial.set(deviceId, device);
         return device;
