@@ -19,6 +19,7 @@ export class ApiDevice extends (EventEmitter as { new(): DeviceEventEmitter; }) 
     freeAtHomeApi: FreeAtHomeApi;
 
     serialNumber: string;
+    displayName: string | undefined;
 
     private channels: Array<ApiChannel> = new Array();
 
@@ -26,6 +27,7 @@ export class ApiDevice extends (EventEmitter as { new(): DeviceEventEmitter; }) 
         super();
         this.freeAtHomeApi = freeAtHomeApi;
         this.serialNumber = serialNumber;
+        this.displayName = apiDevice.displayName;
 
         let i = 0;
         for (const channelName in apiDevice?.channels) {
