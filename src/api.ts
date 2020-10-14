@@ -34,6 +34,8 @@ export type Channel = {
 };
 export type Device = {
     displayName?: string;
+    room?: string;
+    floor?: string;
     "interface"?: string;
     nativeId?: string;
     channels?: {
@@ -92,13 +94,27 @@ export type ApiRestDevice_sysap__device_Get200ApplicationJsonResponse = {
         devices?: Devices;
     };
 };
-export type DeviceAndEndPontSerial = string;
+export type ChannelSerial = string;
+export type DatapointSerial = string;
 export type ApiRestDatapoint_sysap__serial_Get200ApplicationJsonResponse = {
     [key: string]: {
         values?: string[];
     };
 };
 export type ApiRestDatapoint_sysap__serial_Put200TextPlainResponse = object;
+export type WebsocketMessage = {
+    [key: string]: {
+        datapoints: {
+            [key: string]: string;
+        };
+        devices: {
+            [key: string]: Devices;
+        };
+        devicesAdded: string[];
+        devicesRemoved: string[];
+        scenesTriggered: object;
+    };
+};
 export type NativeSerial = string;
 export type VirtualDeviceType = "BinarySensor" | "BlindActuator" | "SwitchingActuator" | "CeilingFanActuator" | "RTC" | "DimActuator" | "evcharging" | "WindowSensor" | "simple_doorlock" | "ShutterActuator" | "WeatherStation" | "Weather-TemperatureSensor" | "Weather-WindSensor" | "Weather-BrightnessSensor" | "Weather-RainSensor" | "WindowActuator" | "CODetector" | "FireDetector" | "KNX-SwitchSensor" | "MediaPlayer";
 export type VirtualDevice = {
@@ -168,20 +184,20 @@ export function getdevice(sysap: SysapUuid, device: DeviceSerial, opts?: Oazapft
 /**
  * Get datapoint value
  */
-export function getdatapoint(sysap: SysapUuid, serial: DeviceAndEndPontSerial, opts?: Oazapfts.RequestOpts) {
+export function getdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: ChannelSerial, datapoint: DatapointSerial, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: ApiRestDatapoint_sysap__serial_Get200ApplicationJsonResponse;
     } | {
         status: 401;
-    }>(`/api/rest/datapoint/${sysap}/${serial}`, {
+    }>(`/api/rest/datapoint/${sysap}/${device}.${channel}.${datapoint}`, {
         ...opts
     });
 }
 /**
  * Set datapoint value
  */
-export function putdatapoint(sysap: SysapUuid, serial: DeviceAndEndPontSerial, body: string, opts?: Oazapfts.RequestOpts) {
+export function putdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: ChannelSerial, datapoint: DatapointSerial, body: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: ApiRestDatapoint_sysap__serial_Put200TextPlainResponse;
@@ -190,7 +206,7 @@ export function putdatapoint(sysap: SysapUuid, serial: DeviceAndEndPontSerial, b
     } | {
         status: 502;
         data: string;
-    }>(`/api/rest/datapoint/${sysap}/${serial}`, {
+    }>(`/api/rest/datapoint/${sysap}/${device}.${channel}.${datapoint}`, {
         ...opts,
         method: "PUT",
         body
@@ -200,7 +216,12 @@ export function putdatapoint(sysap: SysapUuid, serial: DeviceAndEndPontSerial, b
  * Websocket connection
  */
 export function ws(opts?: Oazapfts.RequestOpts) {
-    return oazapfts.fetchText("/api/ws", {
+    return oazapfts.fetchJson<{
+        status: 101;
+        data: WebsocketMessage;
+    } | {
+        status: 401;
+    }>("/api/ws", {
         ...opts
     });
 }
