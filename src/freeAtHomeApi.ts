@@ -384,7 +384,7 @@ export class Response extends EventEmitter {
 
     timeout: NodeJS.Timeout;
 
-    constructor(timeout: number = 10_000) {
+    constructor(timeout: number = 2 * 60 * 1_000) { // set timeout to two minutes
         super();
         this.timeout =  setTimeout(this.onTimeout.bind(this), timeout);
         this.promise = new Promise<ApiVirtualDevice>((resolve, reject) => {
