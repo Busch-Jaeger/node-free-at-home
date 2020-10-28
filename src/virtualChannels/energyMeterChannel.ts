@@ -46,14 +46,6 @@ export class EnergyMeterChannel extends Mixin(Channel, (EventEmitter as { new():
         return this.setDatapoint(PairingIds.AL_CONSUMED_ENERGY_TODAY, value);
     }
 
-    public setInjectedEnergyToday(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_INJECTED_ENERGY_TODAY, value);
-    }
-    
-    public setPurchasedEnergyToday(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_PURCHASED_ENERGY_TODAY, value);
-    }
-
     public setNotification(value: string): Promise<void> {
         return this.setDatapoint(PairingIds.AL_NOTIFICATION_METER_COMMUNICATION_ERROR_WARNING, value);
     }
