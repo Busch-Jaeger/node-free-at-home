@@ -203,9 +203,10 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     async createEnergyInverterMeterDevice(nativeId: string, name: string): Promise<EnergyInverterMeterChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeter", nativeId, name);
         const channelIterator = device.getChannels();
+        const Iterator = channelIterator.next().value;
         const channels = {
-            inverter: new EnergyInverterChannel(channelIterator.next().value),
-            meter: new EnergyMeterChannel(channelIterator.next().value),
+            inverter: new EnergyInverterChannel(Iterator),
+            meter: new EnergyMeterChannel(Iterator),
         }
         return channels;
     }
@@ -213,9 +214,10 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     async createEnergyMeterBatteryDevice(nativeId: string, name: string): Promise<EnergyMeterBatteryChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterBattery", nativeId, name);
         const channelIterator = device.getChannels();
+        const Iterator = channelIterator.next().value;
         const channels = {
-            battery: new EnergyBatteryChannel(channelIterator.next().value),
-            meter: new EnergyMeterChannel(channelIterator.next().value),
+            battery: new EnergyBatteryChannel(Iterator),
+            meter: new EnergyMeterChannel(Iterator),
         }
         return channels;
     }
@@ -223,10 +225,11 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     async createEnergyInverterMeterBatteryDevice(nativeId: string, name: string): Promise<EnergyInverterMeterBatteryChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeterBattery", nativeId, name);
         const channelIterator = device.getChannels();
-        const channels = {
-            inverter: new EnergyInverterChannel(channelIterator.next().value),
-            meter: new EnergyMeterChannel(channelIterator.next().value),
-            battery: new EnergyBatteryChannel(channelIterator.next().value),
+        const Iterator = channelIterator.next().value;
+        const channels = {            
+            inverter: new EnergyInverterChannel(Iterator),
+            meter: new EnergyMeterChannel(Iterator),
+            battery: new EnergyBatteryChannel(Iterator),
         }
         return channels;
     }
