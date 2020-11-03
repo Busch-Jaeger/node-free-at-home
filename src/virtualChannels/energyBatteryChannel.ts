@@ -31,7 +31,7 @@ export class EnergyBatteryChannel extends Mixin(Channel, (EventEmitter as { new(
     }
 
     public setBatteryPower(value: string): Promise<void>  {
-        return this.setDatapoint(PairingIds.AL_BATTERY_POWER, value);
+        return this.setDatapoint(PairingIds.AL_INFO_CURRENT_BATTERY_POWER, value);
     }
 
 }

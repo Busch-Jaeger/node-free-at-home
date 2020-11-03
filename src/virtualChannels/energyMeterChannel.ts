@@ -35,11 +35,11 @@ export class EnergyMeterChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     public setHomePowerConsumption(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_HOME_POWER_CONSUMPTION, value);
+        return this.setDatapoint(PairingIds.AL_INFO_CURRENT_HOME_POWER_CONSUMPTION, value);
     }
     
     public setPowerToGrid(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_POWER_TO_GRID, value);
+        return this.setDatapoint(PairingIds.AL_INFO_CURRENT_POWER_TO_GRID, value);
     }
     
     public setConsumedEnergyToday(value: string): Promise<void> {

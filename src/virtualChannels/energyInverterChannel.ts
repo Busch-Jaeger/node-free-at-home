@@ -28,11 +28,11 @@ export class EnergyInverterChannel extends Mixin(Channel, (EventEmitter as { new
     }
 
     public setSolarPowerProduction(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_SOLAR_POWER_PRODUCTION, value);
+        return this.setDatapoint(PairingIds.AL_INFO_CURRENT_SOLAR_POWER, value);
     }
     
     public setInverterOutputPower(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_INVERTER_OUTPUT_POWER, value);
+        return this.setDatapoint(PairingIds.AL_INFO_CURRENT_INVERTER_OUTPUT_POWER, value);
     }
 
     public setSolarEnergyToday(value: string): Promise<void> {
