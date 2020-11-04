@@ -34,6 +34,8 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
     room: number | undefined = undefined;
     functionID: FunctionIds | undefined = undefined;
 
+    displayName: string | undefined = undefined;
+
     constructor(device: ApiDevice, apiChannel: api.Channel, channelNumber: number) {
         super();
         this.device = device;
@@ -45,6 +47,8 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
             this.room = parseInt(apiChannel.room, 16);
         if (apiChannel.functionID !== undefined)
             this.functionID = <FunctionIds>parseInt(apiChannel.functionID, 16);
+        if (apiChannel.displayName !== undefined)
+            this.displayName = apiChannel.displayName;
 
         { //inputs
             const inputs = apiChannel?.inputs;
