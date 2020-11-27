@@ -25,6 +25,7 @@ import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
 import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
+import { Device } from './api';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -181,6 +182,10 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     public async getAllDevices(): Promise<IterableIterator<ApiDevice>> {
         return this.freeAtHomeApi.getAllDevices();
     }    
+
+    public async getDevice(deviceId: string): Promise<Device> {
+        return this.freeAtHomeApi.getDevice(deviceId);
+    }   
 
     async createEnergyBatteryDevice(nativeId: string, name: string): Promise<EnergyBatteryChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyBattery", nativeId, name);
