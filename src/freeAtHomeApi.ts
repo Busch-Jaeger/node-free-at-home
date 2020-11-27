@@ -344,6 +344,29 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         return device;
     }
 
+    public async getDevice(deviceId: string) : Promise<api.Device> {
+        let result: api.Device = {
+            
+        };
+        const deviceRequest = await api.getdevice(
+            "00000000-0000-0000-0000-000000000000",
+            deviceId
+        );
+        if (deviceRequest.status === 200) {
+            const deviceObject = deviceRequest.data;
+            for (const sysApId in deviceObject) {
+                const device = deviceObject[sysApId].devices;
+                for (const deviceId in device) {
+                    result = device[deviceId];                    
+                }
+            }
+        }
+        else {
+            throw new Error("Could not read configuration from data model. Error code: " + deviceRequest.status);
+        }
+        return result;
+    }
+
     public async getAllDevices() : Promise<IterableIterator<ApiDevice>> {
         if(this.devicesBySerial.size !== 0) {
             return this.devicesBySerial.values();
