@@ -20,6 +20,19 @@ import { EnergyBatteryChannel } from './virtualChannels/energyBatteryChannel';
 import { EnergyInverterChannel } from './virtualChannels/energyInverterChannel';
 import { EnergyMeterChannel } from './virtualChannels/energyMeterChannel';
 
+import { AirCO2Channel } from './virtualChannels/airCO2Channel';
+import { AirCOChannel } from './virtualChannels/airCOChannel';
+import { AirHumidityChannel } from './virtualChannels/airHumidityChannel';
+import { AirNO2Channel } from './virtualChannels/airNO2Channel';
+import { AirO3Channel } from './virtualChannels/airO3Channel';
+import { AirPM10Channel } from './virtualChannels/airPM10Channel';
+import { AirPM25Channel } from './virtualChannels/airPM25Channel';
+import { AirPressureChannel } from './virtualChannels/airPressureChannel';
+import { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
+import { AirVOCChannel } from './virtualChannels/airVOCChannel';
+
+
+
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
@@ -49,6 +62,19 @@ export interface EnergyMeterBatteryChannels {
     battery: EnergyBatteryChannel;
     meter: EnergyMeterChannel;
 };
+
+export interface AirQualityFullChannels {
+    co2: AirCO2Channel;
+    co: AirCOChannel;
+    humidity: AirHumidityChannel;
+    no2: AirNO2Channel;
+    o3: AirO3Channel;
+    pm10: AirPM10Channel;
+    pm25: AirPM25Channel;
+    pressure: AirPressureChannel;
+    temperature: AirTemperatureChannel;
+    voc: AirVOCChannel;
+}
 
 interface Events {
     open(): void,
@@ -235,6 +261,85 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
             inverter: new EnergyInverterChannel(Iterator),
             meter: new EnergyMeterChannel(Iterator),
             battery: new EnergyBatteryChannel(Iterator),
+        }
+        return channels;
+    }
+
+    async createAirQualityCO2Device(nativeId: string, name: string): Promise<AirCO2Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityCO2", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirCO2Channel(channel);
+    }
+
+    async createAirQualityCODevice(nativeId: string, name: string): Promise<AirCOChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityCO", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirCOChannel(channel);
+    }
+
+    async createAirQualityHumidityDevice(nativeId: string, name: string): Promise<AirHumidityChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityHumidity", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirHumidityChannel(channel);
+    }
+
+    async createAirQualityNO2Device(nativeId: string, name: string): Promise<AirNO2Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityNO2", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirNO2Channel(channel);
+    }
+
+    async createAirQualityO3Device(nativeId: string, name: string): Promise<AirO3Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityO3", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirO3Channel(channel);
+    }
+
+    async createAirQualityPM10Device(nativeId: string, name: string): Promise<AirPM10Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityPM10", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirPM10Channel(channel);
+    }
+
+    async createAirQualityPM25Device(nativeId: string, name: string): Promise<AirPM25Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityPM25", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirPM25Channel(channel);
+    }
+
+    async createAirQualityPressureDevice(nativeId: string, name: string): Promise<AirPressureChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityPressure", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirPressureChannel(channel);
+    }
+
+    async createAirQualityTemperatureDevice(nativeId: string, name: string): Promise<AirTemperatureChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityTemperature", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirTemperatureChannel(channel);
+    }
+
+    async createAirQualityVOCDevice(nativeId: string, name: string): Promise<AirVOCChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityVOC", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new AirVOCChannel(channel);
+    }
+
+    async createAirQualityFullDevice(nativeId: string, name: string): Promise<AirQualityFullChannels> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityFull", nativeId, name);
+        const channelIterator = device.getChannels();
+        const Iterator = channelIterator.next().value;
+        const channels = {   
+            co2: new AirCO2Channel(Iterator),        
+            co: new AirCOChannel(Iterator),
+            humidity: new AirHumidityChannel(Iterator),
+            no2: new AirNO2Channel(Iterator),
+            o3: new AirO3Channel(Iterator),
+            pm10: new AirPM10Channel(Iterator),
+            pm25: new AirPM25Channel(Iterator),
+            pressure: new AirPressureChannel(Iterator),
+            temperature: new AirTemperatureChannel(Iterator),
+            voc: new AirVOCChannel(Iterator),
         }
         return channels;
     }
