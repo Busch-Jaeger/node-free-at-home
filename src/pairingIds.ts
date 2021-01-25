@@ -204,6 +204,14 @@ export enum PairingIds {
     AL_INFO_STATUS_CHANGED_TIME = 0x0616,	//	Time of last status change (start, finish, etc.)
     AL_LOCK_UNLOCK_COMMAND = 0x0618,	//	Lock/Unlock door command
     AL_INFO_LOCK_UNLOCK_COMMAND = 0x0619,	//	Info Locked / Unlocked
+    AL_INFO_PRESSURE = 0x061A,  // Info Air Pressure
+    AL_INFO_CO_2 = 0x061B,  // Info CO2 Value
+    AL_INFO_CO = 0x061C,    // Info CO Value
+    AL_INFO_NO_2 = 0x061D,  // Info NO2 Value
+    AL_INFO_O_3 = 0x061E,   // Info O3 Value
+    AL_INFO_PM_10 = 0x061F, // Info PM 10 Value
+    AL_INFO_PM_2_5 = 0x0620,    // Info PM 2.5 Value
+    AL_INFO_VOC = 0x0621,   // Info VOC Value
     AL_TIME_OF_DAY = 0xF001,	//	Time
     AL_DATE = 0xF002,	//	Date
     AL_MESSAGE_CENTER_NOTIFICATION = 0xF003,	//	Notification

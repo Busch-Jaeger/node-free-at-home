@@ -138,5 +138,13 @@ export enum FunctionIds {
     FID_PANEL_WALLBOX = 0x00A7,	//	Wallbox
     FID_DOOR_LOCK_CONTROL = 0x00A8,	//	Door lock control
     FID_VRV_GATEWAY = 0x00AA,	//	Room temperature controller with fan speed level
+    FID_CO_2 = 0xE018,  // CO2 Value
+    FID_CO = 0xE019,    // CO Value
+    FID_NO_2 = 0xE01A,  // NO2 Value
+    FID_O_3 = 0xE01B,   // O3 Value
+    FID_PM_10 = 0xE01C, // PM10 Value
+    FID_PM_2_5 = 0xE01D,    // PM 2.5 Value
+    FID_VOC = 0xE01E,   // VOC Value
+
 
 }
