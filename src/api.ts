@@ -4,8 +4,8 @@
  * DO NOT MODIFY - This file has been generated using oazapfts.
  * See https://www.npmjs.com/package/oazapfts
  */
-import * as Oazapfts from "oazapfts/lib/runtime";
-import * as QS from "oazapfts/lib/runtime/query";
+import * as Oazapfts from "oazapfts_runtime/lib/runtime";
+import * as QS from "oazapfts_runtime/lib/runtime/query";
 export const defaults: Oazapfts.RequestOpts = {
     baseUrl: "https://192.168.2.1/fhapi/v1",
 };

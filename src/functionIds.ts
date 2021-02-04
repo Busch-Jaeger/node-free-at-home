@@ -145,6 +145,7 @@ export enum FunctionIds {
     FID_PM_10 = 0xE01C, // PM10 Value
     FID_PM_2_5 = 0xE01D,    // PM 2.5 Value
     FID_VOC = 0xE01E,   // VOC Value
+    FID_HUMIDITY = 0xB03F,  // Humidity Value
 
 
 }
