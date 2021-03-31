@@ -76,7 +76,7 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
     public async setOutputDatapoint(id: PairingIds, value: string): Promise<void> {    
         const index = this.outputPairingToPosition.get(id);
         if (undefined === index)
-            throw new Error("Pairing id not found");
+            throw new Error("Pairing id not found: " + id);
         return this.device.setOutputDatapoint(this.channelNumber, index, value);
     }
 }
