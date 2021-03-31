@@ -39,6 +39,9 @@ export class ApiDevice extends (EventEmitter as { new(): DeviceEventEmitter; }) 
     }
 
     onOutputDatapointChange(channelIndex: number, data: IndexedDatapoint) {
+        if(channelIndex >= this.channels.length) {
+            return;
+        }
         const channel = this.channels[channelIndex];
         channel.onOutputDatapointChange(data);
     }
