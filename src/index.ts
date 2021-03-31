@@ -2,6 +2,8 @@ export { FreeAtHome } from './freeAtHome';
 export { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
 export { NodeState } from './freeAtHomeDeviceInterface';
 
+export { Channel } from './channel'
+
 export { BlindActuatorChannel as FreeAtHomeBlindActuatorChannel } from './virtualChannels/blindActuatorChannel';
 export { DimActuatorChannel as FreeAtHomeDimActuatorChannel } from './virtualChannels/dimActuatorChannel'
 export { WindowActuatorChannel as FreeAtHomeWindowActuatorChannel } from './virtualChannels/windowActuatorChannel';
@@ -43,3 +45,6 @@ export { EnergyInverterMeterChannels } from './freeAtHome';
 export { ParameterIds } from './parameterIds';
 export { PairingIds } from './pairingIds';
 export { FunctionIds } from './functionIds';
+
+export { ApiDevice } from './api/apiDevice';
+export { ApiChannel } from './api/apiChannel';
