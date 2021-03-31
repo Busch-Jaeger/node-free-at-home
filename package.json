@@ -29,6 +29,7 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "cross-fetch": "^3.0.6",
+    "isomorphic-ws": "^4.0.1",
     "oazapfts_runtime": "^1.0.0",
     "strict-event-emitter-types": "^2.0.0",
     "ts-mixer": "^5.3.0",
