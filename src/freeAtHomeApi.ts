@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
-import WebSocket from 'ws';
+import WebSocket from 'isomorphic-ws';
 import * as api from "./api";
 import fetch from 'cross-fetch';
 
@@ -52,7 +52,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     websocketBaseUrl: string;
     authenticationHeader: object;
     websocket: WebSocket | undefined = undefined;
-    pingTimer: NodeJS.Timeout;
+    pingTimer: NodeJS.Timeout | undefined = undefined;
     pongReceived: boolean = true;
 
     virtualDevicesBySerial: Map<string, ApiVirtualDevice> = new Map();
@@ -76,6 +76,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
         this.connectWebsocket();
 
+        if (typeof window === 'undefined') {
         this.pingTimer = setInterval(() => {
             if (this.websocket !== undefined && this.websocket.OPEN == this.websocket.readyState) {
                 this.websocket.ping();
@@ -86,22 +87,32 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             }
         }, 5000);
     }
+    }
 
     private connectWebsocket() {
         try {
-            this.websocket = new WebSocket(this.websocketBaseUrl + "/api/ws", {
-                rejectUnauthorized: false,
-                headers: {
-                    ...this.authenticationHeader
-                }
-            });
+            if (typeof window === 'undefined') {
+                this.websocket = new WebSocket(this.websocketBaseUrl + "/api/ws", {
+                    headers: {
+                        ...this.authenticationHeader
+                    }
+                });
+                this.websocket.on('open', this.onOpen.bind(this));
+                this.websocket.on('close', this.onClose.bind(this));
+                this.websocket.on('error', this.onError.bind(this));
+                this.websocket.on('pong', this.onPong.bind(this));
+    
+                this.websocket.on('message', this.parseWebsocketData.bind(this));
+            }
+            else {
+                this.websocket = new WebSocket(this.websocketBaseUrl + "/api/ws");
+                this.websocket.addEventListener('message', (event) => {
+                    this.parseWebsocketData(event.data);
+                });
+            }
 
-            this.websocket.on('open', this.onOpen.bind(this));
-            this.websocket.on('close', this.onClose.bind(this));
-            this.websocket.on('error', this.onError.bind(this));
-            this.websocket.on('pong', this.onPong.bind(this));
 
-            this.websocket.on('message', this.parseWebsocketData.bind(this));
+
         }
         catch (error) {
             setTimeout(
@@ -113,6 +124,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     }
 
     disconnect() {
+        if(undefined !== this.pingTimer)
         clearInterval(this.pingTimer);
         if (undefined !== this.websocket) {
             this.websocket.removeAllListeners('close');
@@ -208,9 +220,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 {
                     const deviceObject = new ApiDevice(this, device, deviceId);
                     this.devicesBySerial.set(deviceId, deviceObject);
-        }
+                }
                 this.deviceAddedEmitter.emit(deviceId, device);
-    }
+            }
         }
     }
 
@@ -311,25 +323,25 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         });
         this.deviceAddedEmitter.on(deviceId, websocketDeviceAddedCallback);
 
-                        const deviceRequest = await api.getdevice(
-                            "00000000-0000-0000-0000-000000000000",
-                            deviceId
-                        );
-                        if (deviceRequest.status === 200) {
-                            const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
-                            if (device !== undefined) {
+        const deviceRequest = await api.getdevice(
+            "00000000-0000-0000-0000-000000000000",
+            deviceId
+        );
+        if (deviceRequest.status === 200) {
+            const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
+            if (device !== undefined) {
                 if(undefined !== device.channels &&  0 == Object.keys(device.channels).length )
                     return await devicePromiseWithTimeout.promise;
-                                const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType);
+                const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType);
                 devicePromiseWithTimeout.clearTimeout();
                 this.deviceAddedEmitter.off(deviceId, websocketDeviceAddedCallback);
-                                return deviceObject;
-                            }
-                            else {
-                                throw new Error("device not found in response");
-                            }
-                        }
-                        else {
+                return deviceObject;
+            }
+            else {
+                throw new Error("device not found in response");
+            }
+        }
+        else {
             return await devicePromiseWithTimeout.promise;
             // throw new Error("Could not read device from ata model error code: " + res.status);
         }
