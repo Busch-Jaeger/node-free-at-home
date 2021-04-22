@@ -40,6 +40,8 @@ export { EnergyMeterBatteryChannels } from './freeAtHome';
 export { EnergyInverterMeterBatteryChannels } from './freeAtHome';
 export { EnergyInverterMeterChannels } from './freeAtHome';
 
+export { AirQualityKaiterraChannels } from './freeAtHome';
+
 
 
 export { ParameterIds } from './parameterIds';

@@ -71,7 +71,17 @@ export interface AirQualityFullChannels {
     o3: AirO3Channel;
     pm10: AirPM10Channel;
     pm25: AirPM25Channel;
-    pressure: AirPressureChannel;
+    temperature: AirTemperatureChannel;
+    voc: AirVOCChannel;
+}
+
+export interface AirQualityKaiterraChannels {
+    co2: AirCO2Channel;
+    co: AirCOChannel;
+    humidity: AirHumidityChannel;
+    o3: AirO3Channel;
+    pm10: AirPM10Channel;
+    pm25: AirPM25Channel;
     temperature: AirTemperatureChannel;
     voc: AirVOCChannel;
 }
@@ -338,6 +348,22 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
             pm10: new AirPM10Channel(Iterator),
             pm25: new AirPM25Channel(Iterator),
             pressure: new AirPressureChannel(Iterator),
+            temperature: new AirTemperatureChannel(Iterator),
+            voc: new AirVOCChannel(Iterator),
+        }
+        return channels;
+    }
+    async createAirQualityKaiterra(nativeId: string, name: string): Promise<AirQualityKaiterraChannels> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityKaiterra", nativeId, name);
+        const channelIterator = device.getChannels();
+        const Iterator = channelIterator.next().value;
+        const channels = {   
+            co2: new AirCO2Channel(Iterator),        
+            co: new AirCOChannel(Iterator),
+            humidity: new AirHumidityChannel(Iterator),
+            o3: new AirO3Channel(Iterator),
+            pm10: new AirPM10Channel(Iterator),
+            pm25: new AirPM25Channel(Iterator),
             temperature: new AirTemperatureChannel(Iterator),
             voc: new AirVOCChannel(Iterator),
         }
