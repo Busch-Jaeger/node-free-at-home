@@ -1,4 +1,4 @@
-import { FreeAtHomeApi, PairingIds, ParameterIds } from '../freeAtHomeApi';
+import { PairingIds, ParameterIds } from '../freeAtHomeApi';
 import { ApiVirtualChannel } from "../api/apiVirtualChannel";
 import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
