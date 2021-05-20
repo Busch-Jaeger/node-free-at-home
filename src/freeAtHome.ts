@@ -39,6 +39,7 @@ import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
 import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
 import { Device } from './api';
+import { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -368,6 +369,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
             voc: new AirVOCChannel(Iterator),
         }
         return channels;
+    }
+
+    async createCeilingFan(nativeId: string, name: string): Promise<CeilingFanChannel> {
+        const device = await this.freeAtHomeApi.createDevice("CeilingFanActuator", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new CeilingFanChannel(channel);
     }
 
     public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {
