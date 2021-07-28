@@ -25,6 +25,7 @@ export { EnergyBatteryChannel } from './virtualChannels/energyBatteryChannel';
 export { EnergyInverterChannel } from './virtualChannels/energyInverterChannel';
 export { EnergyMeterChannel } from './virtualChannels/energyMeterChannel';
 
+import ScriptingHost from './scriptinghost';
 import { AirCO2Channel } from './virtualChannels/airCO2Channel';
 import { AirCOChannel } from './virtualChannels/airCOChannel';
 import { AirHumidityChannel } from './virtualChannels/airHumidityChannel';
@@ -52,3 +53,7 @@ export { FunctionIds } from './functionIds';
 
 export { ApiDevice } from './api/apiDevice';
 export { ApiChannel } from './api/apiChannel';
+
+export * as ScriptingHost from './scriptinghost'
+
+export * as ScriptingAPI from './scriptingApi'
