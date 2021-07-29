@@ -32,7 +32,7 @@
     "cross-fetch": "^3.0.6",
     "eventsource": "^1.1.0",
     "isomorphic-ws": "^4.0.1",
-    "oazapfts_runtime": "^1.0.0",
+    "oazapfts_runtime": "^3.3.1",
     "strict-event-emitter-types": "^2.0.0",
     "ts-mixer": "5.4.0",
     "utf-8-validate": "^5.0.2",
