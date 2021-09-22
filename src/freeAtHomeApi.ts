@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import WebSocket from 'isomorphic-ws';
+import net from 'net';
+import http from 'http';
 import * as api from "./api";
 import fetch from 'cross-fetch';
 
@@ -40,6 +42,14 @@ export enum ConnectionStates {
     unknown,
 }
 
+interface ConnectionOptions {
+    headers: Record<string, string | undefined> | undefined;
+    baseUrl: string;
+    fetch: any;
+    createConnection: ((options: http.ClientRequestArgs, connectionListener?: (() => void) | undefined) => net.Socket) | undefined;
+    agent: http.Agent;
+}
+
 interface Events {
     open: FreeAtHomeApi,
     close: (code: number, reason: string) => void,
@@ -49,8 +59,8 @@ interface Events {
 type Emitter = StrictEventEmitter<EventEmitter, Events>;
 
 export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
+    private connectionOptions: ConnectionOptions;
     websocketBaseUrl: string;
-    authenticationHeader: object;
     websocket: WebSocket | undefined = undefined;
     pingTimer: NodeJS.Timeout | undefined = undefined;
     pongReceived: boolean = true;
@@ -63,16 +73,32 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     constructor(baseUrl: string, authenticationHeader: object = {}) {
         super();
 
-        this.websocketBaseUrl = baseUrl.replace(/^(http)/, "ws");
-        this.authenticationHeader = authenticationHeader;
+        const useUnixSocket: boolean = process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined;
 
-        api.defaults.baseUrl = baseUrl;
+        this.websocketBaseUrl = (useUnixSocket)
+            ? "ws+unix:///run/api/fhapi/v1:"
+            : baseUrl.replace(/^(http)/, "ws");
 
-        api.defaults.headers = {
-            ...authenticationHeader
-        };
+        console.log(this.websocketBaseUrl);
 
-        api.defaults.fetch = fetch;
+        function connectToUnixSocket(options: http.ClientRequestArgs, connectionListener?: () => void) {
+            return net.createConnection("/run/api/fhapi/v1", connectionListener);
+        }
+
+        const unixSocketAgent = new http.Agent(<object>{
+            socketPath: "/run/api/fhapi/v1",
+        })
+
+        this.connectionOptions = {
+            headers: {
+                "Range": "0",
+                ...authenticationHeader
+            },
+            baseUrl: (useUnixSocket) ? "http://localhost" : baseUrl,
+            fetch: fetch,
+            createConnection: (useUnixSocket) ? connectToUnixSocket : undefined, // used in EventSource
+            agent: (useUnixSocket) ? unixSocketAgent : http.globalAgent          // used in fetch
+        }
 
         this.connectWebsocket();
 
@@ -94,7 +120,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             if (typeof window === 'undefined') {
                 this.websocket = new WebSocket(this.websocketBaseUrl + "/api/ws", {
                     headers: {
-                        ...this.authenticationHeader
+                        ...this.connectionOptions.headers
                     }
                 });
                 this.websocket.on('open', this.onOpen.bind(this));
@@ -235,7 +261,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             serialNumber,
             channelString,
             datapointString,
-            value
+            value,
+            this.connectionOptions
         );
     }
 
@@ -248,7 +275,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             serialNumber,
             channelString,
             datapointString,
-            value
+            value,
+            this.connectionOptions
         );
     }
 
@@ -261,7 +289,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 properties: {
                     ttl: "0",
                 }
-            }
+            },
+            this.connectionOptions
         );
     }
 
@@ -274,7 +303,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 properties: {
                     ttl: "180",
                 }
-            }
+            },
+            this.connectionOptions
         );
     }
 
@@ -288,7 +318,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                     ttl: "180",
                     displayname: displayName
                 }
-            }
+            },
+            this.connectionOptions
         );
         if (res.status === 200) {
             const dataObject = res.data;
@@ -325,7 +356,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
         const deviceRequest = await api.getdevice(
             "00000000-0000-0000-0000-000000000000",
-            deviceId
+            deviceId,
+            this.connectionOptions
         );
         if (deviceRequest.status === 200) {
             const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
@@ -362,7 +394,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         };
         const deviceRequest = await api.getdevice(
             "00000000-0000-0000-0000-000000000000",
-            deviceId
+            deviceId,
+            this.connectionOptions
         );
         if (deviceRequest.status === 200) {
             const deviceObject = deviceRequest.data;
@@ -383,7 +416,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         if(this.devicesBySerial.size !== 0) {
             return this.devicesBySerial.values();
         }
-        const configurationRequest = await api.getconfiguration();
+        const configurationRequest = await api.getconfiguration(this.connectionOptions);
         if (configurationRequest.status === 200) {
             const configurationObject = configurationRequest.data;
             for (const sysApId in configurationObject) {
