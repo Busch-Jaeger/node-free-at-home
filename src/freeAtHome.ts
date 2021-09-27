@@ -30,6 +30,7 @@ import { AirPM25Channel } from './virtualChannels/airPM25Channel';
 import { AirPressureChannel } from './virtualChannels/airPressureChannel';
 import { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
 import { AirVOCChannel } from './virtualChannels/airVOCChannel';
+import { EvChargerChannel } from './virtualChannels/evCharger';
 
 
 
@@ -375,6 +376,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("CeilingFanActuator", nativeId, name);
         const channel = device.getChannels().next().value;
         return new CeilingFanChannel(channel);
+    }
+
+    async createEvCharger(nativeId: string, name: string): Promise<EvChargerChannel> {
+        const device = await this.freeAtHomeApi.createDevice("evcharging", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new EvChargerChannel(channel);
     }
 
     public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {

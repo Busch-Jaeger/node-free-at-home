@@ -25,17 +25,17 @@ export { EnergyBatteryChannel } from './virtualChannels/energyBatteryChannel';
 export { EnergyInverterChannel } from './virtualChannels/energyInverterChannel';
 export { EnergyMeterChannel } from './virtualChannels/energyMeterChannel';
 
-import ScriptingHost from './scriptinghost';
-import { AirCO2Channel } from './virtualChannels/airCO2Channel';
-import { AirCOChannel } from './virtualChannels/airCOChannel';
-import { AirHumidityChannel } from './virtualChannels/airHumidityChannel';
-import { AirNO2Channel } from './virtualChannels/airNO2Channel';
-import { AirO3Channel } from './virtualChannels/airO3Channel';
-import { AirPM10Channel } from './virtualChannels/airPM10Channel';
-import { AirPM25Channel } from './virtualChannels/airPM25Channel';
-import { AirPressureChannel } from './virtualChannels/airPressureChannel';
-import { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
-import { AirVOCChannel } from './virtualChannels/airVOCChannel';
+export { AirCO2Channel } from './virtualChannels/airCO2Channel';
+export { AirCOChannel } from './virtualChannels/airCOChannel';
+export { AirHumidityChannel } from './virtualChannels/airHumidityChannel';
+export { AirNO2Channel } from './virtualChannels/airNO2Channel';
+export { AirO3Channel } from './virtualChannels/airO3Channel';
+export { AirPM10Channel } from './virtualChannels/airPM10Channel';
+export { AirPM25Channel } from './virtualChannels/airPM25Channel';
+export { AirPressureChannel } from './virtualChannels/airPressureChannel';
+export { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
+export { AirVOCChannel } from './virtualChannels/airVOCChannel';
+export { EvChargerChannel } from './virtualChannels/evCharger';
 
 export { EnergyMeterBatteryChannels } from './freeAtHome';
 export { EnergyInverterMeterBatteryChannels } from './freeAtHome';
