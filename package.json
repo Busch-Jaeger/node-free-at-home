@@ -37,5 +37,8 @@
     "ts-mixer": "5.4.0",
     "utf-8-validate": "^5.0.2",
     "ws": "^7.4.4"
-  }
+  },
+  "bundledDependencies": [
+    "oazapfts_runtime"
+  ]
 }
