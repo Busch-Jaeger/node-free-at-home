@@ -5,6 +5,7 @@ import { Mixin } from 'ts-mixer';
 
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
+import { Datapoint } from '..';
 
 interface ChannelEvents {
     isOnChanged(value: boolean): void;
@@ -17,6 +18,7 @@ export class SwitchingActuatorChannel extends Mixin(Channel, (EventEmitter as { 
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
+        channel.on("sceneTriggered", this.sceneTriggered.bind(this));
     }
 
     setOn(isOn: boolean) {
@@ -46,5 +48,17 @@ export class SwitchingActuatorChannel extends Mixin(Channel, (EventEmitter as { 
     }
 
     protected parameterChanged(id: ParameterIds, value: string): void {
+    }
+
+    protected sceneTriggered(scene: Datapoint[]): void {
+        for (const datapoint of scene) {
+            switch (datapoint.pairingID) {
+                case PairingIds.AL_INFO_ON_OFF:
+                    this.emit("isOnChanged", ("1" === datapoint.value));
+                    if (this.isAutoConfirm)
+                        this.setDatapoint(PairingIds.AL_INFO_ON_OFF, datapoint.value);
+                    break;
+            }
+        }
     }
 }
