@@ -72,7 +72,7 @@ export type Error = {
     detail?: string;
     title?: string;
 } | null;
-export type SysAP = {
+export type SysAp = {
     devices?: Devices;
     floorplan?: {
         floors?: Floors;
@@ -82,26 +82,40 @@ export type SysAP = {
     error?: Error;
 };
 export type Configuration = {
-    [key: string]: SysAP;
+    [key: string]: SysAp;
 };
 export type Devicelist = {
     [key: string]: string[];
 };
 export type SysapUuid = string;
 export type DeviceSerial = string;
-export type ApiRestDevice_sysap__device_Get200ApplicationJsonResponse = {
+export type ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse = {
     [key: string]: {
         devices?: Devices;
     };
 };
 export type ChannelSerial = string;
 export type DatapointSerial = string;
-export type ApiRestDatapoint_sysap__serial_Get200ApplicationJsonResponse = {
+export type ApiRestDatapointSysapSerialGet200ApplicationJsonResponse = {
     [key: string]: {
         values?: string[];
     };
 };
-export type ApiRestDatapoint_sysap__serial_Put200TextPlainResponse = object;
+export type ApiRestDatapointSysapSerialPut200TextPlainResponse = object;
+export type ScenesTriggered = {
+    [key: string]: {
+        channels: {
+            [key: string]: {
+                outputs: {
+                    [key: string]: {
+                        value: string;
+                        pairingID: number;
+                    };
+                };
+            };
+        };
+    };
+};
 export type WebsocketMessage = {
     [key: string]: {
         datapoints: {
@@ -112,13 +126,13 @@ export type WebsocketMessage = {
         };
         devicesAdded: string[];
         devicesRemoved: string[];
-        scenesTriggered: object;
+        scenesTriggered: ScenesTriggered;
     };
 };
 export type NativeSerial = string;
-export type VirtualDeviceType = "BinarySensor" | "BlindActuator" | "SwitchingActuator" | "CeilingFanActuator" | "RTC" | "DimActuator" | "evcharging" | "WindowSensor" | "simple_doorlock" | "ShutterActuator" | "WeatherStation" | "Weather-TemperatureSensor" | "Weather-WindSensor" | "Weather-BrightnessSensor" | "Weather-RainSensor" | "WindowActuator" | "CODetector" | "FireDetector" | "KNX-SwitchSensor" | "MediaPlayer";
+export type VirtualDeviceType = "BinarySensor" | "BlindActuator" | "SwitchingActuator" | "CeilingFanActuator" | "RTC" | "DimActuator" | "evcharging" | "WindowSensor" | "simple_doorlock" | "ShutterActuator" | "WeatherStation" | "Weather-TemperatureSensor" | "Weather-WindSensor" | "Weather-BrightnessSensor" | "Weather-RainSensor" | "WindowActuator" | "CODetector" | "FireDetector" | "KNX-SwitchSensor" | "MediaPlayer" | "EnergyBattery" | "EnergyInverter" | "EnergyMeter" | "EnergyInverterBattery" | "EnergyInverterMeter" | "EnergyInverterMeterBattery" | "EnergyMeterBattery" | "AirQualityCO2" | "AirQualityCO" | "AirQualityFull" | "AirQualityHumidity" | "AirQualityNO2" | "AirQualityO3" | "AirQualityPM10" | "AirQualityPM25" | "AirQualityPressure" | "AirQualityTemperature" | "AirQualityVOC";
 export type VirtualDevice = {
-    "type"?: VirtualDeviceType;
+    "type": VirtualDeviceType;
     properties?: {
         ttl?: string;
         displayname?: string;
@@ -171,7 +185,7 @@ export function getdevicelist(opts?: Oazapfts.RequestOpts) {
 export function getdevice(sysap: SysapUuid, device: DeviceSerial, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: ApiRestDevice_sysap__device_Get200ApplicationJsonResponse;
+        data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
     } | {
         status: 401;
     } | {
@@ -187,7 +201,7 @@ export function getdevice(sysap: SysapUuid, device: DeviceSerial, opts?: Oazapft
 export function getdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: ChannelSerial, datapoint: DatapointSerial, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: ApiRestDatapoint_sysap__serial_Get200ApplicationJsonResponse;
+        data: ApiRestDatapointSysapSerialGet200ApplicationJsonResponse;
     } | {
         status: 401;
     }>(`/api/rest/datapoint/${sysap}/${device}.${channel}.${datapoint}`, {
@@ -197,10 +211,10 @@ export function getdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: Ch
 /**
  * Set datapoint value
  */
-export function putdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: ChannelSerial, datapoint: DatapointSerial, body: string, opts?: Oazapfts.RequestOpts) {
+export function putdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: ChannelSerial, datapoint: DatapointSerial, body?: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: ApiRestDatapoint_sysap__serial_Put200TextPlainResponse;
+        data: ApiRestDatapointSysapSerialPut200TextPlainResponse;
     } | {
         status: 401;
     } | {
@@ -218,9 +232,11 @@ export function putdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: Ch
 export function ws(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 101;
-        data: WebsocketMessage;
     } | {
         status: 401;
+    } | {
+        status: 418;
+        data: WebsocketMessage;
     }>("/api/ws", {
         ...opts
     });
@@ -241,4 +257,20 @@ export function putApiRestVirtualdeviceBySysapAndSerial(sysap: SysapUuid, serial
         method: "PUT",
         body: virtualDevice
     }));
+}
+/**
+ * Trigger proxy device
+ */
+export function proxydevice(sysap: SysapUuid, device: NativeSerial, action: "shortpress" | "doublepress", opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
+    } | {
+        status: 401;
+    } | {
+        status: 502;
+        data: string;
+    }>(`/api/rest/proxydevice/${sysap}/pushbutton/${device}/action/${action}`, {
+        ...opts
+    });
 }
