@@ -5,11 +5,13 @@ import { PairingIds } from "../pairingIds";
 import { ParameterIds } from '../parameterIds';
 import { FreeAtHomeApi, IndexedDatapoint } from '../freeAtHomeApi';
 import { ApiVirtualDevice } from './apiVirtualDevice';
+import { Datapoint } from '..';
 
 interface ChannelEvents {
     inputDatapointChanged(id: PairingIds, value: string): void,
     outputDatapointChanged(id: PairingIds, value: string): void,
     parameterChanged(id: ParameterIds, value: string): void,
+    sceneTriggered(scene: Datapoint[]): void,
 }
 
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
@@ -61,6 +63,10 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
         if (undefined === pairingId)
             return;
         this.emit("inputDatapointChanged", pairingId, data.value);
+    }
+
+    onSceneTriggered(data: Datapoint[]) {
+        this.emit("sceneTriggered", data);
     }
 
     public async setUnresponsive(): Promise<void> {

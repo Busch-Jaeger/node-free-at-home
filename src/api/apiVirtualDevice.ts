@@ -3,7 +3,7 @@ import StrictEventEmitter from 'strict-event-emitter-types';
 import * as api from "../api";
 import { PairingIds } from "../pairingIds";
 import { ParameterIds } from '../parameterIds';
-import { FreeAtHomeApi, IndexedDatapoint } from '../freeAtHomeApi';
+import { FreeAtHomeApi, IndexedDatapoint, Datapoint } from '../freeAtHomeApi';
 import { ApiVirtualChannel } from './apiVirtualChannel';
 
 interface DeviceEvents {
@@ -40,6 +40,11 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     onInputDatapointChange(channelIndex: number, data: IndexedDatapoint) {
         const channel = this.channels[channelIndex];
         channel.onInputDatapointChange(data);
+    }
+
+    onSceneTriggered(channelIndex: number, data: Datapoint[]) {
+        const channel = this.channels[channelIndex];
+        channel.onSceneTriggered(data);
     }
 
     public getChannels() : IterableIterator<ApiVirtualChannel> {

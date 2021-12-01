@@ -17,12 +17,12 @@ import { WebsocketMessage } from './api';
 export { PairingIds, ParameterIds };
 
 export interface Datapoint {
-    pairingId: PairingIds,
+    pairingID: PairingIds,
     value: string
 }
 
 export interface Parameter {
-    parameterId: ParameterIds,
+    parameterID: ParameterIds,
     value: string
 }
 
@@ -248,6 +248,19 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                     this.devicesBySerial.set(deviceId, deviceObject);
                 }
                 this.deviceAddedEmitter.emit(deviceId, device);
+            }
+            const scenesTriggered = dataObject[sysApId].scenesTriggered;
+            for(const deviceId in scenesTriggered) {
+                const device = scenesTriggered[deviceId];
+                const channels = device.channels;
+                for(const channelID in channels) {
+                    const channel = parseInt(channelID.substring(2), 16);
+                    const outputs = channels[channelID].outputs;
+                    const virtualDevice = this.virtualDevicesBySerial.get(deviceId);
+                    if (undefined !== virtualDevice) {
+                            virtualDevice.onSceneTriggered(channel, Object.values(outputs));
+                    }
+                }
             }
         }
     }
