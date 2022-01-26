@@ -6,6 +6,7 @@ import { Mixin } from 'ts-mixer';
 
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
+import { Datapoint } from '..';
 
 interface ChannelEvents {
     absoluteValueChanged(value: number): void;
@@ -38,6 +39,7 @@ export class DimActuatorChannel extends Mixin(Channel, (EventEmitter as { new():
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
+        channel.on("sceneTriggered", this.sceneTriggered.bind(this));
     }
 
     private handleSwitchOnOff(value: string) {
@@ -146,6 +148,13 @@ export class DimActuatorChannel extends Mixin(Channel, (EventEmitter as { new():
         this.emit("absoluteValueChanged", this.brightness)
         if (this.isAutoConfirm) {
             this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, this.brightness.toString());
+            if (this.isOn) {
+                if (this.brightness === 0)
+                    this.setDatapoint(PairingIds.AL_INFO_ON_OFF, "0");
+            } else {
+                if (this.brightness > 0)
+                    this.setDatapoint(PairingIds.AL_INFO_ON_OFF, "1");
+            }
         }
     }
 
@@ -255,6 +264,16 @@ export class DimActuatorChannel extends Mixin(Channel, (EventEmitter as { new():
             default:
                 console.log("parameter %s : %s", id, value);
                 break;
+        }
+    }
+
+    protected sceneTriggered(scene: Datapoint[]): void {
+        for (const datapoint of scene) {
+            switch (datapoint.pairingID) {
+                case PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE:
+                    this.handleAbsoluteSetValue(datapoint.value)
+                    break;
+            }
         }
     }
 

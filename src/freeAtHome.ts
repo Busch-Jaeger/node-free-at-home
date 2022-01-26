@@ -41,6 +41,7 @@ import { ApiChannel } from './api/apiChannel';
 import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
 import { Device } from './api';
 import { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
+import { ApiVirtualDevice } from './api/apiVirtualDevice';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -382,6 +383,14 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("evcharging", nativeId, name);
         const channel = device.getChannels().next().value;
         return new EvChargerChannel(channel);
+    }
+
+    public async markAllDevicesAsUnresponsive(): Promise<void[]> {
+        const promises = [] as PromiseLike<void>[];
+        this.freeAtHomeApi.virtualDevicesBySerial.forEach((device: ApiVirtualDevice) => {
+            promises.push(device.setUnresponsive());
+        });
+        return Promise.all(promises);
     }
 
     public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {

@@ -22,6 +22,7 @@
     "@types/node": "^12.6.8",
     "cspell": "^4.0.55",
     "nodemon": "^1.19.1",
+    "oazapfts": "^3.4.0",
     "ts-node": "^8.3.0",
     "typescript": "^3.9.7"
   },
@@ -31,10 +32,13 @@
     "cross-fetch": "^3.0.6",
     "eventsource": "^1.1.0",
     "isomorphic-ws": "^4.0.1",
-    "oazapfts": "^3.4.0",
+    "oazapfts_runtime": "^3.3.1",
     "strict-event-emitter-types": "^2.0.0",
     "ts-mixer": "5.4.0",
     "utf-8-validate": "^5.0.2",
     "ws": "^7.4.4"
-  }
+  },
+  "bundledDependencies": [
+    "oazapfts_runtime"
+  ]
 }
