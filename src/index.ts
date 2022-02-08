@@ -57,3 +57,5 @@ export { ApiChannel } from './api/apiChannel';
 export * as ScriptingHost from './scriptinghost'
 
 export * as ScriptingAPI from './scriptingApi'
+
+export * as RPC from "./rpcWebsocket";
