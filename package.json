@@ -10,6 +10,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "node_modules/.bin/tsc -p .",
+    "buildProd": "node_modules/.bin/tsc  -p . --sourceMap false --declarationMap false",
     "spellcheck": "node_modules/.bin/cspell 'src/**/*.ts'",
     "generateApi": "node_modules/.bin/oazapfts http://localhost/fhapi/v1/openapi.yaml src/api.ts"
   },

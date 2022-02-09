@@ -24,7 +24,7 @@ steps:
   inputs:
     command: 'custom'
     workingDir: '$(Build.SourcesDirectory)'
-    customCommand: 'run build'
+    customCommand: 'run buildProd'
 - task: Npm@1
   displayName: 'npm publish'
   inputs:
