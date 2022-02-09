@@ -59,3 +59,5 @@ export * as ScriptingHost from './scriptinghost'
 export * as ScriptingAPI from './scriptingApi'
 
 export * as RPC from "./rpcWebsocket";
+
+export * as Serial from "./serialWebsocket";
