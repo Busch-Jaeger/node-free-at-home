@@ -58,6 +58,7 @@ export class AutoReconnectWebSocket extends EventEmitter {
     }
 
     private connectWebsocket() {
+        this.pongReceived = true;
         try {
             if (typeof window === 'undefined') {
                 this.websocket = new WebSocket(this.websocketBaseUrl, {
