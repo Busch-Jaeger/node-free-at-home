@@ -50,6 +50,8 @@ interface ConnectionOptions {
     agent: http.Agent;
 }
 
+const nativeIdRegExp = new RegExp("^[a-zA-Z0-9\-_]{1,64}$");
+
 interface Events {
     open: FreeAtHomeApi,
     close: (code: number, reason: string) => void,
@@ -322,6 +324,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     }
 
     async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string): Promise<ApiVirtualDevice> {
+        if(false === nativeIdRegExp.test(nativeId))
+            throw new Error("nativeId contains not supported characters");
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
             "00000000-0000-0000-0000-000000000000",
             nativeId,
