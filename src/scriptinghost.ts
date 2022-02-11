@@ -63,7 +63,7 @@ export class ScriptingHost<
         super();
         this.id = id;
         const baseUrl = baseUrl_ ?? process.env.FREEATHOME_SCRIPTING_API_BASE_URL
-            ?? (process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/scripting/v1" : "http://localhost/api/scripting/v1";
+            ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/scripting/v1" : "http://localhost/api/scripting/v1");
         const username = username_ ?? process.env.FREEATHOME_API_USERNAME ?? "installer";
         const password = password_ ?? process.env.FREEATHOME_API_PASSWORD ?? "12345";
         const useUnixSocket: boolean = process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined;

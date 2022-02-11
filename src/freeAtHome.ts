@@ -102,8 +102,9 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     constructor(baseUrlIn: string | undefined = undefined) {
         super();
 
-        const baseUrl = process.env.FREEATHOME_API_BASE_URL
-            ?? (process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/fhapi/v1" : "http://localhost/fhapi/v1";
+        const baseUrl = baseUrlIn
+            ?? process.env.FREEATHOME_API_BASE_URL
+            ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/fhapi/v1" : "http://localhost/api/fhapi/v1");
         const username: string = process.env.FREEATHOME_API_USERNAME || "installer";
         const password: string = process.env.FREEATHOME_API_PASSWORD || "12345";
         const authenticationHeader = {

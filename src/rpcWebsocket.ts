@@ -8,7 +8,7 @@ import * as API from './rpcApi';
 export { JSONRPCParams };
 
 const baseUrl = process.env.FREEATHOME_RPC_API_BASE_URL
-    ?? (process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/rpc/v1" : "http://localhost";
+    ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/rpc/v1" : "http://localhost/api/rpc/v1");
 const username = process.env.FREEATHOME_API_USERNAME ?? "installer";
 const password = process.env.FREEATHOME_API_PASSWORD ?? "12345";
 const useUnixSocket: boolean = process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined;
