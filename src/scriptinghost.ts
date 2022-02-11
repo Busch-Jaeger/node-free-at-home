@@ -84,7 +84,7 @@ export class ScriptingHost<
                 "Range": "0",
                 ...authenticationHeader
             },
-            baseUrl: baseUrl,
+            baseUrl:  (useUnixSocket) ? "http://localhost" : baseUrl,
             fetch: fetch,
             createConnection: (useUnixSocket) ? connectToUnixSocket : undefined, // used in EventSource
             agent: (useUnixSocket) ? unixSocketAgent : http.globalAgent          // used in fetch

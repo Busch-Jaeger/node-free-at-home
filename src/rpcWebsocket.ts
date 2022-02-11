@@ -24,7 +24,7 @@ const connectionOptions = {
     headers: {
         ...authenticationHeader
     },
-    baseUrl: baseUrl,
+    baseUrl:  (useUnixSocket) ? "http://localhost" : baseUrl,
     fetch: fetch,
     agent: (useUnixSocket) ? unixSocketAgent : http.globalAgent
 }
