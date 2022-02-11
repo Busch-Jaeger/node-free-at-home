@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import WebSocket from 'isomorphic-ws';
+import { AutoReconnectWebSocket } from "./autoReconnectWebSocket";
 import net from 'net';
 import http from 'http';
 import * as api from "./api";
@@ -62,8 +63,7 @@ type Emitter = StrictEventEmitter<EventEmitter, Events>;
 
 export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     private connectionOptions: ConnectionOptions;
-    websocketBaseUrl: string;
-    websocket: WebSocket | undefined = undefined;
+    websocket: AutoReconnectWebSocket;
     pingTimer: NodeJS.Timeout | undefined = undefined;
     pongReceived: boolean = true;
 
@@ -76,12 +76,6 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         super();
 
         const useUnixSocket: boolean = process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined;
-
-        this.websocketBaseUrl = (useUnixSocket)
-            ? "ws+unix:///run/api/fhapi/v1:"
-            : baseUrl.replace(/^(http)/, "ws");
-
-        console.log(this.websocketBaseUrl);
 
         function connectToUnixSocket(options: http.ClientRequestArgs, connectionListener?: () => void) {
             return net.createConnection("/run/api/fhapi/v1", connectionListener);
@@ -102,68 +96,21 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             agent: (useUnixSocket) ? unixSocketAgent : http.globalAgent          // used in fetch
         }
 
-        this.connectWebsocket();
+        this.websocket = new AutoReconnectWebSocket(baseUrl, "/api/ws", {
+            ...authenticationHeader
+        });
+        this.websocket.on('message', this.parseWebsocketData.bind(this));
 
-        if (typeof window === 'undefined') {
-        this.pingTimer = setInterval(() => {
-            if (this.websocket !== undefined && this.websocket.OPEN == this.websocket.readyState) {
-                this.websocket.ping();
-                if(this.pongReceived === false) {
-                    this.websocket.close();
-                }
-                this.pongReceived = false;
-            }
-        }, 5000);
-    }
-    }
-
-    private connectWebsocket() {
-        try {
-            if (typeof window === 'undefined') {
-                this.websocket = new WebSocket(this.websocketBaseUrl + "/api/ws", {
-                    headers: {
-                        ...this.connectionOptions.headers
-                    }
-                });
-                this.websocket.on('open', this.onOpen.bind(this));
-                this.websocket.on('close', this.onClose.bind(this));
-                this.websocket.on('error', this.onError.bind(this));
-                this.websocket.on('pong', this.onPong.bind(this));
-    
-                this.websocket.on('message', this.parseWebsocketData.bind(this));
-            }
-            else {
-                this.websocket = new WebSocket(this.websocketBaseUrl + "/api/ws");
-                this.websocket.addEventListener('message', (event) => {
-                    this.parseWebsocketData(event.data);
-                });
-            }
-
-
-
-        }
-        catch (error) {
-            setTimeout(
-                () => {
-                    console.log("reconnecting...");
-                    this.connectWebsocket();
-                }, 10000);
-        }
     }
 
     disconnect() {
-        if(undefined !== this.pingTimer)
-        clearInterval(this.pingTimer);
-        if (undefined !== this.websocket) {
-            this.websocket.removeAllListeners('close');
-            this.websocket.close();
-        }
+        this.websocket.disconnect();
     }
 
     getConnectionState(): ConnectionStates {
-        if (undefined === this.websocket)
+        if (undefined === this.websocket.websocket)
             return ConnectionStates.closed;
-        const state = this.websocket.readyState;
+        const state = this.websocket.websocket.readyState;
         switch (state) {
             case WebSocket.CONNECTING:
                 return ConnectionStates.connecting;
@@ -178,33 +125,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
     }
 
-    private onOpen() {
-        this.emit("open", this);
-    }
-
-    private onClose(code: number, reason: string) {
-        console.log("try to reconnect in 10 seconds...");
-        setTimeout(
-            () => {
-                console.log("reconnecting...");
-                this.connectWebsocket();
-            }, 10000);
-        this.emit('close', code, reason);
-    }
-
-    private onError(err: Error) {
-        console.error('❌', err.toString())
-    }
-
-    private onPong() {
-        this.pongReceived = true;
-    }
-
     end() {
-        if (undefined !== this.websocket) {
-            this.websocket.removeAllListeners();
-            this.websocket.close();
-        }
+        this.websocket.disconnect();
     }
 
     private parseWebsocketData(data: WebSocket.Data) {
