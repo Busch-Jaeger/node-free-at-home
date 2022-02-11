@@ -102,7 +102,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     constructor(baseUrlIn: string | undefined = undefined) {
         super();
 
-        const baseUrl = baseUrlIn || process.env.FREEATHOME_API_BASE_URL || "http://localhost/fhapi/v1";
+        const baseUrl = process.env.FREEATHOME_API_BASE_URL
+            ?? (process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/fhapi/v1" : "http://localhost/fhapi/v1";
         const username: string = process.env.FREEATHOME_API_USERNAME || "installer";
         const password: string = process.env.FREEATHOME_API_PASSWORD || "12345";
         const authenticationHeader = {
@@ -220,11 +221,11 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
 
     public async getAllDevices(): Promise<IterableIterator<ApiDevice>> {
         return this.freeAtHomeApi.getAllDevices();
-    }    
+    }
 
     public async getDevice(deviceId: string): Promise<Device> {
         return this.freeAtHomeApi.getDevice(deviceId);
-    }   
+    }
 
     async createEnergyBatteryDevice(nativeId: string, name: string): Promise<EnergyBatteryChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyBattery", nativeId, name);
@@ -270,7 +271,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeterBattery", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
-        const channels = {            
+        const channels = {
             inverter: new EnergyInverterChannel(Iterator),
             meter: new EnergyMeterChannel(Iterator),
             battery: new EnergyBatteryChannel(Iterator),
@@ -342,8 +343,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityFull", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
-        const channels = {   
-            co2: new AirCO2Channel(Iterator),        
+        const channels = {
+            co2: new AirCO2Channel(Iterator),
             co: new AirCOChannel(Iterator),
             humidity: new AirHumidityChannel(Iterator),
             no2: new AirNO2Channel(Iterator),
@@ -360,8 +361,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityKaiterra", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
-        const channels = {   
-            co2: new AirCO2Channel(Iterator),        
+        const channels = {
+            co2: new AirCO2Channel(Iterator),
             co: new AirCOChannel(Iterator),
             humidity: new AirHumidityChannel(Iterator),
             o3: new AirO3Channel(Iterator),
@@ -396,5 +397,5 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {
         return this.freeAtHomeApi.getAllChannels();
     }
-    
+
 }
