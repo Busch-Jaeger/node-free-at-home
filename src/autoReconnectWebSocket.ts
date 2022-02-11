@@ -99,14 +99,16 @@ export class AutoReconnectWebSocket extends EventEmitter {
     }
 
     private onOpen() {
+        console.log("connection to " + this.websocketBaseUrl + " complete");
         this.emit("open");
     }
 
     private onClose(code: number, reason: string) {
+        console.log("connection to " + this.websocketBaseUrl + " closed");
         console.log("try to reconnect in 10 seconds...");
         setTimeout(
             () => {
-                console.log("reconnecting...");
+                console.log("try to reconnec to "+ this.websocketBaseUrl);
                 this.connectWebsocket();
             }, 10000);
         this.emit('close', code, reason);
