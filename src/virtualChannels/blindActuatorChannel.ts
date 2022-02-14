@@ -8,6 +8,8 @@ import { Mixin } from 'ts-mixer';
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
+import { Datapoint } from '..';
+
 interface ChannelEvents {
     relativeValueChanged(value: number): void;
     stopMovement(): void;
@@ -32,10 +34,11 @@ export class BlindActuatorChannel extends Mixin(Channel, (EventEmitter as { new(
     isMoving = false;
     isForced = false;
 
-    constructor(channel: ApiVirtualChannel){
+    constructor(channel: ApiVirtualChannel) {
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
+        channel.on("sceneTriggered", this.sceneTriggered.bind(this));
     }
 
     protected dataPointChanged(id: PairingIds, value: string): void {
@@ -168,6 +171,18 @@ export class BlindActuatorChannel extends Mixin(Channel, (EventEmitter as { new(
     protected parameterChanged(id: ParameterIds, value: string): void {
         const silentMode = (value === "02") ? true : false;
         this.emit("silentModeChanged", silentMode);
+    }
+
+    protected sceneTriggered(scene: Datapoint[]): void {
+        for (const datapoint of scene) {
+            switch (datapoint.pairingID) {
+                case PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE:
+                    this.emit("relativeValueChanged", parseInt(datapoint.value));
+                    if (this.isAutoConfirm)
+                        this.setDatapoint(PairingIds.AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE, datapoint.value);
+                    break;
+            }
+        }
     }
 
     delegatePositionChanged(position: number): void {
