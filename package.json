@@ -22,15 +22,13 @@
     "@types/eventsource": "^1.1.6",
     "@types/node": "^12.6.8",
     "cspell": "^4.0.55",
-    "nodemon": "^1.19.1",
-    "oazapfts": "^3.4.0",
-    "ts-node": "^8.3.0",
+    "oazapfts": "^3.5.0",
     "typescript": "^3.9.7"
   },
   "dependencies": {
     "@types/ws": "^7.4.0",
     "bufferutil": "^4.0.1",
-    "cross-fetch": "^3.0.6",
+    "cross-fetch": "^3.1.5",
     "eventsource": "^1.1.0",
     "isomorphic-ws": "^4.0.1",
     "json-rpc-2.0": "^1.0.0",
@@ -38,7 +36,7 @@
     "strict-event-emitter-types": "^2.0.0",
     "ts-mixer": "5.4.0",
     "utf-8-validate": "^5.0.2",
-    "ws": "^7.4.4"
+    "ws": "^7.5.7"
   },
   "bundledDependencies": [
     "oazapfts_runtime"
