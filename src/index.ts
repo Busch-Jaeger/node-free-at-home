@@ -46,6 +46,7 @@ export { AirQualityKaiterraChannels } from './freeAtHome';
 export { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
 
 
+export { ApiVirtualChannel } from "./api/apiVirtualChannel";
 
 export { ParameterIds } from './parameterIds';
 export { PairingIds } from './pairingIds';
