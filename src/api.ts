@@ -136,6 +136,7 @@ export type VirtualDevice = {
     properties?: {
         ttl?: string;
         displayname?: string;
+        flavor?: string;
     };
 };
 export type VirtualDevicesSuccess = {
