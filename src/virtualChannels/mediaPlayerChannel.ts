@@ -2,6 +2,7 @@ import { PairingIds, ParameterIds } from '../freeAtHomeApi';
 import { ApiVirtualChannel } from "../api/apiVirtualChannel";
 import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
+import { Datapoint } from '..';
 
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
@@ -20,6 +21,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
+        channel.on("sceneTriggered", this.sceneTriggered.bind(this));
     }
 
     // public static readonly MediaPlayerChannel.PlayMode = MediaPlayerChannel.PlayMode;
@@ -45,8 +47,8 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.Previous);
                 break;
             case PairingIds.AL_RELATIVE_VOLUME_CONTROL:
-                if(parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeDec) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeDec);
-                else if(parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeInc) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeInc);
+                if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeDec) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeDec);
+                else if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeInc) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeInc);
                 break;
             case PairingIds.AL_ABSOLUTE_VOLUME_CONTROL:
                 this.emit("playVolumeChanged", parseInt(value));
@@ -60,6 +62,31 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
 
     protected parameterChanged(id: ParameterIds, value: string): void {
 
+    }
+
+    protected sceneTriggered(scene: Datapoint[]): void {
+        for (const datapoint of scene) {
+            //Only work on non-empty commands
+            if (datapoint.value !== "") {
+                switch (datapoint.pairingID) {
+                    case PairingIds.AL_PLAYBACK_STATUS:
+                        if (parseInt(datapoint.value) == MediaPlayerChannel.PlayMode.playing) this.emit("playModeChanged", MediaPlayerChannel.PlayMode.playing);
+                        else if (parseInt(datapoint.value) == MediaPlayerChannel.PlayMode.paused) this.emit("playModeChanged", MediaPlayerChannel.PlayMode.paused);
+                        break;
+                    case PairingIds.AL_INFO_MUTE:
+                        if (parseInt(datapoint.value) === MediaPlayerChannel.SetMute.Mute) this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
+                        else if (parseInt(datapoint.value) === MediaPlayerChannel.SetMute.Unmute) this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
+                        break;
+                    case PairingIds.AL_INFO_ACTUAL_VOLUME:
+                        this.emit("playVolumeChanged", parseInt(datapoint.value));
+                        break;
+                    case PairingIds.AL_INFO_GROUP_MEMBERSHIP:
+                        break;
+                    case PairingIds.AL_INFO_PLAYING_FAVORITE:
+                        break;
+                }
+            }
+        }
     }
 
     setTitle(value: string): Promise<void> {
@@ -96,21 +123,21 @@ export namespace MediaPlayerChannel {
         paused = 2,
         buffering = 3,
     }
-    
+
     export enum PlayCommand {
         Next = 2,
         Previous = 3,
         VolumeDec = 4,
         VolumeInc = 12,
     }
-    
+
     export enum SetMute {
         Unmute = 0,
         Mute = 1
     }
-    
+
     export enum PlayControls {
         PlayStop = 3,
         PlayStopNextPrev = 127
     }
-  } 
+} 
