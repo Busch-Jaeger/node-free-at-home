@@ -37,6 +37,11 @@ export { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
 export { AirVOCChannel } from './virtualChannels/airVOCChannel';
 export { EvChargerChannel } from './virtualChannels/evCharger';
 
+export { EnergyTwoWayMeterV2Channel } from './virtualChannels/energyTwoWayMeterV2Channel';
+export { EnergyOneWayMeterV2Channel } from './virtualChannels/energyOneWayMeterV2Channel';
+export { EnergyInverterV2Channel } from './virtualChannels/energyInverterV2Channel';
+export { EnergyBatteryV2Channel } from './virtualChannels/energyBatteryV2Channel';
+
 export { EnergyMeterBatteryChannels } from './freeAtHome';
 export { EnergyInverterMeterBatteryChannels } from './freeAtHome';
 export { EnergyInverterMeterChannels } from './freeAtHome';

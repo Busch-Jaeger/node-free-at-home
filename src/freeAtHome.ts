@@ -252,31 +252,35 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     }
 
     // Device Flavors
-    // 8001 -> one-way meter
-    // 8002 -> two-way meter
-    // 8003 -> battery
-    // 8004 -> inverter
+    // 0001 -> one-way meter
+    // 0010 -> two-way meter
+    // 0100 -> battery
+    // 1000 -> inverter
     async createEnergyBatteryV2Device(nativeId: string, name: string): Promise<EnergyBatteryV2Channel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "03");
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "04");
         const channel = device.getChannels().next().value;
+        console.log('Battery channel', channel.channelNumber);
         return new EnergyBatteryV2Channel(channel);
     }
 
     async createEnergyInverterV2Device(nativeId: string, name: string): Promise<EnergyInverterV2Channel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "04");
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "08");
         const channel = device.getChannels().next().value;
+        console.log('Inverter channel', channel.channelNumber);
         return new EnergyInverterV2Channel(channel);
     }
 
     async createEnergyTwoWayMeterV2Device(nativeId: string, name: string): Promise<EnergyTwoWayMeterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "02");
         const channel = device.getChannels().next().value;
+        console.log('2Way meter channel', channel.channelNumber);
         return new EnergyTwoWayMeterV2Channel(channel);
     }
 
     async createEnergyOneWayMeterV2Device(nativeId: string, name: string): Promise<EnergyOneWayMeterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "01");
         const channel = device.getChannels().next().value;
+        console.log('1way meter channel', channel.channelNumber);
         return new EnergyOneWayMeterV2Channel(channel);
     }
 
