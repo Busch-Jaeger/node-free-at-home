@@ -28,12 +28,11 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
         this.serialNumber = serialNumber;
         this.deviceType = deviceType;
 
-        let i = 0;
         for (const channelName in apiDevice?.channels) {
             const apiChannel = apiDevice.channels?.[channelName];
+            const i = parseInt(channelName.substring(2));
             const channel = new ApiVirtualChannel(this, apiChannel, i);
             this.channels.push(channel);
-            i++
         }
     }
 
