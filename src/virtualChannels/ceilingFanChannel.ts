@@ -5,6 +5,7 @@ import { Mixin } from 'ts-mixer';
 
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
+import { Datapoint } from '..';
 
 interface ChannelEvents {
     isOnChanged(value: boolean): void;
@@ -15,10 +16,11 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class CeilingFanChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
-    constructor(channel: ApiVirtualChannel){
+    constructor(channel: ApiVirtualChannel) {
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
+        channel.on("sceneTriggered", this.sceneTriggered.bind(this));
     }
 
     //Output Datapoints
@@ -81,4 +83,15 @@ export class CeilingFanChannel extends Mixin(Channel, (EventEmitter as { new(): 
     protected parameterChanged(id: ParameterIds, value: string): void {
     }
 
+    protected sceneTriggered(scene: Datapoint[]): void {
+        for (const datapoint of scene) {
+            switch (datapoint.pairingID) {
+                case PairingIds.AL_INFO_ABSOLUTE_FAN_SPEED:
+                    this.emit("absoluteFanSpeedChanged", parseInt(datapoint.value));
+                    if (this.isAutoConfirm)
+                        this.setDatapoint(PairingIds.AL_INFO_ABSOLUTE_FAN_SPEED, datapoint.value);
+                    break;
+            }
+        }
+    }
 }
