@@ -6,6 +6,10 @@ export class EnergyBatteryV2Channel extends Channel {
     constructor(channel: ApiVirtualChannel){
         super(channel);
     }
+    
+    public setDatapoint(id: PairingIds, value: string): Promise<void> {
+        return super.setDatapoint(id, value);
+    }
 
     /**
     * Battery power: Discharge (less then 0), Charge (more then 0)

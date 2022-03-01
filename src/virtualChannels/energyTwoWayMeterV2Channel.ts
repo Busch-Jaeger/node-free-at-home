@@ -7,6 +7,9 @@ export class EnergyTwoWayMeterV2Channel extends Channel {
         super(channel);
     }
 
+    public setDatapoint(id: PairingIds, value: string): Promise<void> {
+        return super.setDatapoint(id, value);
+    }
     
     /**
      * Current power consumed. Value is signed, > 0 means power consumed, < 0: power injected
