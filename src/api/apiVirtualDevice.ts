@@ -21,10 +21,10 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
 
     private channels: Array<ApiVirtualChannel> = new Array();
 
-    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, deviceType: api.VirtualDeviceType) {
+    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, nativeId: string, deviceType: api.VirtualDeviceType) {
         super();
         this.freeAtHomeApi = freeAtHomeApi;
-        this.nativeId = apiDevice.nativeId || "";
+        this.nativeId = nativeId;
         this.serialNumber = serialNumber;
         this.deviceType = deviceType;
 

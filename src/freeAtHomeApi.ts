@@ -323,7 +323,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         const existingDevice = this.virtualDevicesBySerial.get(deviceId);
         if(undefined !== existingDevice)
             return existingDevice;
-        const device = new ApiVirtualDevice(this, apiDevice, deviceId, deviceType);
+        const device = new ApiVirtualDevice(this, apiDevice, deviceId, nativeId, deviceType);
         this.virtualDevicesBySerial.set(deviceId, device);
         return device;
     }
