@@ -109,3 +109,20 @@ export class SerialBinding implements BindingInterface {
     }
 }
 
+import { SerialPortStream } from '@serialport/stream'
+import rewiremock from 'rewiremock';
+
+class FreeAtHomeSerialPortStream extends SerialPortStream {
+    constructor(options: OpenOptions, openCallback?: ErrorCallback) {
+        super({ ...options, binding: new SerialBinding });
+    }
+}
+
+export function EnableSerialMock() {
+    rewiremock('serialport')
+        .with({
+            SerialPort: FreeAtHomeSerialPortStream
+        });
+
+    rewiremock.enable()
+}
