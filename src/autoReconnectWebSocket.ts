@@ -126,8 +126,8 @@ export class AutoReconnectWebSocket extends EventEmitter {
         this.emit('message', message);
     };
 
-    send(data: any) {
-        this.websocket?.send(data);
+    send(data: any, cb?: (err?: Error) => void): void {
+        this.websocket?.send(data, cb);
     }
 
     close() {
