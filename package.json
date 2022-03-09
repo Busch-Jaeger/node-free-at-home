@@ -19,6 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^1.0.18-4.3.1",
+    "@tsconfig/node12": "^1.0.9",
     "@types/eventsource": "^1.1.6",
     "@types/node": "^12.6.8",
     "cspell": "^4.0.55",
