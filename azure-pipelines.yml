@@ -9,52 +9,43 @@ trigger:
 pool: 
   vmImage: 'ubuntu-20.04'
 
-container: node:lts
+jobs:
+- job: Scan
+  steps:
+  - task: SonarQubePrepare@5
+    inputs:
+      SonarQube: 'codescan.abb.com'
+      scannerMode: 'CLI'
+      configMode: 'file'
 
-steps:
-- task: SonarQubePrepare@5
-  inputs:
-    SonarQube: 'codescan.abb.com'
-    scannerMode: 'CLI'
-    configMode: 'manual'
-    cliProjectKey: 'ABB-BHC-BHAS_DEBJE_FreeAtHomeExtensions_node-free-at-home'
-    cliSources: '.'
+  - task: SonarQubeAnalyze@5
+    condition: succeededOrFailed()
+  - task: SonarQubePublish@5
+    inputs:
+      pollingTimeoutSec: '300'
 
-- script: |
-    env
-    echo "----"
-    pwd
-    ls
-    echo "----"
-    ls $(Build.SourcesDirectory)
-- task: SonarQubeAnalyze@5
-  target: host
-  condition: succeededOrFailed()
-- task: SonarQubePublish@5
-  target: host
-  inputs:
-    pollingTimeoutSec: '300'
-
-
-- task: Npm@1
-  displayName: 'npm install'
-  inputs:
-    command: 'install'
-    workingDir: '$(Build.SourcesDirectory)'
-    customRegistry: 'useFeed'
-    customFeed: 'cdc66582-4317-419c-9804-b5c9a44d0fdd/49a182ba-d355-4d1a-9882-fa25de6123e0'
-- task: Npm@1
-  displayName: 'npm run build'
-  inputs:
-    command: 'custom'
-    workingDir: '$(Build.SourcesDirectory)'
-    customCommand: 'run buildProd'
-- task: Npm@1
-  displayName: 'npm publish'
-  inputs:
-    command: 'publish'
-    workingDir: '$(Build.SourcesDirectory)'
-    verbose: true
-    publishRegistry: 'useFeed'
-    publishFeed: 'cdc66582-4317-419c-9804-b5c9a44d0fdd/49a182ba-d355-4d1a-9882-fa25de6123e0'
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+- job: Build
+  container: node:lts
+  steps:
+  - task: Npm@1
+    displayName: 'npm install'
+    inputs:
+      command: 'install'
+      workingDir: '$(Build.SourcesDirectory)'
+      customRegistry: 'useFeed'
+      customFeed: 'cdc66582-4317-419c-9804-b5c9a44d0fdd/49a182ba-d355-4d1a-9882-fa25de6123e0'
+  - task: Npm@1
+    displayName: 'npm run build'
+    inputs:
+      command: 'custom'
+      workingDir: '$(Build.SourcesDirectory)'
+      customCommand: 'run buildProd'
+  - task: Npm@1
+    displayName: 'npm publish'
+    inputs:
+      command: 'publish'
+      workingDir: '$(Build.SourcesDirectory)'
+      verbose: true
+      publishRegistry: 'useFeed'
+      publishFeed: 'cdc66582-4317-419c-9804-b5c9a44d0fdd/49a182ba-d355-4d1a-9882-fa25de6123e0'
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
