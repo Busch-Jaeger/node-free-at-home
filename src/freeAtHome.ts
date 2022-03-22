@@ -160,8 +160,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new SwitchingActuatorChannel(channel);
     }
 
-    async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType): Promise<RawChannel> {
-        const device = await this.freeAtHomeApi.createDevice(deviceType, nativeId, name);
+    async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType, flavor?: string): Promise<RawChannel> {
+        const device = await this.freeAtHomeApi.createDevice(deviceType, nativeId, name, flavor);
         const channel = device.getChannels().next().value;
         return new RawChannel(channel);
     }
