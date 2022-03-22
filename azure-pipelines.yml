@@ -12,6 +12,9 @@ pool:
 jobs:
 - job: Scan
   steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '14.x'
   - task: SonarQubePrepare@5
     inputs:
       SonarQube: 'codescan.abb.com'
