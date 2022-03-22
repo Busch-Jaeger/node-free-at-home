@@ -16,7 +16,9 @@ steps:
   inputs:
     SonarQube: 'codescan.abb.com'
     scannerMode: 'CLI'
-    configMode: 'file'
+    configMode: 'manual'
+    cliProjectKey: 'ABB-BHC-BHAS_DEBJE_FreeAtHomeExtensions_node-free-at-home'
+    cliSources: '.'
 
 - script: |
     env
