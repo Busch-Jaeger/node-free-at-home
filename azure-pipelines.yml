@@ -14,13 +14,19 @@ jobs:
   steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '14.x'
+      versionSpec: '12.x'
   - task: SonarQubePrepare@5
     inputs:
       SonarQube: 'codescan.abb.com'
       scannerMode: 'CLI'
       configMode: 'file'
-
+  - task: Npm@1
+    displayName: 'npm install'
+    inputs:
+      command: 'install'
+      workingDir: '$(Build.SourcesDirectory)'
+      customRegistry: 'useFeed'
+      customFeed: 'cdc66582-4317-419c-9804-b5c9a44d0fdd/49a182ba-d355-4d1a-9882-fa25de6123e0'
   - task: SonarQubeAnalyze@5
     condition: succeededOrFailed()
   - task: SonarQubePublish@5
