@@ -18,15 +18,17 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     nativeId: string;
     serialNumber: string;
     deviceType: api.VirtualDeviceType;
+    flavor?: string;
 
     private channels: Array<ApiVirtualChannel> = new Array();
 
-    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, nativeId: string, deviceType: api.VirtualDeviceType) {
+    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, nativeId: string, deviceType: api.VirtualDeviceType, flavor?: string) {
         super();
         this.freeAtHomeApi = freeAtHomeApi;
         this.nativeId = nativeId;
         this.serialNumber = serialNumber;
         this.deviceType = deviceType;
+        this.flavor = flavor;
 
         for (const channelName in apiDevice?.channels) {
             const apiChannel = apiDevice.channels?.[channelName];
@@ -51,12 +53,12 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     }
 
     public async setUnresponsive() : Promise<void> {
-        return this.freeAtHomeApi.setDeviceToUnresponsive(this.deviceType, this.nativeId);
+        return this.freeAtHomeApi.setDeviceToUnresponsive(this.deviceType, this.nativeId, this.flavor);
     }
 
 
     public async triggerKeepAlive() : Promise<void> {
-        return this.freeAtHomeApi.setDeviceToResponsive(this.deviceType, this.nativeId);
+        return this.freeAtHomeApi.setDeviceToResponsive(this.deviceType, this.nativeId, this.flavor);
     }
 
 
