@@ -271,7 +271,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                     const responseNativeId = devices[deviceId].serial;
                     if (responseNativeId === nativeId) {
                         console.log("Found device: " + deviceId);
-                        return this.getCreatedDevice(deviceId, nativeId, deviceType);
+                        return this.getCreatedDevice(deviceId, nativeId, deviceType, flavor);
                     }
                 }
             }
