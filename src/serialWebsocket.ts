@@ -36,11 +36,11 @@ export class SerialPortBinding implements BindingPortInterface {
         this.stream = createWebSocketStream(this.websocket);
     }
 
-    waitForOpen(): Promise<void> {
-        return new Promise<void>(
+    waitForOpen(): Promise<SerialPortBinding> {
+        return new Promise<SerialPortBinding>(
             (resolve, reject) => {
                 this.websocket.on("open", () => {
-                    resolve();
+                    resolve(this);
                 });
                 this.stream.on("error", (err: Error) => {
                     reject(err);
@@ -123,8 +123,7 @@ export class SerialBinding implements BindingInterface {
     }
     async open(options: OpenOptions): Promise<BindingPortInterface> {
         const binding = new SerialPortBinding(options);
-        await binding.waitForOpen();
-        return binding;
+        return binding.waitForOpen();
     }
 }
 
