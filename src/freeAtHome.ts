@@ -426,6 +426,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("HomeAppliance-Laundry", nativeId, name);
         const channel = device.getChannels().next().value;
         return new HomeApplianceChannel(channel);
+    }
 
     async createBinarySensor(nativeId: string, name: string): Promise<BinarySensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("BinarySensor", nativeId, name);
