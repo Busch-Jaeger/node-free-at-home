@@ -1,5 +1,6 @@
-import { AutoReconnectWebSocket } from "./autoReconnectWebSocket";
-import { WebsocketStreamReader } from './websocketStreamReader';
+import { FreeAtHomeWebsocket } from "./freeAtHomeWebsocket";
+import { createWebSocketStream } from 'ws';
+import stream from "stream";
 
 const baseUrl = process.env.FREEATHOME_SERIAL_API_BASE_URL
     ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/serial/v1" : "http://localhost/api/serial/v1");
@@ -11,12 +12,12 @@ const authenticationHeader = {
 
 export function CreateSerialWebSocket(options: OpenOptions) {
     let params = "?";
-    if(undefined !== options.baudRate)
+    if (undefined !== options.baudRate)
         params += "baudrate=" + options.baudRate + "&";
-    if(undefined !== options.parity)
+    if (undefined !== options.parity)
         params += "parity=" + options.parity + "&";
 
-    const websocket = new AutoReconnectWebSocket(baseUrl, "/" + options.path + "/websocket" + params, {
+    const websocket = new FreeAtHomeWebsocket(baseUrl, "/" + options.path + "/websocket" + params, {
         ...authenticationHeader
     });
 
@@ -27,30 +28,41 @@ import { BindingInterface, BindingPortInterface, OpenOptions, UpdateOptions, Set
 export class SerialPortBinding implements BindingPortInterface {
     openOptions: Required<OpenOptions>;
     isOpen: boolean = true;
-    websocket: AutoReconnectWebSocket;
-    streamReader: WebsocketStreamReader;
+    websocket: FreeAtHomeWebsocket;
+    stream: stream.Duplex;
     constructor(options: OpenOptions) {
         this.openOptions = options as Required<OpenOptions>;
-        this.websocket = CreateSerialWebSocket(options)
-        this.streamReader = new WebsocketStreamReader(this.websocket);
+        this.websocket = CreateSerialWebSocket(options);
+        this.stream = createWebSocketStream(this.websocket);
     }
 
-    waitForOpen(): Promise<void> {
-        return new Promise<void>(
+    waitForOpen(): Promise<SerialPortBinding> {
+        return new Promise<SerialPortBinding>(
             (resolve, reject) => {
                 this.websocket.on("open", () => {
-                    resolve();
+                    resolve(this);
+                });
+                this.stream.on("error", (err: Error) => {
+                    reject(err);
                 });
             });
     }
     close(): Promise<void> {
-        throw new Error("Method not implemented.");
+        return new Promise<void>(
+            (resolve) => {
+                this.websocket.close();
+                resolve();
+            });
     }
     read(buffer: Buffer, offset: number, length: number): Promise<{ buffer: Buffer; bytesRead: number; }> {
         return new Promise<{ buffer: Buffer; bytesRead: number; }>(
             (resolve, reject) => {
-                this.streamReader.once("readable", () => {
-                    let chunk: Buffer = this.streamReader.read(1);
+                this.stream.once("readable", () => {
+                    let chunk: Buffer = this.stream.read(1);
+                    if (null === chunk) {
+                        reject(new Error("broken pipe"));
+                        return;
+                    }
                     const count = chunk.copy(buffer, offset);
                     resolve({ buffer, bytesRead: count });
                 });
@@ -59,11 +71,18 @@ export class SerialPortBinding implements BindingPortInterface {
     write(buffer: Buffer): Promise<void> {
         return new Promise<void>(
             (resolve, reject) => {
-                this.websocket.send(buffer, (err?: Error | null) => {
-                    if (err)
-                        return reject();
-                    resolve();
-                });
+                try {
+                    this.stream.write(buffer, (err?: Error | null) => {
+                        if (err)
+                            return reject(err);
+                        resolve();
+                    });
+
+
+                }
+                catch (err) {
+                    reject();
+                }
             });
         // throw new Error("Method not implemented.");
     }
@@ -104,8 +123,7 @@ export class SerialBinding implements BindingInterface {
     }
     async open(options: OpenOptions): Promise<BindingPortInterface> {
         const binding = new SerialPortBinding(options);
-        await binding.waitForOpen();
-        return binding;
+        return binding.waitForOpen();
     }
 }
 

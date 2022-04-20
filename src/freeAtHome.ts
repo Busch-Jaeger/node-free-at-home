@@ -47,6 +47,7 @@ import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperat
 import { Device } from './api';
 import { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
 import { ApiVirtualDevice } from './api/apiVirtualDevice';
+import { BinarySensorChannel } from './virtualChannels/binarySensorChannel';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -159,8 +160,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new SwitchingActuatorChannel(channel);
     }
 
-    async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType): Promise<RawChannel> {
-        const device = await this.freeAtHomeApi.createDevice(deviceType, nativeId, name);
+    async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType, flavor?: string): Promise<RawChannel> {
+        const device = await this.freeAtHomeApi.createDevice(deviceType, nativeId, name, flavor);
         const channel = device.getChannels().next().value;
         return new RawChannel(channel);
     }
@@ -425,6 +426,11 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("HomeAppliance-Laundry", nativeId, name);
         const channel = device.getChannels().next().value;
         return new HomeApplianceChannel(channel);
+
+    async createBinarySensor(nativeId: string, name: string): Promise<BinarySensorChannel> {
+        const device = await this.freeAtHomeApi.createDevice("BinarySensor", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new BinarySensorChannel(channel);
     }
 
     public async markAllDevicesAsUnresponsive(): Promise<void[]> {

@@ -36,6 +36,7 @@ export { AirPressureChannel } from './virtualChannels/airPressureChannel';
 export { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
 export { AirVOCChannel } from './virtualChannels/airVOCChannel';
 export { EvChargerChannel } from './virtualChannels/evCharger';
+export { BinarySensorChannel } from './virtualChannels/binarySensorChannel'
 
 export { EnergyTwoWayMeterV2Channel } from './virtualChannels/energyTwoWayMeterV2Channel';
 export { EnergyOneWayMeterV2Channel } from './virtualChannels/energyOneWayMeterV2Channel';
