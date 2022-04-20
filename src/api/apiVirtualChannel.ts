@@ -31,7 +31,7 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
         super();
         this.device = device;
         this.channelNumber = channelNumber;
-        this.serialNumber = device.serialNumber + '/ch' + channelNumber.toString().padStart(4, '0');
+        this.serialNumber = `${device.serialNumber}/ch${channelNumber.toString().padStart(4, '0')}`;
 
         {
             const inputs = apiChannel?.inputs;

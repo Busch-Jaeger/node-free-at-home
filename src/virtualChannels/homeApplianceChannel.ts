@@ -40,19 +40,21 @@ export class HomeApplianceChannel extends Mixin(Channel, (EventEmitter as { new(
     }
 
     protected dataPointChanged(id: PairingIds, value: string): void{
-        switch (<PairingIds>id) {
+        switch (id) {
             case PairingIds.AL_SWITCH_ON_OFF: {
                 switch (value) {
                     case "1": {
                         this.emit("isOnChanged", true);
-                        if (this.isAutoConfirm)
+                        if (this.isAutoConfirm) {
                             this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
+                        }
                         break;
                     }
                     case "0": {
                         this.emit("isOnChanged", false);
-                        if (this.isAutoConfirm)
+                        if (this.isAutoConfirm) {
                             this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
+                        }
                         break;
                     }
                 }
@@ -72,8 +74,9 @@ export class HomeApplianceChannel extends Mixin(Channel, (EventEmitter as { new(
             switch (datapoint.pairingID) {
                 case PairingIds.AL_INFO_ON_OFF:
                     this.emit("isOnChanged", ("1" === datapoint.value));
-                    if (this.isAutoConfirm)
+                    if (this.isAutoConfirm) {
                         this.setDatapoint(PairingIds.AL_INFO_ON_OFF, datapoint.value);
+                    }
                     break;
 
                 case PairingIds.AL_CHANGE_OPERATION:
