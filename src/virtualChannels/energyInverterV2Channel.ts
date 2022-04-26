@@ -6,6 +6,10 @@ export class EnergyInverterV2Channel extends Channel {
     constructor(channel: ApiVirtualChannel){
         super(channel);
     }
+    
+    public setDatapoint(id: PairingIds, value: string): Promise<void> {
+        return super.setDatapoint(id, value);
+    }
 
     /**
      * production PV / Total consumption
@@ -35,15 +39,15 @@ export class EnergyInverterV2Channel extends Channel {
     /**
     * @param value {String} unit Wh (DPT_ACTIVE_ENERGY)
     */
-    public setProvidedEnergyToday(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_MEASURED_PROVIDED_ENERGY_TODAY, value);
+    public setImportedEnergyToday(value: string): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY, value);
     }
 
     /**
     * @param value {String} unit kWh (DPT_ACTIVE_ENERGY_KWH)
     */
-    public setTotalEnergyProvided(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_PROVIDED, value);
+    public setTotalEnergyImported(value: string): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED, value);
     }
 
     

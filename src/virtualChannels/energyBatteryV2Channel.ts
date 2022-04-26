@@ -6,6 +6,10 @@ export class EnergyBatteryV2Channel extends Channel {
     constructor(channel: ApiVirtualChannel){
         super(channel);
     }
+    
+    public setDatapoint(id: PairingIds, value: string): Promise<void> {
+        return super.setDatapoint(id, value);
+    }
 
     /**
     * Battery power: Discharge (less then 0), Charge (more then 0)
@@ -26,14 +30,28 @@ export class EnergyBatteryV2Channel extends Channel {
     /**
      * @param value {String} unit Wh (DPT_ACTIVE_ENERGY)
      */
-    public setConsumedEnergyToday(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_MEASURED_CONSUMED_ENERGY_TODAY, value);
+     public setImportedEnergyToday(value: string): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY, value);
     }
     
     /**
      * @param value {String} unit Wh (DPT_ACTIVE_ENERGY)
      */
-    public setProvidedEnergyToday(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_MEASURED_PROVIDED_ENERGY_TODAY, value);
+    public setExportedEnergyToday(value: string): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_MEASURED_EXPORTED_ENERGY_TODAY, value);
+    }
+
+    /**
+    * @param value {String} unit kWh (DPT_ACTIVE_ENERGY_KWH)
+    */
+    public setTotalEnergyImported(value: string): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED, value);
+    }
+
+    /**
+    * @param value {String} unit kWh (DPT_ACTIVE_ENERGY_KWH)
+    */
+    public setTotalEnergyExported(value: string): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_EXPORTED, value);
     }
 }

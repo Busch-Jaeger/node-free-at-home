@@ -36,7 +36,7 @@ import { AirPressureChannel } from './virtualChannels/airPressureChannel';
 import { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
 import { AirVOCChannel } from './virtualChannels/airVOCChannel';
 import { EvChargerChannel } from './virtualChannels/evCharger';
-
+import { HomeApplianceChannel } from './virtualChannels/homeApplianceChannel';
 
 
 
@@ -260,28 +260,24 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     async createEnergyBatteryV2Device(nativeId: string, name: string): Promise<EnergyBatteryV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "04");
         const channel = device.getChannels().next().value;
-        console.log('Battery channel', channel.channelNumber);
         return new EnergyBatteryV2Channel(channel);
     }
 
     async createEnergyInverterV2Device(nativeId: string, name: string): Promise<EnergyInverterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "08");
         const channel = device.getChannels().next().value;
-        console.log('Inverter channel', channel.channelNumber);
         return new EnergyInverterV2Channel(channel);
     }
 
     async createEnergyTwoWayMeterV2Device(nativeId: string, name: string): Promise<EnergyTwoWayMeterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "02");
         const channel = device.getChannels().next().value;
-        console.log('2Way meter channel', channel.channelNumber);
         return new EnergyTwoWayMeterV2Channel(channel);
     }
 
     async createEnergyOneWayMeterV2Device(nativeId: string, name: string): Promise<EnergyOneWayMeterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "01");
         const channel = device.getChannels().next().value;
-        console.log('1way meter channel', channel.channelNumber);
         return new EnergyOneWayMeterV2Channel(channel);
     }
 
@@ -424,6 +420,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("evcharging", nativeId, name);
         const channel = device.getChannels().next().value;
         return new EvChargerChannel(channel);
+    }
+
+    async createHomeApplianceLaundry(nativeId: string, name: string): Promise<HomeApplianceChannel> {
+        const device = await this.freeAtHomeApi.createDevice("HomeAppliance-Laundry", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new HomeApplianceChannel(channel);
     }
 
     async createBinarySensor(nativeId: string, name: string): Promise<BinarySensorChannel> {
