@@ -1,6 +1,8 @@
 import { FreeAtHomeWebsocket } from "./freeAtHomeWebsocket";
 import { createWebSocketStream } from 'ws';
 import stream from "stream";
+import { getConnectionOptions } from "./connectionOptions";
+import * as API from './serialApi';
 
 const baseUrl = process.env.FREEATHOME_SERIAL_API_BASE_URL
     ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/serial/v1" : "http://localhost/api/serial/v1");
@@ -109,17 +111,18 @@ export class SerialPortBinding implements BindingPortInterface {
 
 export class SerialBinding implements BindingInterface {
     async list(): Promise<PortInfo[]> {
-        return await [
-            {
-                path: "USB0",
+        const result = await API.getSettings(getConnectionOptions("/api/serial/v1"));
+        return result.data.map((device): PortInfo => {
+            return {
+                path: device.sysName,
                 manufacturer: undefined,
-                serialNumber: undefined,
+                serialNumber: device.serialNumber,
                 pnpId: undefined,
                 locationId: undefined,
-                productId: undefined,
-                vendorId: undefined,
+                productId: device.pID,
+                vendorId: device.vID,
             }
-        ];
+        });
     }
     async open(options: OpenOptions): Promise<BindingPortInterface> {
         const binding = new SerialPortBinding(options);
@@ -133,6 +136,10 @@ import rewiremock from 'rewiremock';
 class FreeAtHomeSerialPortStream extends SerialPortStream {
     constructor(options: OpenOptions, openCallback?: ErrorCallback) {
         super({ ...options, binding: new SerialBinding });
+    }
+    static list() {
+        const binding = new SerialBinding;
+        return binding.list();
     }
 }
 
