@@ -111,7 +111,6 @@ export class ScriptingHost<
         this.configurationEventSource.onmessage = (event: MessageEvent) => {
             try {
                 const data = JSON.parse(event.data);
-                console.log(data);
                 this.emit('configurationChanged', data);
             }
             catch (error) {
@@ -140,7 +139,6 @@ export class ScriptingHost<
         this.applicationStateEventSource.onmessage = (event: MessageEvent) => {
             try {
                 const data = JSON.parse(event.data);
-                console.log(data);
                 this.emit('applicationStateChanged', data);
             }
             catch (error) {
@@ -169,7 +167,6 @@ export class ScriptingHost<
         this.eventEventSource.onmessage = async (event: MessageEvent) => {
             try {
                 const data = <EventType>JSON.parse(event.data);
-                console.log(data);
                 this.emit("event", data)
             }
             catch (error) {
