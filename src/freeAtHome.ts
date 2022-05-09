@@ -446,4 +446,32 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return this.freeAtHomeApi.getAllChannels();
     }
 
+    public activateSignalHandling() {
+        // Signal handling for a smooth shutdown of an add on
+        //#################################################################################
+
+        if (process.platform === "win32") {
+            const rl = require("readline").createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+
+            rl.on("SIGINT", function () {
+                process.emit("SIGINT" as any);
+            });
+        }
+
+        process.on('SIGINT', async () => {
+            console.log("SIGINT received, cleaning up...")
+            await this.markAllDevicesAsUnresponsive();
+            console.log("clean up finished, exiting procces")
+            process.exit();
+        });
+        process.on('SIGTERM', async () => {
+            console.log("SIGTERM received, cleaning up...")
+            await this.markAllDevicesAsUnresponsive();
+            console.log("clean up finished, exiting procces")
+            process.exit();
+        });
+    }
 }
