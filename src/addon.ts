@@ -8,6 +8,8 @@ import { EventEmitter } from 'events';
 
 import fetch from 'cross-fetch';
 
+export {Configuration} from './scriptingApi';
+
 export function readMetaData() {
     const data = fs.readFileSync('free-at-home-metadata.json', 'utf8');
     const metaData = JSON.parse(data);
@@ -36,7 +38,7 @@ interface Events<ConfigurationType, EventType> {
     applicationStateConnectionChanged(state: ConnectionState): void,
 }
 
-export declare interface ScriptingHost<
+export declare interface AddOn<
     ConfigurationType  extends API.Configuration = API.Configuration,
     StateType  extends API.Configuration = API.Configuration,
     EventType extends API.Event = API.Event> {
@@ -49,7 +51,7 @@ export declare interface ScriptingHost<
     ): boolean;
 }
 
-export class ScriptingHost<
+export class AddOn<
     ConfigurationType = API.Configuration,
     StateType = API.Configuration,
     EventType = API.Event> extends EventEmitter {
@@ -195,4 +197,9 @@ export class ScriptingHost<
 
 };
 
-export default ScriptingHost;
+/**
+ * @deprecated use AddOn instead
+ */
+export class ScriptingHost extends AddOn {};
+
+export default AddOn;

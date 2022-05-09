@@ -61,7 +61,11 @@ export { FunctionIds } from './functionIds';
 export { ApiDevice } from './api/apiDevice';
 export { ApiChannel } from './api/apiChannel';
 
-export * as ScriptingHost from './scriptinghost'
+/**
+ * @deprecated use AddOn instead
+ */
+export * as ScriptingHost from './addon'
+export * as AddOn from  './addon'
 
 export * as ScriptingAPI from './scriptingApi'
 
