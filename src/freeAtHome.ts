@@ -464,13 +464,13 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         process.on('SIGINT', async () => {
             console.log("SIGINT received, cleaning up...")
             await this.markAllDevicesAsUnresponsive();
-            console.log("clean up finished, exiting procces")
+            console.log("clean up finished, exiting process")
             process.exit();
         });
         process.on('SIGTERM', async () => {
             console.log("SIGTERM received, cleaning up...")
             await this.markAllDevicesAsUnresponsive();
-            console.log("clean up finished, exiting procces")
+            console.log("clean up finished, exiting process")
             process.exit();
         });
     }
