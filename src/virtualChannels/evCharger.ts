@@ -10,8 +10,10 @@ interface ChannelEvents {
     datapointChanged(id: PairingIds, value: string): void;
     parameterChanged(id: ParameterIds, value: string): void;
     isBoostChanged(value: boolean): void;
-    stopCharging(value: boolean): void;
+    switchCharging(value: boolean): void;
+    ecoCharging(value: boolean): void;
     isChargingEnabledChanged(value: boolean): void;
+    currentPowerConsumed(value: number): void;
 }
 
 enum STATE {
@@ -91,6 +93,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     protected errorState: string = ""
     // OCPP StatusNotification.status
     protected status: string = ""
+    protected paused: boolean = false
 
 
     constructor(channel: ApiVirtualChannel){
@@ -107,15 +110,23 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     protected dataPointChanged(id: PairingIds, value: string): void {
         switch (<PairingIds>id) {
             case PairingIds.AL_BOOST_ENABLE_REQUEST:
-                this.emit("isBoostChanged", value == "1")
+                this.emit("isBoostChanged", value === "1")
                 break
             
-            case PairingIds.AL_STOP_CHARGING_SESSIONS_REQUEST:
-                this.emit("stopCharging", true)
+            case PairingIds.AL_SWITCH_CHARGING:
+                this.emit("switchCharging", value === "1")
                 break
 
             case PairingIds.AL_STOP_ENABLE_CHARGING_REQUEST:
-                this.emit("isChargingEnabledChanged", value == "1")
+                this.emit("isChargingEnabledChanged", value === "1")
+                break
+
+            case PairingIds.AL_SWITCH_ECO_CHARGING_ON_OFF:
+                this.emit("ecoCharging", value === "1")
+                break
+
+            case PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED:
+                this.emit("currentPowerConsumed", parseInt(value))
                 break
         }
     }
@@ -173,6 +184,10 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public setChargingEnabled(value: boolean): Promise<void>  {
         return this.setDatapoint(PairingIds.AL_INFO_CHARGING_ENABLED, value ? "1" : "0");
+    }
+
+    public setEcoCharging(value: boolean): Promise<void>  {
+        return this.setDatapoint(PairingIds.AL_INFO_ECO_CHARGING_ON_OFF, value ? "1" : "0");
     }
 
     public setCarPluggedIn(value: boolean): Promise<void>  {
