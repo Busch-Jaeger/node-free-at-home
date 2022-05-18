@@ -149,8 +149,8 @@ export enum PairingIds {
     AL_SOC = 0x04AC,	//	Battery level
     AL_BATTERY_POWER = 0x04AD,	//	Battery power
     AL_BOOST_ENABLE_REQUEST = 0x04B0,	//	Boost
-    AL_STOP_CHARGING_SESSIONS_REQUEST = 0x04B1,	//	Stop charging request
-    AL_STOP_ENABLE_CHARGING_REQUEST = 0x04B2,	//	Enable charging request
+    AL_SWITCH_CHARGING = 0x04B1,	//	switch charging
+    AL_STOP_ENABLE_CHARGING_REQUEST = 0x04B2,	//	Enable charging request    
     AL_INFO_BOOST = 0x04B3,	//	Info boost
     AL_INFO_WALLBOX_STATUS = 0x04B4,	//	Info wallbox status
     AL_INFO_CHARGING = 0x04B5,	//	Info charging
@@ -174,6 +174,8 @@ export enum PairingIds {
     AL_MEASURED_EXPORTED_ENERGY_TODAY = 0x04C7,
     AL_MEASURED_TOTAL_ENERGY_IMPORTED = 0x04C8,
     AL_MEASURED_TOTAL_ENERGY_EXPORTED = 0x04C9,
+    AL_SWITCH_ECO_CHARGING_ON_OFF = 0x04CA,	//	Eco charging
+    AL_INFO_ECO_CHARGING_ON_OFF = 0x04CB,	//	Info eco charging
     AL_DISARM_SYSTEM = 0x0501,	//	secure@home Central Unit
     AL_DISARM_COUNTER = 0x0502,	//	DomusDisarmCounter
     AL_INFO_INTRUSION_ALARM = 0x0504,	//	Intrusion Alarm
