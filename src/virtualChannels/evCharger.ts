@@ -110,19 +110,19 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     protected dataPointChanged(id: PairingIds, value: string): void {
         switch (<PairingIds>id) {
             case PairingIds.AL_BOOST_ENABLE_REQUEST:
-                this.emit("isBoostChanged", value == "1")
+                this.emit("isBoostChanged", value === "1")
                 break
             
             case PairingIds.AL_SWITCH_CHARGING:
-                this.emit("switchCharging", value == "1")
+                this.emit("switchCharging", value === "1")
                 break
 
             case PairingIds.AL_STOP_ENABLE_CHARGING_REQUEST:
-                this.emit("isChargingEnabledChanged", value == "1")
+                this.emit("isChargingEnabledChanged", value === "1")
                 break
 
             case PairingIds.AL_SWITCH_ECO_CHARGING_ON_OFF:
-                this.emit("ecoCharging", value == "1")
+                this.emit("ecoCharging", value === "1")
                 break
 
             case PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED:
