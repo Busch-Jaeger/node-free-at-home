@@ -45,6 +45,7 @@ enum STATE {
     UNAVAILABLE = 23,
     FAULTED = 24,
     // other states start here
+    AUTHORIZE_REMOTE_TX_REQUESTS = 28,
     CAR_PLUGGED_IN = 29,
     AUTHORIZATION_GRANTED = 30,
     BATTERY_FULL = 31
@@ -84,16 +85,17 @@ type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     // states encoded in AL_INFO_WALLBOX_STATUS
-    protected carPluggedIn: boolean = false
-    protected authorizationGranted: boolean = false
-    protected batteryFull: boolean = false
-    protected blackoutPrevention: boolean = false
-    protected groundFault: boolean = false
+    protected carPluggedIn = false
+    protected authorizationGranted = false
+    protected batteryFull = false
+    protected blackoutPrevention = false
+    protected groundFault = false
     // OCPP StatusNotification.errorCode
     protected errorState: string = ""
     // OCPP StatusNotification.status
     protected status: string = ""
-    protected paused: boolean = false
+    protected paused = false
+    protected authorizeRemoteTxRequests = false
 
 
     constructor(channel: ApiVirtualChannel){
@@ -152,6 +154,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
         value = this._toggleBit(value, this.carPluggedIn, STATE.CAR_PLUGGED_IN)
         value = this._toggleBit(value, this.authorizationGranted, STATE.AUTHORIZATION_GRANTED)
         value = this._toggleBit(value, this.batteryFull, STATE.BATTERY_FULL) 
+        value = this._toggleBit(value, this.authorizeRemoteTxRequests, STATE.AUTHORIZE_REMOTE_TX_REQUESTS) 
         
         if (errorMapping.has(this.errorState)) {
             const errorMask = 1 << (errorMapping.get(this.errorState)!)
@@ -209,6 +212,14 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     public setBatteryFull(value: boolean): Promise<void>  {
         if (this.batteryFull != value) {
             this.batteryFull = value
+            return this.sendStatus();
+        }
+        return Promise.resolve(undefined)
+    }
+
+    public setAuthorizeRemoteTxRequests(value: boolean): Promise<void>  {
+        if (this.authorizeRemoteTxRequests != value) {
+            this.authorizeRemoteTxRequests = value
             return this.sendStatus();
         }
         return Promise.resolve(undefined)
