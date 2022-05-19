@@ -194,7 +194,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public setCarPluggedIn(value: boolean): Promise<void>  {
-        if (this.carPluggedIn != value) {
+        if (this.carPluggedIn !== value) {
             this.carPluggedIn = value
             return this.sendStatus();
         }
@@ -202,7 +202,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public setAuthorizationGranted(value: boolean): Promise<void>  {
-        if (this.authorizationGranted != value) {
+        if (this.authorizationGranted !== value) {
             this.authorizationGranted = value
             return this.sendStatus();
         }
@@ -210,7 +210,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public setBatteryFull(value: boolean): Promise<void>  {
-        if (this.batteryFull != value) {
+        if (this.batteryFull !== value) {
             this.batteryFull = value
             return this.sendStatus();
         }
@@ -218,7 +218,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public setAuthorizeRemoteTxRequests(value: boolean): Promise<void>  {
-        if (this.authorizeRemoteTxRequests != value) {
+        if (this.authorizeRemoteTxRequests !== value) {
             this.authorizeRemoteTxRequests = value
             return this.sendStatus();
         }
@@ -227,7 +227,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public setErrorState(err: string) {
         if (errorMapping.has(err)) {
-            if (this.errorState != err) {
+            if (this.errorState !== err) {
                 this.errorState = err
                 return this.sendStatus();
             }
@@ -239,7 +239,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public setStatus(status: string) {
         if (statusMapping.has(status)) {
-            if (this.status != status) {
+            if (this.status !== status) {
                 this.status = status
                 return this.sendStatus();
             }
