@@ -103,6 +103,7 @@ export enum PairingIds {
     AL_SCALING_VALUE_1 = 0x0290,	//	Brightness sensor
     AL_SCALING_VALUE_2 = 0x0291,	//	Last touch
     AL_SCALING_VALUE_3 = 0x0292,	//	LED backlight night mode
+    AL_UNLOCK = 0x02A0,         // Unlock command
     AL_LOCATOR_BEEP = 0x02C0,	//	Locator beep
     AL_SWITCH_TEST_ALARM = 0x02C1,	//	Switch test alarm
     AL_FIRE_ALARM_ACTIVE = 0x02C3,	//	Fire alarm active
@@ -176,6 +177,7 @@ export enum PairingIds {
     AL_MEASURED_TOTAL_ENERGY_EXPORTED = 0x04C9,
     AL_SWITCH_ECO_CHARGING_ON_OFF = 0x04CA,	//	Eco charging
     AL_INFO_ECO_CHARGING_ON_OFF = 0x04CB,	//	Info eco charging
+    AL_LIMIT_FOR_CHARGER = 0x04CC, // set charger limit
     AL_DISARM_SYSTEM = 0x0501,	//	secure@home Central Unit
     AL_DISARM_COUNTER = 0x0502,	//	DomusDisarmCounter
     AL_INFO_INTRUSION_ALARM = 0x0504,	//	Intrusion Alarm

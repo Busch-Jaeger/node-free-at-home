@@ -14,6 +14,8 @@ interface ChannelEvents {
     ecoCharging(value: boolean): void;
     isChargingEnabledChanged(value: boolean): void;
     currentPowerConsumed(value: number): void;
+    chargerLimit(value: number): void;
+    unlock(): void;
 }
 
 enum STATE {
@@ -129,6 +131,14 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
             case PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED:
                 this.emit("currentPowerConsumed", parseInt(value))
+                break
+
+            case PairingIds.AL_LIMIT_FOR_CHARGER:
+                this.emit("chargerLimit", parseFloat(value))
+                break
+
+            case PairingIds.AL_UNLOCK:
+                this.emit("unlock")
                 break
         }
     }
