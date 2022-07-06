@@ -1,4 +1,4 @@
-import { PairingIds, ParameterIds } from '../freeAtHomeApi';
+import { PairingIds } from '../freeAtHomeApi';
 import { ApiVirtualChannel } from "../api/apiVirtualChannel";
 import { Channel } from '../channel';
 
