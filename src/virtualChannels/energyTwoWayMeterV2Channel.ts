@@ -18,6 +18,14 @@ export class EnergyTwoWayMeterV2Channel extends Channel {
     public setCurrentPowerConsumed(value: string): Promise<void> {
         return this.setDatapoint(PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED, value);
     }
+
+    /**
+     * Currently available excess power (value is unsigned)
+     * @param value {String} unit W (DPT_VALUE_POWER)
+     */
+    public setCurrentExcessPower(value: string): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_MEASURED_CURRENT_EXCESS_POWER, value);
+    }
     
     /**
      * @param value {String} unit Wh (DPT_ACTIVE_ENERGY)

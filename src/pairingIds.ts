@@ -178,6 +178,11 @@ export enum PairingIds {
     AL_SWITCH_ECO_CHARGING_ON_OFF = 0x04CA,	//	Eco charging
     AL_INFO_ECO_CHARGING_ON_OFF = 0x04CB,	//	Info eco charging
     AL_LIMIT_FOR_CHARGER = 0x04CC, // set charger limit
+    AL_MEASURED_CURRENT_EXCESS_POWER =  0x04CD, //Current excess power
+    AL_MEASURED_TOTAL_WATER = 0x04CE, // Measured total water consumption
+    AL_MEASURED_TOTAL_GAS = 0x04CF, // Measured total gas consumption
+    AL_CONSUMED_WATER_TODAY = 0x04D0, // Consumed water today
+    AL_CONSUMED_GAS_TODAY = 0x04D1, // Consumed gas today
     AL_DISARM_SYSTEM = 0x0501,	//	secure@home Central Unit
     AL_DISARM_COUNTER = 0x0502,	//	DomusDisarmCounter
     AL_INFO_INTRUSION_ALARM = 0x0504,	//	Intrusion Alarm

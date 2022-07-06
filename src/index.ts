@@ -43,6 +43,9 @@ export { EnergyOneWayMeterV2Channel } from './virtualChannels/energyOneWayMeterV
 export { EnergyInverterV2Channel } from './virtualChannels/energyInverterV2Channel';
 export { EnergyBatteryV2Channel } from './virtualChannels/energyBatteryV2Channel';
 
+export { WaterMeterChannel } from './virtualChannels/waterMeterChannel';
+export { GasMeterChannel } from './virtualChannels/gasMeterChannel';
+
 export { EnergyMeterBatteryChannels } from './freeAtHome';
 export { EnergyInverterMeterBatteryChannels } from './freeAtHome';
 export { EnergyInverterMeterChannels } from './freeAtHome';

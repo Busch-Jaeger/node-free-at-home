@@ -48,6 +48,8 @@ import { Device } from './api';
 import { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
 import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { BinarySensorChannel } from './virtualChannels/binarySensorChannel';
+import { WaterMeterChannel } from './virtualChannels/waterMeterChannel';
+import { GasMeterChannel } from './virtualChannels/gasMeterChannel';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -290,6 +292,18 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
             meter: new EnergyMeterChannel(Iterator),
         }
         return channels;
+    }
+
+    async createWaterMeterDevice(nativeId: string, name: string): Promise<WaterMeterChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"WaterMeter", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new WaterMeterChannel(channel);
+    }
+
+    async createGasMeterDevice(nativeId: string, name: string): Promise<GasMeterChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"GasMeter", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new GasMeterChannel(channel);
     }
 
     async createEnergyMeterBatteryDevice(nativeId: string, name: string): Promise<EnergyMeterBatteryChannels> {
