@@ -37,7 +37,7 @@ import { AirTemperatureChannel } from './virtualChannels/airTemperatureChannel';
 import { AirVOCChannel } from './virtualChannels/airVOCChannel';
 import { EvChargerChannel } from './virtualChannels/evCharger';
 import { HomeApplianceChannel } from './virtualChannels/homeApplianceChannel';
-
+import { HVACChannel } from './virtualChannels/hvacChannel';
 
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
@@ -446,6 +446,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("BinarySensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new BinarySensorChannel(channel);
+    }
+
+    async createHVACDevice(nativeId: string, name: string): Promise<HVACChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"HVAC", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new HVACChannel(channel);
     }
 
     public async markAllDevicesAsUnresponsive(): Promise<void[]> {
