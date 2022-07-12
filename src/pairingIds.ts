@@ -39,6 +39,7 @@ export enum PairingIds {
     AL_FAN_MANUAL_ON_OFF_REQUEST = 0x0041,	//	Fan Manual On/Off Request
     AL_CONTROLLER_ON_OFF_REQUEST = 0x0042,	//	Controller On/Off Request
     AL_ECO_ON_OFF_INDICATION = 0x0044,	//	Eco mode On/Off Request
+    AL_AWAY = 0x0050, // Indicates auto mode
     AL_INFO_ON_OFF = 0x0100,	//	Info On/Off
     AL_INFO_FORCE = 0x0101,	//	Force-position info
     AL_SYSAP_INFO_ON_OFF = 0x0105,	//	SysAP-InfoOnOff

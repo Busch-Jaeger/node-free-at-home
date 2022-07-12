@@ -169,7 +169,8 @@ export type VirtualDeviceType = "BinarySensor" |
     "AirQualityTemperature" | 
     "AirQualityVOC" | 
     "EnergyMeterv2" | 
-    "HomeAppliance-Laundry";
+    "HomeAppliance-Laundry" |
+    "HVAC";
 export type VirtualDevice = {
     "type": VirtualDeviceType;
     properties?: {
