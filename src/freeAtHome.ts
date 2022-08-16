@@ -494,4 +494,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
             process.exit();
         });
     }
+
+    public setEnableLogging(enableLogging: boolean) {
+        this.freeAtHomeApi.enableLogging = true;
+    }
 }

@@ -72,6 +72,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
     deviceAddedEmitter: EventEmitter = new EventEmitter();
 
+    enableLogging: boolean = false;
+
     constructor(baseUrl: string, authenticationHeader: object = {}) {
         super();
 
@@ -198,7 +200,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         const channelString = channel.toString(16).padStart(6, "ch0000");
         const datapointString = datapointIndex.toString(16).padStart(7, "odp0000")
 
-        await api.putdatapoint(
+        const result = await api.putdatapoint(
             "00000000-0000-0000-0000-000000000000",
             serialNumber,
             channelString,
@@ -206,13 +208,16 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             value,
             this.connectionOptions
         );
+        if(this.enableLogging && result.status != 200) {
+            console.error("Error in call to setInputDatapoint status:", result.status);
+        }
     }
 
     async setInputDatapoint(serialNumber: string, channel: number, datapointIndex: number, value: string) {
         const channelString = channel.toString(16).padStart(6, "ch0000");
         const datapointString = datapointIndex.toString(16).padStart(7, "idp0000")
 
-        await api.putdatapoint(
+        const result = await api.putdatapoint(
             "00000000-0000-0000-0000-000000000000",
             serialNumber,
             channelString,
@@ -220,6 +225,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             value,
             this.connectionOptions
         );
+        if(this.enableLogging && result.status != 200) {
+            console.error("Error in call to setInputDatapoint status:", result.status);
+        }
     }
 
     async setDeviceToUnresponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string) {
