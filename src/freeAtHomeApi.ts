@@ -82,8 +82,13 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
 
         const unixSocketAgent = new http.Agent(<object>{
+            maxSockets: 4,
             socketPath: "/run/api/fhapi/v1",
-        })
+        });
+
+        const tcpSocketAgent = new http.Agent(<object>{
+            maxSockets: 4,
+        });
 
         this.connectionOptions = {
             headers: {
@@ -93,7 +98,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             baseUrl: (useUnixSocket) ? "http://localhost" : baseUrl,
             fetch: fetch,
             createConnection: (useUnixSocket) ? connectToUnixSocket : undefined, // used in EventSource
-            agent: (useUnixSocket) ? unixSocketAgent : http.globalAgent          // used in fetch
+            agent: (useUnixSocket) ? unixSocketAgent : tcpSocketAgent          // used in fetch
         }
 
         this.websocket = new AutoReconnectWebSocket(baseUrl, "/api/ws", {
