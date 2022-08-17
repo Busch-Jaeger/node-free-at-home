@@ -84,7 +84,6 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
 
         const unixSocketAgent = new http.Agent(<object>{
-            maxSockets: 4,
             socketPath: "/run/api/fhapi/v1",
         });
 
