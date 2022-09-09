@@ -38,6 +38,7 @@ import { AirVOCChannel } from './virtualChannels/airVOCChannel';
 import { EvChargerChannel } from './virtualChannels/evCharger';
 import { HomeApplianceChannel } from './virtualChannels/homeApplianceChannel';
 import { HVACChannel } from './virtualChannels/hvacChannel';
+import { SplitUnitChannel } from './virtualChannels/splitUnitChannel';
 
 
 import { StrictEventEmitter } from 'strict-event-emitter-types';
@@ -452,6 +453,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"HVAC", nativeId, name);
         const channel = device.getChannels().next().value;
         return new HVACChannel(channel);
+    }
+
+    async createSplitUnitDevice(nativeId: string, name: string): Promise<SplitUnitChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"SplitUnit", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new SplitUnitChannel(channel);
     }
 
     public async markAllDevicesAsUnresponsive(): Promise<void[]> {

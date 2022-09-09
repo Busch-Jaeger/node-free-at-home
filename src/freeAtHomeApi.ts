@@ -199,6 +199,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         const channelString = channel.toString(16).padStart(6, "ch0000");
         const datapointString = datapointIndex.toString(16).padStart(7, "odp0000")
 
+
         const result = await api.putdatapoint(
             "00000000-0000-0000-0000-000000000000",
             serialNumber,
@@ -224,7 +225,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             value,
             this.connectionOptions
         );
-        if(this.enableLogging && result.status != 200) {
+        if (this.enableLogging && result.status != 200) {
             console.error("Error in call to setInputDatapoint status:", result.status);
         }
     }
@@ -242,6 +243,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             },
             this.connectionOptions
         );
+        if (this.enableLogging && res.status != 200) {
+            console.error("Could not set device to unresponsive: " + res.status);
+        }
     }
 
     async setDeviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string) {
@@ -257,6 +261,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             },
             this.connectionOptions
         );
+        if (this.enableLogging && res.status != 200) {
+            console.error("Could not set device to responsive: " + res.status);
+        }
     }
 
     async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string): Promise<ApiVirtualDevice> {
