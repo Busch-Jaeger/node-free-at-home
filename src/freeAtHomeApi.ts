@@ -225,7 +225,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             value,
             this.connectionOptions
         );
-        if(this.enableLogging && result.status != 200) {
+        if (this.enableLogging && result.status != 200) {
             console.error("Error in call to setInputDatapoint status:", result.status);
         }
     }
@@ -243,7 +243,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             },
             this.connectionOptions
         );
-        console.log('deviceUnresponsive', deviceType, nativeId, res.status)
+        if (this.enableLogging && res.status != 200) {
+            console.error("Could not set device to unresponsive: " + res.status);
+        }
     }
 
     async setDeviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string) {
@@ -259,9 +261,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             },
             this.connectionOptions
         );
-        console.log('triggerKeepAlive', deviceType, nativeId)
-        if (res.status !== 200) {
-            throw new Error("Could not set device to responsive: " + res.status);
+        if (this.enableLogging && res.status != 200) {
+            console.error("Could not set device to responsive: " + res.status);
         }
     }
 
