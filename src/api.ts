@@ -4,8 +4,8 @@
  * DO NOT MODIFY - This file has been generated using oazapfts.
  * See https://www.npmjs.com/package/oazapfts
  */
-import * as Oazapfts from "oazapfts_runtime/lib/runtime";
-import * as QS from "oazapfts_runtime/lib/runtime/query";
+ import * as Oazapfts from "oazapfts_runtime/lib/runtime";
+ import * as QS from "oazapfts_runtime/lib/runtime/query";
 export const defaults: Oazapfts.RequestOpts = {
     baseUrl: "https://192.168.2.1/fhapi/v1",
 };
@@ -102,6 +102,8 @@ export type ApiRestDatapointSysapSerialGet200ApplicationJsonResponse = {
     };
 };
 export type ApiRestDatapointSysapSerialPut200TextPlainResponse = object;
+export type AuxilaryDataId = number;
+export type ApiRestAuxiliarydata = string[];
 export type ScenesTriggered = {
     [key: string]: {
         channels: {
@@ -130,45 +132,45 @@ export type WebsocketMessage = {
     };
 };
 export type NativeSerial = string;
-export type VirtualDeviceType = "BinarySensor" | 
-    "BlindActuator" | 
-    "SwitchingActuator" | 
-    "CeilingFanActuator" | 
-    "RTC" | 
-    "DimActuator" | 
-    "evcharging" | 
-    "WindowSensor" | 
-    "simple_doorlock" | 
-    "ShutterActuator" | 
-    "WeatherStation" | 
-    "Weather-TemperatureSensor" | 
-    "Weather-WindSensor" | 
-    "Weather-BrightnessSensor" | 
-    "Weather-RainSensor" | 
-    "WindowActuator" | 
-    "CODetector" | 
-    "FireDetector" | 
-    "KNX-SwitchSensor" | 
-    "MediaPlayer" | 
-    "EnergyBattery" | 
-    "EnergyInverter" | 
-    "EnergyMeter" | 
-    "EnergyInverterBattery" | 
-    "EnergyInverterMeter" | 
-    "EnergyInverterMeterBattery" | 
-    "EnergyMeterBattery" | 
-    "AirQualityCO2" | 
-    "AirQualityCO" | 
-    "AirQualityFull" | 
-    "AirQualityHumidity" | 
-    "AirQualityNO2" | 
-    "AirQualityO3" | 
-    "AirQualityPM10" | 
-    "AirQualityPM25" | 
-    "AirQualityPressure" | 
-    "AirQualityTemperature" | 
-    "AirQualityVOC" | 
-    "EnergyMeterv2" | 
+export type VirtualDeviceType = "BinarySensor" |
+    "BlindActuator" |
+    "SwitchingActuator" |
+    "CeilingFanActuator" |
+    "RTC" |
+    "DimActuator" |
+    "evcharging" |
+    "WindowSensor" |
+    "simple_doorlock" |
+    "ShutterActuator" |
+    "WeatherStation" |
+    "Weather-TemperatureSensor" |
+    "Weather-WindSensor" |
+    "Weather-BrightnessSensor" |
+    "Weather-RainSensor" |
+    "WindowActuator" |
+    "CODetector" |
+    "FireDetector" |
+    "KNX-SwitchSensor" |
+    "MediaPlayer" |
+    "EnergyBattery" |
+    "EnergyInverter" |
+    "EnergyMeter" |
+    "EnergyInverterBattery" |
+    "EnergyInverterMeter" |
+    "EnergyInverterMeterBattery" |
+    "EnergyMeterBattery" |
+    "AirQualityCO2" |
+    "AirQualityCO" |
+    "AirQualityFull" |
+    "AirQualityHumidity" |
+    "AirQualityNO2" |
+    "AirQualityO3" |
+    "AirQualityPM10" |
+    "AirQualityPM25" |
+    "AirQualityPressure" |
+    "AirQualityTemperature" |
+    "AirQualityVOC" |
+    "EnergyMeterv2" |
     "HomeAppliance-Laundry" |
     "HVAC" |
     "SplitUnit";
@@ -189,6 +191,7 @@ export type VirtualDevicesSuccess = {
         };
     };
 };
+export type DeviceClass = "doorring" | "pushbutton" | "smokedetector" | "temperaturesensor";
 /**
  * Get configuration
  */
@@ -269,6 +272,16 @@ export function putdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: Ch
     });
 }
 /**
+ * Set auxiliary data for a channel
+ */
+export function putAuxiliaryData(sysap: SysapUuid, device: DeviceSerial, channel: ChannelSerial, index: AuxilaryDataId, apiRestAuxiliarydata: ApiRestAuxiliarydata, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/rest/auxiliarydata/${sysap}/${device}/${channel}/${index}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: apiRestAuxiliarydata
+    }));
+}
+/**
  * Websocket connection
  */
 export function ws(opts?: Oazapfts.RequestOpts) {
@@ -303,7 +316,7 @@ export function putApiRestVirtualdeviceBySysapAndSerial(sysap: SysapUuid, serial
 /**
  * Trigger proxy device
  */
-export function proxydevice(sysap: SysapUuid, device: NativeSerial, action: "shortpress" | "doublepress", opts?: Oazapfts.RequestOpts) {
+export function proxydevice(sysap: SysapUuid, deviceClass: DeviceClass, device: NativeSerial, action: "shortpress" | "doublepress", opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
@@ -312,7 +325,24 @@ export function proxydevice(sysap: SysapUuid, device: NativeSerial, action: "sho
     } | {
         status: 502;
         data: string;
-    }>(`/api/rest/proxydevice/${sysap}/pushbutton/${device}/action/${action}`, {
+    }>(`/api/rest/proxydevice/${sysap}/${deviceClass}/${device}/action/${action}`, {
         ...opts
+    });
+}
+/**
+ * Set proxy device value
+ */
+export function proxydeviceValue(sysap: SysapUuid, deviceClass: DeviceClass, device: NativeSerial, value: "temperature" | "alarm", opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
+    } | {
+        status: 401;
+    } | {
+        status: 502;
+        data: string;
+    }>(`/api/rest/proxydevice/${sysap}/${deviceClass}/${device}/value/${value}`, {
+        ...opts,
+        method: "PUT"
     });
 }
