@@ -87,4 +87,8 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
             throw new Error("Pairing id not found: " + id);
         return this.device.setOutputDatapoint(this.channelNumber, index, value);
     }
+
+    public async setAuxiliaryData(index: number, auxiliaryData: string[]): Promise<void> {
+        return this.device.setAuxiliaryData(this.channelNumber, index, auxiliaryData);
+    }
 }

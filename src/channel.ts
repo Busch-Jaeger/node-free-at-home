@@ -41,6 +41,10 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         return this.channel.setOutputDatapoint(id, value);
     }
 
+    public async setAuxiliaryData(index: number, auxiliaryData: string[]): Promise<void> {
+        return this.channel.setAuxiliaryData(index, auxiliaryData);
+    }
+
     public async setUnresponsive(): Promise<void>  {
         return this.channel.setUnresponsive();
     }

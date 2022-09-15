@@ -339,6 +339,15 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
     }
 
+    public async setAuxiliaryData(serialNumber: string, channel: number, index: number, auxiliaryData: string[]): Promise<void> {
+        const channelString = channel.toString(16).padStart(6, "ch0000");
+        await api.putAuxiliaryData(
+            "00000000-0000-0000-0000-000000000000",
+            serialNumber,
+            channelString, index, auxiliaryData,
+            this.connectionOptions);
+    }
+
     private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType, flavor?: string): ApiVirtualDevice {
         const existingDevice = this.virtualDevicesBySerial.get(deviceId);
         if(undefined !== existingDevice)

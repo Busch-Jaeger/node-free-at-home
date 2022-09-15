@@ -65,4 +65,8 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     public async setOutputDatapoint(channelNumber: number, index: number, value: string) : Promise<void> {
         return this.freeAtHomeApi.setOutputDatapoint(this.serialNumber, channelNumber, index, value);
     }
+
+    public async setAuxiliaryData(channel: number, index: number, auxiliaryData: string[]): Promise<void> {
+        return this.freeAtHomeApi.setAuxiliaryData(this.serialNumber, channel, index, auxiliaryData);
+    }
 }
