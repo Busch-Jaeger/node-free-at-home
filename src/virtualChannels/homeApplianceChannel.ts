@@ -39,6 +39,22 @@ export class HomeApplianceChannel extends Mixin(Channel, (EventEmitter as { new(
         this.setDatapoint(PairingIds.AL_INFO_DOOR, (isOpen) ? "1" : "0");
     }
 
+    setCurrentTemperature(tmp: number) {
+        this.setDatapoint(PairingIds.AL_CURRENT_TEMPERATURE_APPLIANCE_1, tmp.toString())
+    }
+
+    setCurrentTemperatureInvalid() {
+        this.setDatapoint(PairingIds.AL_CURRENT_TEMPERATURE_APPLIANCE_1, "invalid")
+    }
+
+    setSetPointTemperature(tmp: number) {
+        this.setDatapoint(PairingIds.AL_SETPOINT_TEMPERATURE_APPLIANCE_1, tmp.toString())
+    }
+
+    setSetPointTemperatureInvalid() {
+        this.setDatapoint(PairingIds.AL_SETPOINT_TEMPERATURE_APPLIANCE_1, "invalid")
+    }
+
     protected dataPointChanged(id: PairingIds, value: string): void{
         switch (id) {
             case PairingIds.AL_SWITCH_ON_OFF: {
