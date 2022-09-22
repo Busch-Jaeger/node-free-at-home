@@ -112,7 +112,6 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
 
     public async setInputDatapoint(id: PairingIds, value: string) {
         const index = this.inputPairingToPosition.get(id);
-        console.log(id, index)
         if (undefined === index)
             return;
         return this.device.setInputDatapoint(this.channelNumber, index, value);
