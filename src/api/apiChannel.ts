@@ -54,12 +54,16 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
             const inputs = apiChannel?.inputs;
             let i = 0;
             for (const input in inputs) {
+                i = parseInt(input.substring(3), 16)
+                if (isNaN(i)) {
+                    console.error('error parsing index for', input);
+                    continue;
+                }
                 const pairingId = inputs[input].pairingID;
                 if (undefined === pairingId)
                     break;
                 this.inputPairingToPosition.set(pairingId as PairingIds, i);
                 this.inputPositionToPairing.set(i, pairingId as PairingIds);
-                i++;
             }
         }
 
@@ -67,6 +71,11 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
             const outputs = apiChannel?.outputs;
             let i = 0;
             for (const output in outputs) {
+                i = parseInt(output.substring(3), 16)
+                if (isNaN(i)) {
+                    console.error('error parsing index for', output);
+                    continue;
+                }
                 const pairingId = outputs[output].pairingID;
                 if (undefined === pairingId)
                     break;
@@ -77,7 +86,6 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
                 if(undefined !== value) {
                     this.outputDataPoints.set(pairingId, value);
                 }
-                i++;
             }
         }
     }
@@ -104,6 +112,7 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
 
     public async setInputDatapoint(id: PairingIds, value: string) {
         const index = this.inputPairingToPosition.get(id);
+        console.log(id, index)
         if (undefined === index)
             return;
         return this.device.setInputDatapoint(this.channelNumber, index, value);
