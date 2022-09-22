@@ -9,6 +9,7 @@ import { Datapoint } from '..';
 
 interface ChannelEvents {
     isOnChanged(value: boolean): void;
+    isForcedChanged(value: boolean): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -23,6 +24,10 @@ export class SwitchingActuatorChannel extends Mixin(Channel, (EventEmitter as { 
 
     setOn(isOn: boolean) {
         this.setDatapoint(PairingIds.AL_INFO_ON_OFF, (isOn) ? "1" : "0");
+    }
+
+    setForced(isForced: boolean) {
+        this.setDatapoint(PairingIds.AL_INFO_FORCE, (isForced) ? "1" : "0");
     }
 
     protected dataPointChanged(id: PairingIds, value: string): void{
@@ -43,6 +48,18 @@ export class SwitchingActuatorChannel extends Mixin(Channel, (EventEmitter as { 
                     }
                 }
                 break;
+            }
+
+            case PairingIds.AL_FORCED: {
+                const val = parseInt(value);
+                const isOn = (val & 1) > 0;
+                const isForced = (val & 2) > 0
+                this.emit("isOnChanged", isOn);
+                this.emit("isForcedChanged", isForced);
+                if (this.isAutoConfirm) {
+                    this.setDatapoint(PairingIds.AL_INFO_FORCE, (isForced) ? "1" : "0");
+                    this.setDatapoint(PairingIds.AL_INFO_ON_OFF, (isOn) ? "1" : "0");
+                }
             }
         }
     }
