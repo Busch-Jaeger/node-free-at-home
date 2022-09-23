@@ -37,6 +37,10 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         }
     }
 
+    public setAutoConfirm(value: boolean) {
+        this.isAutoConfirm = value;
+    }
+
     protected async setDatapoint(id: PairingIds, value: string): Promise<void> {
         return this.channel.setOutputDatapoint(id, value);
     }

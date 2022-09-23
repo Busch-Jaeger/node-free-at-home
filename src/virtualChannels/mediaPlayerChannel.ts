@@ -8,12 +8,42 @@ import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
 interface ChannelEvents {
+    /**
+     * @deprecated The method should not be used
+     */
     playModeChanged(value: MediaPlayerChannel.PlayMode.playing | MediaPlayerChannel.PlayMode.paused): void;
+    /**
+     * @deprecated The method should not be used
+     */
     playCommandChanged(value: MediaPlayerChannel.PlayCommand.Next | MediaPlayerChannel.PlayCommand.Previous | MediaPlayerChannel.PlayCommand.VolumeDec | MediaPlayerChannel.PlayCommand.VolumeInc): void;
+    /**
+     * @deprecated The method should not be used
+     */
     muteChanged(value: MediaPlayerChannel.SetMute.Mute | MediaPlayerChannel.SetMute.Unmute): void;
+    /**
+     * @deprecated The method should not be used
+     */
     playVolumeChanged(value: number): void;
-    playNext(): void;
-    playPrevious(): void;
+
+    play(): void,
+    pause(): void,
+
+    mute(): void;
+    unMute(): void;
+
+    next(): void;
+    previous(): void;
+
+    volume(value: number): void;
+    volumeDec(): void;
+    volumeInc(): void;
+
+    shuffle(): void;
+    shuffleOff(): void;
+
+    repeatOff(): void;
+    repeat(): void;
+    repeatOne(): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -35,22 +65,20 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     private repeadMode: MediaPlayerChannel.RepeadMode = MediaPlayerChannel.RepeadMode.off;
     private isShuffel: boolean = false;
     private isCrossfade: boolean = false;
-    private allowedActions: MediaPlayerChannel.Actions = {};
 
     protected dataPointChanged(id: PairingIds, value: string): void {
-        //console.log("ID:" + id);
-        //console.log("with value: " + value);
         switch (id) {
             case PairingIds.AL_MEDIA_PLAY: // play
                 this.emit("playModeChanged", MediaPlayerChannel.PlayMode.playing);
+                this.emit("play");
                 if (this.isAutoConfirm) {
                     this.playMode = MediaPlayerChannel.PlayMode.playing;
                     this.updatePlayMode();
                 }
                 break;
-
             case PairingIds.AL_MEDIA_PAUSE: // stop
                 this.emit("playModeChanged", MediaPlayerChannel.PlayMode.paused);
+                this.emit("pause");
                 if (this.isAutoConfirm) {
                     this.playMode = MediaPlayerChannel.PlayMode.paused;
                     this.updatePlayMode();
@@ -58,11 +86,11 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 break;
             case PairingIds.AL_MEDIA_NEXT:
                 this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.Next);
-                this.emit("playNext");
+                this.emit("next");
                 break;
             case PairingIds.AL_MEDIA_PREVIOUS:
                 this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.Previous);
-                this.emit("playPrevious");
+                this.emit("previous");
                 break;
             case PairingIds.AL_RELATIVE_VOLUME_CONTROL:
                 if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeDec) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeDec);
@@ -70,38 +98,58 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 break;
             case PairingIds.AL_ABSOLUTE_VOLUME_CONTROL:
                 this.emit("playVolumeChanged", parseInt(value));
+                this.emit("volume", parseInt(value));
                 if (this.isAutoConfirm)
                     this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, value);
                 break;
             case PairingIds.AL_MEDIA_MUTE:
-                if (parseInt(value) === MediaPlayerChannel.SetMute.Mute) this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
-                else if (parseInt(value) === MediaPlayerChannel.SetMute.Unmute) this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
+                switch (parseInt(value)) {
+                    case MediaPlayerChannel.SetMute.Mute:
+                        this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
+                        this.emit("mute");
+                        break;
+                    case MediaPlayerChannel.SetMute.Unmute:
+                        this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
+                        this.emit("unMute");
+                        break;
+                }
                 break;
             case PairingIds.AL_MEDIA_PLAY_MODE:
                 const intValue = parseInt(value);
-                if ((intValue & (1 << 4)) != 0)
+
+                if ((intValue & (1 << 4)) != 0) {
+                    if (this.isShuffel === false)
+                        this.emit("shuffleOff");
                     if (this.isAutoConfirm)
                         this.isShuffel = true;
-                if ((intValue & (1 << 4)) == 0)
+                }
+                else {
+                    if (this.isShuffel === true)
+                        this.emit("shuffle");
                     if (this.isAutoConfirm)
                         this.isShuffel = false;
+                }
 
-                if ((intValue & (1 << 2)) !== 0)
+                if ((intValue & (1 << 2)) !== 0) {
+                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                        this.emit("repeat");
                     if (this.isAutoConfirm)
                         this.repeadMode = MediaPlayerChannel.RepeadMode.repeat;
+                }
 
-                if ((intValue & (1 << 3)) !== 0)
-                    if (this.isAutoConfirm) {
-                        if (this.allowedActions.canRepeatOne)
-                            this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
-                        else
-                            this.repeadMode = MediaPlayerChannel.RepeadMode.off;
-                        this.isShuffel = false;
-                    }
+                if ((intValue & (1 << 3)) !== 0) {
+                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                        this.emit("repeatOne");
+                    if (this.isAutoConfirm)
+                        this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
+                }
 
-                if ((intValue & ((1 << 2) | 1 << 3)) === 0)
+                if ((intValue & ((1 << 2) | 1 << 3)) === 0) {
+                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                        this.emit("repeatOff");
                     if (this.isAutoConfirm)
                         this.repeadMode = MediaPlayerChannel.RepeadMode.off;
+                }
 
                 if (this.isAutoConfirm)
                     this.updatePlayMode();
@@ -138,25 +186,53 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     protected sceneTriggered(scene: Datapoint[]): void {
         for (const datapoint of scene) {
             //Only work on non-empty commands
-            if (datapoint.value !== "") {
-                switch (datapoint.pairingID) {
-                    case PairingIds.AL_PLAYBACK_STATUS:
-                        if (parseInt(datapoint.value) == MediaPlayerChannel.PlayMode.playing) this.emit("playModeChanged", MediaPlayerChannel.PlayMode.playing);
-                        else if (parseInt(datapoint.value) == MediaPlayerChannel.PlayMode.paused) this.emit("playModeChanged", MediaPlayerChannel.PlayMode.paused);
-                        break;
-                    case PairingIds.AL_INFO_MUTE:
-                        if (parseInt(datapoint.value) === MediaPlayerChannel.SetMute.Mute) this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
-                        else if (parseInt(datapoint.value) === MediaPlayerChannel.SetMute.Unmute) this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
-                        break;
-                    case PairingIds.AL_INFO_ACTUAL_VOLUME:
-                        this.emit("playVolumeChanged", parseInt(datapoint.value));
-                        break;
-                    case PairingIds.AL_INFO_GROUP_MEMBERSHIP:
-                        break;
-                    case PairingIds.AL_INFO_PLAYING_FAVORITE:
-                        break;
-                }
+            if (datapoint.value === "")
+                continue;
+            const value = datapoint.value;
+            switch (datapoint.pairingID) {
+                case PairingIds.AL_PLAYBACK_STATUS:
+                    switch (parseInt(value)) {
+                        case MediaPlayerChannel.PlayMode.playing:
+                            this.emit("playModeChanged", MediaPlayerChannel.PlayMode.playing);
+                            this.emit("play");
+                            if (this.isAutoConfirm) {
+                                this.playMode = MediaPlayerChannel.PlayMode.playing;
+                                this.updatePlayMode();
+                            }
+                            break;
+                        case MediaPlayerChannel.PlayMode.paused:
+                            this.emit("playModeChanged", MediaPlayerChannel.PlayMode.paused);
+                            this.emit("pause");
+                            if (this.isAutoConfirm) {
+                                this.playMode = MediaPlayerChannel.PlayMode.paused;
+                                this.updatePlayMode();
+                            }
+                            break;
+                    }
+                    break;
+                case PairingIds.AL_INFO_MUTE:
+                    switch (parseInt(value)) {
+                        case MediaPlayerChannel.SetMute.Mute:
+                            this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
+                            this.emit("mute");
+                            break;
+                        case MediaPlayerChannel.SetMute.Unmute:
+                            this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
+                            this.emit("unMute");
+                            break;
+                    }
+                case PairingIds.AL_INFO_ACTUAL_VOLUME:
+                    this.emit("playVolumeChanged", parseInt(value));
+                    this.emit("volume", parseInt(value));
+                    if (this.isAutoConfirm)
+                        this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, value);
+                    break;
+                case PairingIds.AL_INFO_GROUP_MEMBERSHIP:
+                    break;
+                case PairingIds.AL_INFO_PLAYING_FAVORITE:
+                    break;
             }
+
         }
     }
 
@@ -168,24 +244,44 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         return this.setDatapoint(PairingIds.AL_INFO_CURRENT_MEDIA_SOURCE, value);
     }
 
+    /**
+     * @deprecated The method should not be used
+     */
     setPlayMode(playMode: MediaPlayerChannel.PlayMode): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_PLAYBACK_STATUS, playMode.toString()); // todo: add number to PairingIds
+        this.playMode = playMode;
+        return this.updatePlayMode();
     }
 
-    setMute(mute: MediaPlayerChannel.SetMute): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_INFO_MUTE, mute.toString());
+    setPlaying(): Promise<void> {
+        this.playMode = MediaPlayerChannel.PlayMode.playing;
+        return this.updatePlayMode();
+    }
+
+    setPaused(): Promise<void> {
+        this.playMode = MediaPlayerChannel.PlayMode.paused;
+        return this.updatePlayMode();
+    }
+
+    setMute(): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_INFO_MUTE, MediaPlayerChannel.SetMute.Mute.toString());
+    }
+
+    setUnMute(): Promise<void> {
+        return this.setDatapoint(PairingIds.AL_INFO_MUTE, MediaPlayerChannel.SetMute.Unmute.toString());
     }
 
     setVolume(value: number): Promise<void> {
         return this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, value.toString());
     }
 
+    /**
+     * @deprecated The method should not be used
+     */
     setControls(value: MediaPlayerChannel.PlayControls): Promise<void> {
         return this.setDatapoint(PairingIds.AL_ALLOWED_PLAYBACK_ACTIONS, value.toString());
     }
 
     setAllowedActions(actions: MediaPlayerChannel.Actions): Promise<void> {
-        this.allowedActions = actions;
         let value = 0;
         if (actions?.canSkip)
             value |= 1 << 0;
@@ -214,7 +310,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         return this.setAuxiliaryData(0, favorites);
     }
 
-    setInputss(inputs: string[]): Promise<void> {
+    setInputs(inputs: string[]): Promise<void> {
         return this.setAuxiliaryData(1, inputs);
     }
 }
