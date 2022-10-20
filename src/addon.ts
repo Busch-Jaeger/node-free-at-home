@@ -40,7 +40,7 @@ interface Events<ConfigurationType, EventType> {
 
 export declare interface AddOn<
     ConfigurationType  extends API.Configuration = API.Configuration,
-    StateType  extends API.Configuration = API.Configuration,
+    StateType  extends API.ApplicationState = API.ApplicationState,
     EventType extends API.Event = API.Event> {
     on<U extends keyof Events<ConfigurationType, EventType>>(
         event: U, listener: Events<ConfigurationType, EventType>[U]
@@ -53,7 +53,7 @@ export declare interface AddOn<
 
 export class AddOn<
     ConfigurationType = API.Configuration,
-    StateType = API.Configuration,
+    StateType = API.ApplicationState,
     EventType = API.Event> extends EventEmitter {
     private id: string;
     private connectionOptions: ConnectionOptions;

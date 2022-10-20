@@ -118,7 +118,7 @@ export type Metadata = {
     url: TranslatedUri;
     minSysapVersion?: string;
     accessControl?: {
-        allowedAPIs?: string[];
+        allowedAPIs?: ("webinterface" | "serialport")[];
         networkAccess?: boolean;
         networkPorts?: number[];
     };
@@ -136,6 +136,14 @@ export type ConfigurationEntry = {
 };
 export type Configuration = {
     [key: string]: ConfigurationEntry;
+};
+export type ApplicationStateEntry = {
+    items?: {
+        [key: string]: any;
+    };
+};
+export type ApplicationState = {
+    [key: string]: ApplicationStateEntry | undefined;
 };
 export type Event = {
     eventType: "buttonPressed";
@@ -294,7 +302,7 @@ export function setContainerConfiguration(reference: Reference, configuration?: 
 export function getContainerApplicationState(reference: Reference, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: Configuration;
+        data: ApplicationState;
     } | {
         status: 401;
     } | {
@@ -306,11 +314,11 @@ export function getContainerApplicationState(reference: Reference, opts?: Oazapf
 /**
  * Set the application state of a container
  */
-export function setContainerApplicationState(reference: Reference, configuration?: Configuration, opts?: Oazapfts.RequestOpts) {
+export function setContainerApplicationState(reference: Reference, applicationState?: ApplicationState, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText(`/rest/container/${reference}/applicationstate`, oazapfts.json({
         ...opts,
         method: "PUT",
-        body: configuration
+        body: applicationState
     }));
 }
 /**
