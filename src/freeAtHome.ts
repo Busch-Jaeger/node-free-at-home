@@ -218,7 +218,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     }
 
     async createMediaPlayerDevice(nativeId: string, name: string): Promise<MediaPlayerChannel> {
-        const device = await this.freeAtHomeApi.createDevice("MediaPlayer", nativeId, name);
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"MediaPlayer_Type1", nativeId, name);
         const channel = device.getChannels().next().value;
         return new MediaPlayerChannel(channel);
     }

@@ -44,9 +44,17 @@ interface ChannelEvents {
     repeatOff(): void;
     repeat(): void;
     repeatOne(): void;
+
+    playlist(value: number): void;
+    input(value: number): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
+
+enum ProfileIndexes {
+    playlist = 0,
+    input = 1,
+};
 
 export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     constructor(channel: ApiVirtualChannel) {
@@ -65,6 +73,9 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     private repeadMode: MediaPlayerChannel.RepeadMode = MediaPlayerChannel.RepeadMode.off;
     private isShuffel: boolean = false;
     private isCrossfade: boolean = false;
+
+    private inputs: string[] = [];
+    private playlists: string[] = [];
 
     protected dataPointChanged(id: PairingIds, value: string): void {
         switch (id) {
@@ -156,6 +167,27 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
 
                 console.log("playmode: ", value);
                 break;
+            case PairingIds.AL_SELECT_PROFILE:
+                {
+                    const intValue = parseInt(value);
+                    const profileIndex = intValue >> 8;
+                    const index = intValue & 0xff;
+                    switch (profileIndex) {
+                        case ProfileIndexes.playlist:
+                            console.log(profileIndex, " index: ", index);
+                            if (this.isAutoConfirm)
+                                this.setPlaylistIndex(index);
+                            break;
+                        case ProfileIndexes.input:
+                            console.log(profileIndex, " index: ", index);
+                            if (this.isAutoConfirm)
+                                this.setInputIndex(index);
+                            break;
+                        default:
+                            console.error("unknown profile index received ", profileIndex);
+                    }
+                }
+                break;
         }
     }
 
@@ -231,6 +263,22 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     break;
                 case PairingIds.AL_INFO_PLAYING_FAVORITE:
                     break;
+                case PairingIds.AL_INFO_PLAYLIST:
+                    {
+                        const intValue = parseInt(value);
+                        this.emit("playlist", intValue)
+                        if (this.isAutoConfirm)
+                            this.setPlaylistIndex(intValue);
+                        break;
+                    }
+                case PairingIds.AL_INFO_AUDIO_INPUT:
+                    {
+                        const intValue = parseInt(value);
+                        this.emit("input", intValue)
+                        if (this.isAutoConfirm)
+                            this.setInputIndex(parseInt(value));
+                        break;
+                    }
             }
 
         }
@@ -306,12 +354,34 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         return this.setDatapoint(PairingIds.AL_INFO_ALBUM_COVER_URL, url);
     }
 
+    /**
+     * @deprecated The method should not be used, use setPlazlists instead
+     */
     setFavorites(favorites: string[]): Promise<void> {
-        return this.setAuxiliaryData(0, favorites);
+        this.playlists = favorites;
+        return this.setAuxiliaryData(ProfileIndexes.playlist, favorites);
+    }
+
+    setPlaylists(playlists: string[]): Promise<void> {
+        this.playlists = playlists;
+        return this.setAuxiliaryData(ProfileIndexes.playlist, playlists);
+    }
+
+    async setPlaylistIndex(value: number): Promise<void> {
+        if (this.isAutoConfirm && this.playlists[value])
+            await this.setTitle(this.playlists[value]);
+        return this.setDatapoint(PairingIds.AL_INFO_PLAYLIST, value.toString());
     }
 
     setInputs(inputs: string[]): Promise<void> {
-        return this.setAuxiliaryData(1, inputs);
+        this.inputs = inputs;
+        return this.setAuxiliaryData(ProfileIndexes.input, inputs);
+    }
+
+    async setInputIndex(value: number): Promise<void> {
+        if (this.isAutoConfirm && this.inputs[value])
+            await this.setInput(this.inputs[value]);
+        return this.setDatapoint(PairingIds.AL_INFO_AUDIO_INPUT, value.toString());
     }
 }
 
