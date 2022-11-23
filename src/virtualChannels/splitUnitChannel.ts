@@ -10,6 +10,9 @@ import { StrictEventEmitter } from 'strict-event-emitter-types';
 interface ChannelEvents {
     setPointTemperatureChanged(value: number) : void;
     isOnChanged(value: boolean) : void;
+    setModeAuto() : void;
+    setModeCooling() : void;
+    setModeHeating() : void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -18,14 +21,17 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
     private setPointTemperature: number = 21.0;
     private swingOn = false;
     private isOn = false;
-    private mode = 1; // AUTO
+    private mode = 0; // AUTO
     private supportedFeatures = 7; // AUTO + HEATING + COOLING
     private remoteId = 0;
 
     constructor(channel: ApiVirtualChannel){
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
-        this.sendSupportedFeatures()
+        channel.on("sceneTriggered", this.sceneTriggered.bind(this));
+        this.sendStatus();
+        this.sendSupportedFeatures();
+        this.setRemoteId(1);
     }
 
      /**
@@ -61,8 +67,32 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
             case PairingIds.AL_INFO_SWING_MODE:
                 this.setSwingOn(value === "1");
                 break;
-        }
-    }
+
+            case PairingIds.AL_FAN_STAGE_REQUEST:
+                if (this.isAutoConfirm) {
+                    this.setDatapoint(PairingIds.AL_FAN_COIL_LEVEL, value);
+                }
+                break;
+            case PairingIds.AL_INFO_OPERATION_MODE:
+                if (this.isAutoConfirm) {
+                    const intValue = Number.parseInt(value);
+                    this.setMode(intValue);
+
+                    switch (intValue) {
+                        case 0:
+                            this.emit("setModeAuto");
+                            break;
+                        case 0:
+                            this.emit("setModeCooling");
+                            break;
+                        case 0:
+                            this.emit("setModeHeating");
+                            break;
+                    }
+                }
+                break;
+          }
+      }
 
     public setDatapoint(id: PairingIds, value: string): Promise<void> {
         return super.setDatapoint(id, value);
@@ -79,7 +109,6 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         if (this.isOn !== isOn) {
             this.isOn = isOn;
             this.sendStatus();
-            this.emit("isOnChanged", isOn);
         }        
     }
 
@@ -90,14 +119,26 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         }        
     }
 
-    setMode(mode: number) {
+    public setModeAuto() {
+        this.setMode(1);
+    }
+
+    public setModeCooling() {
+        this.setMode(2);
+    }
+
+    public setModeHeating() {
+        this.setMode(3);
+    }
+
+    protected setMode(mode: number) {
         if (this.mode !== mode) {
             this.mode = mode;
             this.sendStatus()
         }
     }
 
-    sendStatus() {
+    protected sendStatus() {
         let status = this.mode;
         if (this.isOn) {
             status |= 1 << 5;
@@ -119,5 +160,46 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public sendSetPointTemperature(value: number) {
         this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, value.toFixed(1));
+    }
+
+    protected sceneTriggered(scene: Datapoint[]): void {
+        for (const datapoint of scene) {
+            const value = datapoint.value;
+            switch (datapoint.pairingID) {
+                case PairingIds.AL_SET_POINT_TEMPERATURE:
+                    {
+                        const intValue = Number.parseFloat(value);
+                        this.setPointTemperature = intValue;
+                        if (this.isAutoConfirm)
+                            this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, this.setPointTemperature.toFixed(1));
+                        this.emit("setPointTemperatureChanged", this.setPointTemperature);
+                    }
+                    break;
+                case PairingIds.AL_STATE_INDICATION:
+                    break;
+                case PairingIds.AL_CONTROLLER_ON_OFF:
+                    this.setOn(value === "1");
+                    break;
+                case PairingIds.AL_EXTENDED_STATUS:
+                    {
+                        const intValue = Number.parseInt(value) & 0xf;
+                        if (this.isAutoConfirm)
+                            this.setMode(intValue);
+
+                        switch (intValue) {
+                            case 0:
+                                this.emit("setModeAuto");
+                                break;
+                            case 1:
+                                this.emit("setModeCooling");
+                                break;
+                            case 2:
+                                this.emit("setModeHeating");
+                                break;
+                        }
+                    }
+                    break;
+            }
+        }
     }
 }
