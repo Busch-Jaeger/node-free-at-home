@@ -209,7 +209,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             this.connectionOptions
         );
         if(this.enableLogging && result.status != 200) {
-            console.error("Error in call to setInputDatapoint status:", result.status);
+            console.error("Error in call to setOutputDatapoint status:", result.status);
         }
     }
 
