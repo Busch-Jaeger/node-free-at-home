@@ -21,7 +21,7 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
     private setPointTemperature: number = 21.0;
     private swingOn = false;
     private isOn = false;
-    private mode = 0; // AUTO
+    private mode = 1; // AUTO
     private supportedFeatures = 7; // AUTO + HEATING + COOLING
     private remoteId = 0;
 
