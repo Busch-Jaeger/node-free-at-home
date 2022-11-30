@@ -35,27 +35,25 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
 
         {
             const inputs = apiChannel?.inputs;
-            let i = 0;
             for (const input in inputs) {
+                const i = parseInt(input.substring(3), 16);
                 const pairingId = inputs[input].pairingID;
                 if (undefined === pairingId)
                     break;
                 this.inputPairingToPosition.set(pairingId as PairingIds, i);
                 this.inputPositionToPairing.set(i, pairingId as PairingIds);
-                i++;
             }
         }
 
         {
             const outputs = apiChannel?.outputs;
-            let i = 0;
             for (const output in outputs) {
+                const i = parseInt(output.substring(3), 16);
                 const pairingId = outputs[output].pairingID;
                 if (undefined === pairingId)
                     break;
                 this.outputPairingToPosition.set(pairingId as PairingIds, i);
                 this.outputPositionToPairing.set(i, pairingId as PairingIds);
-                i++;
             }
         }
     }

@@ -20,7 +20,7 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     deviceType: api.VirtualDeviceType;
     flavor?: string;
 
-    private channels: Array<ApiVirtualChannel> = new Array();
+    private channels: Map<number, ApiVirtualChannel> = new Map();
 
     constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, nativeId: string, deviceType: api.VirtualDeviceType, flavor?: string) {
         super();
@@ -32,24 +32,24 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
 
         for (const channelName in apiDevice?.channels) {
             const apiChannel = apiDevice.channels?.[channelName];
-            const i = parseInt(channelName.substring(2));
+            const i = parseInt(channelName.substring(2), 16);
             const channel = new ApiVirtualChannel(this, apiChannel, i);
-            this.channels.push(channel);
+            this.channels.set(i, channel);
         }
     }
 
     onInputDatapointChange(channelIndex: number, data: IndexedDatapoint) {
-        const channel = this.channels[channelIndex];
-        channel.onInputDatapointChange(data);
+        const channel = this.channels.get(channelIndex);
+        channel?.onInputDatapointChange(data);
     }
 
     onSceneTriggered(channelIndex: number, data: Datapoint[]) {
-        const channel = this.channels[channelIndex];
-        channel.onSceneTriggered(data);
+        const channel = this.channels.get(channelIndex);
+        channel?.onSceneTriggered(data);
     }
 
     public getChannels() : IterableIterator<ApiVirtualChannel> {
-        return this.channels[Symbol.iterator]();
+        return this.channels.values();
     }
 
     public async setUnresponsive() : Promise<void> {
