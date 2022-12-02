@@ -33,7 +33,10 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
                 }, 1000 * 120);
         } else {
             if (this.autoKeepAliveTimer !== undefined)
+            {
                 clearInterval(this.autoKeepAliveTimer);
+                this.autoKeepAliveTimer = undefined;
+            }
         }
     }
 
