@@ -9,13 +9,14 @@ import fetch from 'cross-fetch';
 
 import { PairingIds } from "./pairingIds";
 import { ParameterIds } from "./parameterIds";
+import { Topics } from './topics';
 import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
 import { ApiChannelIterator } from './api/apiChannelIterator';
 import { WebsocketMessage } from './api';
 
-export { PairingIds, ParameterIds };
+export { PairingIds, ParameterIds, Topics };
 
 export interface Datapoint {
     pairingID: PairingIds,

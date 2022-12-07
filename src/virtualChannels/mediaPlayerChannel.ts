@@ -1,4 +1,4 @@
-import { PairingIds, ParameterIds } from '../freeAtHomeApi';
+import { PairingIds, ParameterIds, Topics } from '../freeAtHomeApi';
 import { ApiVirtualChannel } from "../api/apiVirtualChannel";
 import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
@@ -50,11 +50,6 @@ interface ChannelEvents {
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
-
-enum ProfileIndexes {
-    playlist = 0,
-    input = 1,
-};
 
 export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     constructor(channel: ApiVirtualChannel) {
@@ -170,21 +165,21 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
             case PairingIds.AL_SELECT_PROFILE:
                 {
                     const intValue = parseInt(value);
-                    const profileIndex = intValue >> 8;
+                    const topicIndex = intValue >> 8;
                     const index = intValue & 0xff;
-                    switch (profileIndex) {
-                        case ProfileIndexes.playlist:
-                            console.log(profileIndex, " index: ", index);
+                    switch (topicIndex) {
+                        case Topics.TOP_MEDIA_PLAYER_PLAYLIST:
+                            console.log(topicIndex, " index: ", index);
                             if (this.isAutoConfirm)
                                 this.setPlaylistIndex(index);
                             break;
-                        case ProfileIndexes.input:
-                            console.log(profileIndex, " index: ", index);
+                        case Topics.TOP_MEDIA_PLAYER_AUDIO_INPUT:
+                            console.log(topicIndex, " index: ", index);
                             if (this.isAutoConfirm)
                                 this.setInputIndex(index);
                             break;
                         default:
-                            console.error("unknown profile index received ", profileIndex);
+                            console.error("unknown profile index received ", topicIndex);
                     }
                 }
                 break;
@@ -359,12 +354,12 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
      */
     setFavorites(favorites: string[]): Promise<void> {
         this.playlists = favorites;
-        return this.setAuxiliaryData(ProfileIndexes.playlist, favorites);
+        return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_PLAYLIST, favorites);
     }
 
     setPlaylists(playlists: string[]): Promise<void> {
         this.playlists = playlists;
-        return this.setAuxiliaryData(ProfileIndexes.playlist, playlists);
+        return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_PLAYLIST, playlists);
     }
 
     async setPlaylistIndex(value: number): Promise<void> {
@@ -375,7 +370,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
 
     setInputs(inputs: string[]): Promise<void> {
         this.inputs = inputs;
-        return this.setAuxiliaryData(ProfileIndexes.input, inputs);
+        return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_AUDIO_INPUT, inputs);
     }
 
     async setInputIndex(value: number): Promise<void> {
