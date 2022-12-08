@@ -1,7 +1,7 @@
 import http from 'http';
 import fetch from 'cross-fetch';
 import net from 'net';
-import { RequestOpts } from "oazapfts_runtime/lib/runtime";
+import { RequestOpts } from "@busch-jaeger/oazapfts_runtime/lib/runtime";
 // import * as Oazapfts from "oazapfts_runtime/lib/runtime";
 
 export function getConnectionOptions(subApiPath: string, baseUrl_?: string, username_?: string, password_?: string): RequestOpts | object {
