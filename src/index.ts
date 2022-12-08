@@ -65,6 +65,8 @@ export { FunctionIds } from './functionIds';
 export { ApiDevice } from './api/apiDevice';
 export { ApiChannel } from './api/apiChannel';
 
+export * as Utilities from './virtualChannels/utilities/colorSpaceConversion';
+
 /**
  * @deprecated use AddOn instead
  */

@@ -5,6 +5,7 @@ import { BlindActuatorChannel } from './virtualChannels/blindActuatorChannel';
 import { DimActuatorChannel } from './virtualChannels/dimActuatorChannel'
 import { WindowActuatorChannel } from './virtualChannels/windowActuatorChannel';
 import { SwitchingActuatorChannel } from './virtualChannels/switchingActuatorChannel';
+import { RGBChannel } from './virtualChannels/rgbChannel';
 import { RawChannel } from './virtualChannels/rawChannel';
 
 import { WeatherBrightnessSensorChannel } from './virtualChannels/weatherBrightnessSensorChannel';
@@ -459,6 +460,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"SplitUnit", nativeId, name);
         const channel = device.getChannels().next().value;
         return new SplitUnitChannel(channel);
+    }
+
+    async createRGBDevice(nativeId: string, name: string): Promise<RGBChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"ledvance-rgb", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new RGBChannel(channel);
     }
 
     public async markAllDevicesAsUnresponsive(): Promise<void[]> {
