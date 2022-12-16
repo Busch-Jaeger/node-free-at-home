@@ -40,7 +40,6 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
      * @param value 
      */
       protected dataPointChanged(id: PairingIds, value: string): void {
-        console.log("set datapoint:", PairingIds[id], value);
         switch (<PairingIds>id) {
             case PairingIds.AL_RELATIVE_SET_POINT_REQUEST: {
                 const intValue = Number.parseFloat(value);
@@ -60,7 +59,6 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
             break;
 
             case PairingIds.AL_CONTROLLER_ON_OFF_REQUEST:
-                console.log('on', value, typeof value, 'current on:', this.isOn)
                 this.setOn(value === "1");
                 break;
 
@@ -146,7 +144,6 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         if (this.swingOn) {
             status |= 1 << 6;
         }
-        console.log('sending status:', status);
         this.setDatapoint(PairingIds.AL_EXTENDED_STATUS, status.toString());
     }
 
