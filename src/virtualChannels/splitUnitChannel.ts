@@ -8,11 +8,11 @@ import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
 interface ChannelEvents {
-    setPointTemperatureChanged(value: number) : void;
-    isOnChanged(value: boolean) : void;
-    setModeAuto() : void;
-    setModeCooling() : void;
-    setModeHeating() : void;
+    setPointTemperatureChanged(value: number): void;
+    isOnChanged(value: boolean): void;
+    setModeAuto(): void;
+    setModeCooling(): void;
+    setModeHeating(): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -25,7 +25,7 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
     private supportedFeatures = 7; // AUTO + HEATING + COOLING
     private remoteId = 0;
 
-    constructor(channel: ApiVirtualChannel){
+    constructor(channel: ApiVirtualChannel) {
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("sceneTriggered", this.sceneTriggered.bind(this));
@@ -34,32 +34,34 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         this.setRemoteId(1);
     }
 
-     /**
-     * handle changes in incoming datapoints. Those events trigger a channel event.
-     * @param id 
-     * @param value 
-     */
-      protected dataPointChanged(id: PairingIds, value: string): void {
+    /**
+    * handle changes in incoming datapoints. Those events trigger a channel event.
+    * @param id 
+    * @param value 
+    */
+    protected dataPointChanged(id: PairingIds, value: string): void {
         switch (<PairingIds>id) {
             case PairingIds.AL_RELATIVE_SET_POINT_REQUEST: {
                 const intValue = Number.parseFloat(value);
                 this.setPointTemperature += intValue;
-                if(this.isAutoConfirm)
+                if (this.isAutoConfirm)
                     this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, this.setPointTemperature.toFixed(1));
                 this.emit("setPointTemperatureChanged", this.setPointTemperature);
             }
-            break;
+                break;
             case PairingIds.AL_INFO_ABSOLUTE_SET_POINT_REQUEST: {
                 const intValue = Number.parseFloat(value);
                 this.setPointTemperature = intValue;
-                if(this.isAutoConfirm)
+                if (this.isAutoConfirm)
                     this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, this.setPointTemperature.toFixed(1));
                 this.emit("setPointTemperatureChanged", this.setPointTemperature);
             }
-            break;
+                break;
 
             case PairingIds.AL_CONTROLLER_ON_OFF_REQUEST:
-                this.setOn(value === "1");
+                this.emit("isOnChanged", value === "1");
+                if (this.isAutoConfirm)
+                    this.setOn(value === "1");
                 break;
 
             case PairingIds.AL_INFO_SWING_MODE:
@@ -72,25 +74,26 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 }
                 break;
             case PairingIds.AL_INFO_OPERATION_MODE:
-                if (this.isAutoConfirm) {
+                {
                     const intValue = Number.parseInt(value);
-                    this.setMode(intValue);
+                    if (this.isAutoConfirm)
+                        this.setMode(intValue);
 
                     switch (intValue) {
-                        case 0:
+                        case 1:
                             this.emit("setModeAuto");
                             break;
-                        case 0:
-                            this.emit("setModeCooling");
-                            break;
-                        case 0:
+                        case 2:
                             this.emit("setModeHeating");
                             break;
+                        case 3:
+                            this.emit("setModeCooling");
+                            break;
                     }
+                    break;
                 }
-                break;
-          }
-      }
+        }
+    }
 
     public setDatapoint(id: PairingIds, value: string): Promise<void> {
         return super.setDatapoint(id, value);
@@ -107,25 +110,25 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         if (this.isOn !== isOn) {
             this.isOn = isOn;
             this.sendStatus();
-        }        
+        }
     }
 
     setSwingOn(swingOn: boolean) {
         if (this.swingOn !== swingOn) {
             this.swingOn = swingOn;
             this.sendStatus();
-        }        
+        }
     }
 
     public setModeAuto() {
         this.setMode(1);
     }
 
-    public setModeCooling() {
+    public setModeHeating() {
         this.setMode(2);
     }
 
-    public setModeHeating() {
+    public setModeCooling() {
         this.setMode(3);
     }
 
@@ -175,7 +178,9 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 case PairingIds.AL_STATE_INDICATION:
                     break;
                 case PairingIds.AL_CONTROLLER_ON_OFF:
-                    this.setOn(value === "1");
+                    if (this.isAutoConfirm)
+                        this.setOn(value === "1");
+                    this.emit("isOnChanged", value === "1");
                     break;
                 case PairingIds.AL_EXTENDED_STATUS:
                     {
@@ -184,14 +189,14 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                             this.setMode(intValue);
 
                         switch (intValue) {
-                            case 0:
-                                this.emit("setModeAuto");
-                                break;
                             case 1:
-                                this.emit("setModeCooling");
+                                this.emit("setModeAuto");
                                 break;
                             case 2:
                                 this.emit("setModeHeating");
+                                break;
+                            case 3:
+                                this.emit("setModeCooling");
                                 break;
                         }
                     }
