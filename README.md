@@ -4,72 +4,33 @@ This api is unstable.
 
 # Install
 
-Npm packages for this project are available [here](https://dev.azure.com/ABB-BHC-BHAS/DEBJE-FreeAtHomeExtensions/_packaging?_a=connect&feed=DEBJE-FreeAtHomeExtensions).
-
-To use this registry, add a .npmrc file to the project directory.
-
-```
-registry=https://pkgs.dev.azure.com/ABB-BHC-BHAS/DEBJE-FreeAtHomeExtensions/_packaging/DEBJE-FreeAtHomeExtensions/npm/registry/ 
-                        
-always-auth=true
-```
-
-Follow the steps for a npm registry that are documented [here](https://dev.azure.com/ABB-BHC-BHAS/DEBJE-FreeAtHomeExtensions/_packaging?_a=connect&feed=DEBJE-FreeAtHomeExtensions).
+Npm packages for this project are available [here](https://www.npmjs.com/package/@busch-jaeger/free-at-home).
 
 To install this packages run:
+```bash
+npm install @busch-jaeger/free-at-home
 ```
-npm install free-at-home
-```
+
+# Documentation
+
+The Documentation of this project is available [here](https://busch-jaeger.github.io/free-at-home-addon-development-kit-documentation-preview).
 
 # Example
 
-```
-import { FreeAtHome } from 'free-at-home';
+```typescript
+import { FreeAtHome } from '@busch-jaeger/free-at-home';
 
-const freeAtHome = new FreeAtHome("http://{ip of your System Access Point}/fhapi/v1");
-
+const freeAtHome = new FreeAtHome();
+freeAtHome.activateSignalHandling();
 
 async function main() {
-    const switchActuatorChannel = await freeAtHome.createSwitchingActuatorDevice("mySerialNumber", "Switching Actuator");
-
-    switchActuatorChannel.setAutoKeepAlive(true);
-    switchActuatorChannel.on('isOnChanged', (value: boolean) => {
-        switchActuatorChannel.setOn(value);
-    })
+  const virtualSwitch = await freeAtHome.createSwitchingActuatorDevice("123switch", "Virtual Switch");
+  virtualSwitch.setAutoKeepAlive(true);
+  virtualSwitch.setAutoConfirm(true);
+  virtualSwitch.on('isOnChanged', (value) => {
+    console.log("switch state is:", (value) ? "on" : "off");
+  });
 }
 
-
-try{
-    main();
-} catch(error) {
-    console.error(error);
-}
-```
-
-# Prepare for local development
-
-Change prefix to user writeable directory.
-```
-npm config set prefix ~/.npm
-```
-
-Install dependencies
-```
-npm install
-```
-
-Add link to local package
-```
-cd node-free-at-home
-npm link
-```
-
-For the package that uses this library:
-```
-npm link free-at-home
-```
-
-Build project
-```
-npm run build
+main();
 ```

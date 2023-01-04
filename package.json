@@ -1,10 +1,10 @@
 {
   "name": "@busch-jaeger/free-at-home",
   "version": "0.26.6-0",
-  "description": "",
+  "description": "Library for free@home local device api",
   "repository": {
     "type": "git",
-    "url": "https://dev.azure.com/ABB-BHC-BHAS/DEBJE-FreeAtHomeExtensions/_git/node-free-at-home"
+    "url": "https://github.com/Busch-Jaeger/node-free-at-home"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
