@@ -363,8 +363,6 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     async setPlaylistIndex(value: number): Promise<void> {
-        if (this.isAutoConfirm && this.playlists[value])
-            await this.setTitle(this.playlists[value]);
         return this.setDatapoint(PairingIds.AL_INFO_PLAYLIST, value.toString());
     }
 
@@ -374,8 +372,6 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     async setInputIndex(value: number): Promise<void> {
-        if (this.isAutoConfirm && this.inputs[value])
-            await this.setInput(this.inputs[value]);
         return this.setDatapoint(PairingIds.AL_INFO_AUDIO_INPUT, value.toString());
     }
 }
