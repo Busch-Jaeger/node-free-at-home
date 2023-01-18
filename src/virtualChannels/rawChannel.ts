@@ -22,8 +22,8 @@ export class RawChannel extends Mixin(Channel, (EventEmitter as { new(): Channel
         channel.on("sceneTriggered", this.sceneTriggered.bind(this));
     }
 
-    public setOutputDatapoint(datapointId: PairingIds, value: string): void {
-        this.setDatapoint(datapointId, value);
+    public async setOutputDatapoint(datapointId: PairingIds, value: string): Promise<void> {
+        return this.setDatapoint(datapointId, value);
     }
 
     protected dataPointChanged(id: PairingIds, value: string): void {
