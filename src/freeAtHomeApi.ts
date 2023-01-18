@@ -298,7 +298,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             throw new Error("data in response not found");
         }
         else {
-            throw new Error("Could not create virtual device error code: " + res.status);
+            throw new Error("Could not create virtual device " + deviceType +" error code: " + res.status + " Description: " + res.data);
         }
     }
 

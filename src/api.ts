@@ -201,6 +201,7 @@ export function getconfiguration(opts?: Oazapfts.RequestOpts) {
         data: Configuration;
     } | {
         status: 401;
+        data: string;
     } | {
         status: 502;
         data: string;
@@ -217,6 +218,7 @@ export function getdevicelist(opts?: Oazapfts.RequestOpts) {
         data: Devicelist;
     } | {
         status: 401;
+        data: string;
     } | {
         status: 502;
         data: string;
@@ -233,6 +235,10 @@ export function getdevice(sysap: SysapUuid, device: DeviceSerial, opts?: Oazapft
         data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
     } | {
         status: 401;
+        data: string;
+    } | {
+        status: 404;
+        data: string;
     } | {
         status: 502;
         data: string;
@@ -249,6 +255,7 @@ export function getdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: Ch
         data: ApiRestDatapointSysapSerialGet200ApplicationJsonResponse;
     } | {
         status: 401;
+        data: string;
     }>(`/api/rest/datapoint/${sysap}/${device}.${channel}.${datapoint}`, {
         ...opts
     });
@@ -262,6 +269,7 @@ export function putdatapoint(sysap: SysapUuid, device: DeviceSerial, channel: Ch
         data: ApiRestDatapointSysapSerialPut200TextPlainResponse;
     } | {
         status: 401;
+        data: string;
     } | {
         status: 502;
         data: string;
@@ -289,6 +297,7 @@ export function ws(opts?: Oazapfts.RequestOpts) {
         status: 101;
     } | {
         status: 401;
+        data: string;
     } | {
         status: 418;
         data: WebsocketMessage;
@@ -304,9 +313,14 @@ export function putApiRestVirtualdeviceBySysapAndSerial(sysap: SysapUuid, serial
         status: 200;
         data: VirtualDevicesSuccess;
     } | {
+        status: 400;
+        data: string;
+    } | {
         status: 401;
+        data: string;
     } | {
         status: 502;
+        data: string;
     }>(`/api/rest/virtualdevice/${sysap}/${serial}`, oazapfts.json({
         ...opts,
         method: "PUT",
@@ -322,6 +336,7 @@ export function proxydevice(sysap: SysapUuid, deviceClass: DeviceClass, device: 
         data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
     } | {
         status: 401;
+        data: string;
     } | {
         status: 502;
         data: string;
@@ -338,6 +353,7 @@ export function proxydeviceValue(sysap: SysapUuid, deviceClass: DeviceClass, dev
         data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
     } | {
         status: 401;
+        data: string;
     } | {
         status: 502;
         data: string;
