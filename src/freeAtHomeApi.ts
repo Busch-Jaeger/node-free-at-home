@@ -212,6 +212,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         if(this.enableLogging && result.status != 200) {
             console.error("Error in call to setOutputDatapoint status:", result.status);
         }
+        if(result.status !== 200)
+            return Promise.reject("HTTP status code: " + result.status + "Reason: " + result.data);
     }
 
     async setInputDatapoint(serialNumber: string, channel: number, datapointIndex: number, value: string) {
@@ -229,6 +231,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         if (this.enableLogging && result.status != 200) {
             console.error("Error in call to setInputDatapoint status:", result.status);
         }
+        if(result.status !== 200)
+            return Promise.reject("HTTP status code: " + result.status + " Reason: " + result.data);
     }
 
     async setDeviceToUnresponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string) {
@@ -247,6 +251,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         if (this.enableLogging && res.status != 200) {
             console.error("Could not set device to unresponsive: " + res.status);
         }
+        if(res.status !== 200)
+            return Promise.reject("HTTP status code: " + res.status + " Reason: " + res.data);
     }
 
     async setDeviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string) {
@@ -265,6 +271,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         if (this.enableLogging && res.status != 200) {
             console.error("Could not set device to responsive: " + res.status);
         }
+        if(res.status !== 200)
+            return Promise.reject("HTTP status code: " + res.status + " Reason: " + res.data);
     }
 
     async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string): Promise<ApiVirtualDevice> {
@@ -342,11 +350,14 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
     public async setAuxiliaryData(serialNumber: string, channel: number, index: number, auxiliaryData: string[]): Promise<void> {
         const channelString = channel.toString(16).padStart(6, "ch0000");
-        await api.putAuxiliaryData(
+        const result = await api.putAuxiliaryData(
             "00000000-0000-0000-0000-000000000000",
             serialNumber,
             channelString, index, auxiliaryData,
             this.connectionOptions);
+        if(result.status !== 200)
+            return Promise.reject("HTTP status code: " + result.status + " Reason: " + result.data);
+        
     }
 
     private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType, flavor?: string): ApiVirtualDevice {
