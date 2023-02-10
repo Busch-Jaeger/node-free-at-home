@@ -5,6 +5,7 @@ import { PairingIds } from "../pairingIds";
 import { ParameterIds } from '../parameterIds';
 import { FreeAtHomeApi, IndexedDatapoint, Datapoint } from '../freeAtHomeApi';
 import { ApiVirtualChannel } from './apiVirtualChannel';
+import { Capabilities } from '../capabilities';
 
 interface DeviceEvents {
 }
@@ -19,16 +20,18 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     serialNumber: string;
     deviceType: api.VirtualDeviceType;
     flavor?: string;
+    capabilities?: Capabilities[];
 
     private channels: Map<number, ApiVirtualChannel> = new Map();
 
-    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, nativeId: string, deviceType: api.VirtualDeviceType, flavor?: string) {
+    constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string, nativeId: string, deviceType: api.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]) {
         super();
         this.freeAtHomeApi = freeAtHomeApi;
         this.nativeId = nativeId;
         this.serialNumber = serialNumber;
         this.deviceType = deviceType;
         this.flavor = flavor;
+        this.capabilities = capabilities;
 
         for (const channelName in apiDevice?.channels) {
             const apiChannel = apiDevice.channels?.[channelName];
@@ -53,12 +56,12 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     }
 
     public async setUnresponsive() : Promise<void> {
-        return this.freeAtHomeApi.setDeviceToUnresponsive(this.deviceType, this.nativeId, this.flavor);
+        return this.freeAtHomeApi.setDeviceToUnresponsive(this.deviceType, this.nativeId, this.flavor, this.capabilities);
     }
 
 
     public async triggerKeepAlive() : Promise<void> {
-        return this.freeAtHomeApi.setDeviceToResponsive(this.deviceType, this.nativeId, this.flavor);
+        return this.freeAtHomeApi.setDeviceToResponsive(this.deviceType, this.nativeId, this.flavor, this.capabilities);
     }
 
 

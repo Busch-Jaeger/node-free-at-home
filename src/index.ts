@@ -61,6 +61,7 @@ export { ApiVirtualChannel } from "./api/apiVirtualChannel";
 export { ParameterIds } from './parameterIds';
 export { PairingIds } from './pairingIds';
 export { FunctionIds } from './functionIds';
+export { Capabilities } from './capabilities';
 
 export { ApiDevice } from './api/apiDevice';
 export { ApiChannel } from './api/apiChannel';

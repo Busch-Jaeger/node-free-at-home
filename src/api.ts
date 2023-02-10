@@ -180,6 +180,7 @@ export type VirtualDevice = {
         ttl?: string;
         displayname?: string;
         flavor?: string;
+        capabilities?: number[];
     };
 };
 export type VirtualDevicesSuccess = {

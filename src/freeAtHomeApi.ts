@@ -10,6 +10,7 @@ import fetch from 'cross-fetch';
 import { PairingIds } from "./pairingIds";
 import { ParameterIds } from "./parameterIds";
 import { Topics } from './topics';
+import { Capabilities } from './capabilities';
 import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
@@ -235,7 +236,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             return Promise.reject("HTTP status code: " + result.status + " Reason: " + result.data);
     }
 
-    async setDeviceToUnresponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string) {
+    async setDeviceToUnresponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string, capabilities?: Capabilities[]) {
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
             "00000000-0000-0000-0000-000000000000",
             nativeId,
@@ -243,7 +244,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 type: deviceType,
                 properties: {
                     ttl: "0",
-                    flavor: flavor
+                    flavor: flavor,
+                    capabilities: capabilities
                 }
             },
             this.connectionOptions
@@ -255,7 +257,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             return Promise.reject("HTTP status code: " + res.status + " Reason: " + res.data);
     }
 
-    async setDeviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string) {
+    async setDeviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string, capabilities?: Capabilities[]) {
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
             "00000000-0000-0000-0000-000000000000",
             nativeId,
@@ -263,7 +265,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 type: deviceType,
                 properties: {
                     ttl: "180",
-                    flavor: flavor
+                    flavor: flavor,
+                    capabilities: capabilities
                 }
             },
             this.connectionOptions
@@ -275,7 +278,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             return Promise.reject("HTTP status code: " + res.status + " Reason: " + res.data);
     }
 
-    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string): Promise<ApiVirtualDevice> {
+    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
         if(false === nativeIdRegExp.test(nativeId))
             throw new Error("nativeId contains not supported characters");
         const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
@@ -286,7 +289,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 properties: {
                     ttl: "180",
                     displayname: displayName,
-                    flavor: flavor
+                    flavor: flavor,
+                    capabilities: capabilities
                 }
             },
             this.connectionOptions
@@ -299,7 +303,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                     const responseNativeId = devices[deviceId].serial;
                     if (responseNativeId === nativeId) {
                         console.log("Found device: " + deviceId);
-                        return this.getCreatedDevice(deviceId, nativeId, deviceType, flavor);
+                        return this.getCreatedDevice(deviceId, nativeId, deviceType, flavor, capabilities);
                     }
                 }
             }
@@ -310,10 +314,10 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
     }
 
-    private async getCreatedDevice(deviceId: string, nativeId: string, deviceType: api.VirtualDeviceType, flavor?: string): Promise<ApiVirtualDevice> {
+    private async getCreatedDevice(deviceId: string, nativeId: string, deviceType: api.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
         const devicePromiseWithTimeout = new Response();
         const websocketDeviceAddedCallback = (device: api.Device) => {
-            const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType, flavor);
+            const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType, flavor, capabilities);
             devicePromiseWithTimeout.clearTimeout();
             this.deviceAddedEmitter.off(deviceId, websocketDeviceAddedCallback);
             devicePromiseWithTimeout.resolve(deviceObject);
@@ -333,7 +337,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             if (device !== undefined) {
                 if(undefined !== device.channels &&  0 == Object.keys(device.channels).length )
                     return await devicePromiseWithTimeout.promise;
-                const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType, flavor);
+                const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType, flavor, capabilities);
                 devicePromiseWithTimeout.clearTimeout();
                 this.deviceAddedEmitter.off(deviceId, websocketDeviceAddedCallback);
                 return deviceObject;
@@ -360,11 +364,11 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         
     }
 
-    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType, flavor?: string): ApiVirtualDevice {
+    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): ApiVirtualDevice {
         const existingDevice = this.virtualDevicesBySerial.get(deviceId);
         if(undefined !== existingDevice)
             return existingDevice;
-        const device = new ApiVirtualDevice(this, apiDevice, deviceId, nativeId, deviceType, flavor);
+        const device = new ApiVirtualDevice(this, apiDevice, deviceId, nativeId, deviceType, flavor, capabilities);
         this.virtualDevicesBySerial.set(deviceId, device);
         return device;
     }
