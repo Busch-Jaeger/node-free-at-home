@@ -59,11 +59,6 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         channel.on("sceneTriggered", this.sceneTriggered.bind(this));
     }
 
-    // public static readonly MediaPlayerChannel.PlayMode = MediaPlayerChannel.PlayMode;
-    // public static readonly PlayCommand = PlayCommand;
-    // public static readonly PlayControls = PlayControls;
-    // public static readonly SetMute = SetMute;
-
     private playMode: MediaPlayerChannel.PlayMode = MediaPlayerChannel.PlayMode.paused;
     private repeadMode: MediaPlayerChannel.RepeadMode = MediaPlayerChannel.RepeadMode.off;
     private isShuffel: boolean = false;
@@ -166,15 +161,15 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 {
                     const intValue = parseInt(value);
                     const topicIndex = intValue >> 8;
-                    const index = intValue & 0xff;
+                    const index = (intValue & 0xff) - 1;
                     switch (topicIndex) {
                         case Topics.TOP_MEDIA_PLAYER_PLAYLIST:
-                            console.log(topicIndex, " index: ", index);
+                            this.emit("playlist", index);
                             if (this.isAutoConfirm)
                                 this.setPlaylistIndex(index);
                             break;
                         case Topics.TOP_MEDIA_PLAYER_AUDIO_INPUT:
-                            console.log(topicIndex, " index: ", index);
+                            this.emit("input", index);
                             if (this.isAutoConfirm)
                                 this.setInputIndex(index);
                             break;
@@ -261,7 +256,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 case PairingIds.AL_INFO_PLAYLIST:
                     {
                         const intValue = parseInt(value);
-                        this.emit("playlist", intValue)
+                        this.emit("playlist", intValue);
                         if (this.isAutoConfirm)
                             this.setPlaylistIndex(intValue);
                         break;
@@ -269,7 +264,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 case PairingIds.AL_INFO_AUDIO_INPUT:
                     {
                         const intValue = parseInt(value);
-                        this.emit("input", intValue)
+                        this.emit("input", intValue);
                         if (this.isAutoConfirm)
                             this.setInputIndex(parseInt(value));
                         break;
@@ -362,7 +357,8 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_PLAYLIST, playlists);
     }
 
-    async setPlaylistIndex(value: number): Promise<void> {
+    async setPlaylistIndex(value?: number): Promise<void> {
+        value = (undefined === value) ? 0 : value + 1;
         return this.setDatapoint(PairingIds.AL_INFO_PLAYLIST, value.toString());
     }
 
@@ -371,7 +367,8 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_AUDIO_INPUT, inputs);
     }
 
-    async setInputIndex(value: number): Promise<void> {
+    async setInputIndex(value?: number): Promise<void> {
+        value = (undefined === value) ? 0 : value + 1;
         return this.setDatapoint(PairingIds.AL_INFO_AUDIO_INPUT, value.toString());
     }
 }
