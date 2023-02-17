@@ -3,8 +3,15 @@ import { ApiVirtualChannel } from "../api/apiVirtualChannel";
 import { Channel } from '../channel';
 
 export class EnergyBatteryV2Channel extends Channel {
+    protected _supportsSoc: boolean = false;
+
     constructor(channel: ApiVirtualChannel){
         super(channel);
+        this._supportsSoc = channel.outputPairingToPosition.has(PairingIds.AL_SOC);
+    }
+
+    get supportsSoc() {
+        return this._supportsSoc;
     }
     
     public setDatapoint(id: PairingIds, value: string): Promise<void> {
@@ -24,7 +31,10 @@ export class EnergyBatteryV2Channel extends Channel {
      * @param value {String} unit % (DPT_SCALING)
      */
     public setSoc(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_SOC, value);
+        if (this._supportsSoc) {
+            return this.setDatapoint(PairingIds.AL_SOC, value);
+        }
+        return Promise.resolve();
     }
     
     /**

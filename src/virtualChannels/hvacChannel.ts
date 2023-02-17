@@ -15,10 +15,18 @@ interface ChannelEvents {
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class HVACChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    protected _supportsCurrentPower: boolean = false;
+    protected _supportsEnergyTotal: boolean = false;
+    protected _supportsEnergyToday: boolean = false;
+
     constructor(channel: ApiVirtualChannel){
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("sceneTriggered", this.sceneTriggered.bind(this));
+
+        this._supportsCurrentPower = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED);
+        this._supportsEnergyTotal = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED);
+        this._supportsEnergyToday = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY);
     }
 
      /**
@@ -40,8 +48,23 @@ export class HVACChannel extends Mixin(Channel, (EventEmitter as { new(): Channe
         }
     }
 
+    get supportsCurrentPower() {
+        return this._supportsCurrentPower;
+    }
+
+    get supportsEnergyTotal() {
+        return this._supportsEnergyTotal;
+    }
+
+    get supportsEnergyToday() {
+        return this._supportsEnergyToday;
+    }
+
     public setDatapoint(id: PairingIds, value: string): Promise<void> {
-        return super.setDatapoint(id, value);
+        if (this.channel.outputPairingToPosition.has(id)) {
+            return super.setDatapoint(id, value);
+        }
+        return Promise.resolve();
     }
 
     setOn(isOn: boolean) {
@@ -54,21 +77,30 @@ export class HVACChannel extends Mixin(Channel, (EventEmitter as { new(): Channe
      * @param value {String} unit W (DPT_VALUE_POWER)
      */
     public setCurrentPowerConsumed(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED, value);
+        if (this._supportsCurrentPower) {
+            return this.setDatapoint(PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED, value);
+        }
+        return Promise.resolve();
     }
     
     /**
      * @param value {String} unit Wh (DPT_ACTIVE_ENERGY)
      */
     public setImportedEnergyToday(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY, value);
+        if (this._supportsEnergyToday) {
+            return this.setDatapoint(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY, value);
+        }
+        return Promise.resolve();
     }
     
     /**
     * @param value {String} unit kWh (DPT_ACTIVE_ENERGY_KWH)
     */
     public setTotalEnergyImported(value: string): Promise<void> {
-        return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED, value);
+        if (this._supportsEnergyTotal) {
+            return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED, value);
+        }
+        return Promise.resolve();
     }
 
     protected sceneTriggered(scene: Datapoint[]): void {
