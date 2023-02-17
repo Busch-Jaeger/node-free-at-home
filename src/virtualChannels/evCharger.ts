@@ -153,7 +153,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
         } else {
             value &= ~mask
         }
-        return value;
+        return value >>> 0;
     }
     
     /**
