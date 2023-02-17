@@ -74,31 +74,31 @@ export class HVACChannel extends Mixin(Channel, (EventEmitter as { new(): Channe
     /**
      * Current power consumed. Although the value is signed, a one way meter does not measure injected power
      * and this value is always >= 0
-     * @param value {String} unit W (DPT_VALUE_POWER)
+     * @param value {number} unit W (DPT_VALUE_POWER)
      */
-    public setCurrentPowerConsumed(value: string): Promise<void> {
+    public setCurrentPowerConsumed(value: number): Promise<void> {
         if (this._supportsCurrentPower) {
-            return this.setDatapoint(PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED, value);
+            return this.setDatapoint(PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED, value.toString(10));
         }
         return Promise.resolve();
     }
     
     /**
-     * @param value {String} unit Wh (DPT_ACTIVE_ENERGY)
+     * @param value {number} unit Wh (DPT_ACTIVE_ENERGY)
      */
-    public setImportedEnergyToday(value: string): Promise<void> {
+    public setImportedEnergyToday(value: number): Promise<void> {
         if (this._supportsEnergyToday) {
-            return this.setDatapoint(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY, value);
+            return this.setDatapoint(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY, value.toString(10));
         }
         return Promise.resolve();
     }
     
     /**
-    * @param value {String} unit kWh (DPT_ACTIVE_ENERGY_KWH)
+    * @param value {number} unit kWh (DPT_ACTIVE_ENERGY_KWH)
     */
-    public setTotalEnergyImported(value: string): Promise<void> {
+    public setTotalEnergyImported(value: number): Promise<void> {
         if (this._supportsEnergyTotal) {
-            return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED, value);
+            return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED, value.toString(10));
         }
         return Promise.resolve();
     }
