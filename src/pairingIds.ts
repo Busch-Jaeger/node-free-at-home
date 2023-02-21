@@ -60,6 +60,7 @@ export enum PairingIds {
     AL_SYSAP_INFO_HSV = 0x011C, // Hue (2 Byte) Saturation (1 Byte); Value (1 Byte - brightness)
     AL_INFO_COLOR_MODE = 0x011D, // hsv or ct
     AL_SYSAP_INFO_COLOR_MODE = 0x011E, // hsv or ct
+    AL_COLOR_MODE = 0x011F, // hsv or ct
     AL_INFO_MOVE_UP_DOWN = 0x0120, // Indicates last moving direction and whether moving  currently or not
     AL_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE = 0x0121, // Indicate the current position of the sunblinds in percentage
     AL_CURRENT_ABSOLUTE_POSITION_SLATS_PERCENTAGE = 0x0122, // Indicate the current position of the slats in percentage
@@ -205,10 +206,10 @@ export enum PairingIds {
     AL_INFO_TOTAL_ENERGY_FROM_GRID = 0x04C3, // Total energy from grid
     AL_INFO_TOTAL_ENERGY_TO_GRID = 0x04C4, // Total energy to grid
     AL_MEASURED_CURRENT_POWER_CONSUMED = 0x04C5, // Current power consumed
-    AL_MEASURED_IMPORTED_ENERGY_TODAY = 0x04C6, // 
-    AL_MEASURED_EXPORTED_ENERGY_TODAY = 0x04C7, // 
-    AL_MEASURED_TOTAL_ENERGY_IMPORTED = 0x04C8, // 
-    AL_MEASURED_TOTAL_ENERGY_EXPORTED = 0x04C9, // 
+    AL_MEASURED_IMPORTED_ENERGY_TODAY = 0x04C6, // Production and import of energy for today (grid purchase, battery discharge, PV production)
+    AL_MEASURED_EXPORTED_ENERGY_TODAY = 0x04C7, // Consumption and export of energy for today (grid feed-in, battery charging, consumer consumption)
+    AL_MEASURED_TOTAL_ENERGY_IMPORTED = 0x04C8, // Total production and import of energy (grid purchase, battery discharge, PV production)
+    AL_MEASURED_TOTAL_ENERGY_EXPORTED = 0x04C9, // Total consumption and export of energy (grid feed-in, battery charging, consumer consumption)
     AL_SWITCH_ECO_CHARGING_ON_OFF = 0x04CA, // 
     AL_INFO_ECO_CHARGING_ON_OFF = 0x04CB, // 
     AL_LIMIT_FOR_CHARGER = 0x04CC, // Limit for charger (in kW)
