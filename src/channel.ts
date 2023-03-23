@@ -44,8 +44,11 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         this.isAutoConfirm = value;
     }
 
-    protected async setDatapoint(id: PairingIds, value: string): Promise<void> {
-        return this.channel.setOutputDatapoint(id, value);
+    public async setDatapoint(id: PairingIds, value: string): Promise<void> {
+        if (this.channel.outputPairingToPosition.has(id)) {
+            return this.channel.setOutputDatapoint(id, value);
+        }
+        return Promise.resolve();
     }
 
     public async setAuxiliaryData(index: number, auxiliaryData: string[]): Promise<void> {
