@@ -5,11 +5,7 @@ import { Channel } from '../channel';
 export class EnergyInverterV2Channel extends Channel {
     constructor(channel: ApiVirtualChannel){
         super(channel);
-    }
-    
-    public setDatapoint(id: PairingIds, value: string): Promise<void> {
-        return super.setDatapoint(id, value);
-    }
+    }    
 
     /**
      * production PV / Total consumption
