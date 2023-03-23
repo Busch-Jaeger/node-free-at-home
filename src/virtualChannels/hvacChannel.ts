@@ -25,8 +25,8 @@ export class HVACChannel extends Mixin(Channel, (EventEmitter as { new(): Channe
         channel.on("sceneTriggered", this.sceneTriggered.bind(this));
 
         this._supportsCurrentPower = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED);
-        this._supportsEnergyTotal = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED);
-        this._supportsEnergyToday = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY);
+        this._supportsEnergyTotal = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_TOTAL_ENERGY_EXPORTED);
+        this._supportsEnergyToday = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_EXPORTED_ENERGY_TODAY);
     }
 
      /**
@@ -88,7 +88,7 @@ export class HVACChannel extends Mixin(Channel, (EventEmitter as { new(): Channe
      */
     public setImportedEnergyToday(value: number): Promise<void> {
         if (this._supportsEnergyToday) {
-            return this.setDatapoint(PairingIds.AL_MEASURED_IMPORTED_ENERGY_TODAY, value.toString(10));
+            return this.setDatapoint(PairingIds.AL_MEASURED_EXPORTED_ENERGY_TODAY, value.toString(10));
         }
         return Promise.resolve();
     }
@@ -98,7 +98,7 @@ export class HVACChannel extends Mixin(Channel, (EventEmitter as { new(): Channe
     */
     public setTotalEnergyImported(value: number): Promise<void> {
         if (this._supportsEnergyTotal) {
-            return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_IMPORTED, value.toString(10));
+            return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_EXPORTED, value.toString(10));
         }
         return Promise.resolve();
     }
