@@ -12,11 +12,7 @@ export class EnergyBatteryV2Channel extends Channel {
 
     get supportsSoc() {
         return this._supportsSoc;
-    }
-    
-    public setDatapoint(id: PairingIds, value: string): Promise<void> {
-        return super.setDatapoint(id, value);
-    }
+    }    
 
     /**
     * Battery power: Discharge (less then 0), Charge (more then 0)

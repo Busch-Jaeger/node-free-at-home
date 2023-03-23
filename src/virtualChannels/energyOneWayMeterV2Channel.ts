@@ -7,10 +7,6 @@ export class EnergyOneWayMeterV2Channel extends Channel {
         super(channel);
     }
 
-    public setDatapoint(id: PairingIds, value: string): Promise<void> {
-        return super.setDatapoint(id, value);
-    }
-
     /**
      * Current power consumed. Although the value is signed, a one way meter does not measure injected power
      * and this value is always >= 0
