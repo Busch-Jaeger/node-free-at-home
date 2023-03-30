@@ -255,7 +255,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     break;
                 case PairingIds.AL_INFO_PLAYLIST:
                     {
-                        const intValue = parseInt(value);
+                        const intValue = parseInt(value) - 1;
                         this.emit("playlist", intValue);
                         if (this.isAutoConfirm)
                             this.setPlaylistIndex(intValue);
@@ -263,7 +263,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     }
                 case PairingIds.AL_INFO_AUDIO_INPUT:
                     {
-                        const intValue = parseInt(value);
+                        const intValue = parseInt(value) - 1;
                         this.emit("input", intValue);
                         if (this.isAutoConfirm)
                             this.setInputIndex(parseInt(value));

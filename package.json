@@ -1,6 +1,6 @@
 {
   "name": "@busch-jaeger/free-at-home",
-  "version": "0.26.6-5",
+  "version": "0.26.7-0",
   "description": "Library for free@home local device api",
   "repository": {
     "type": "git",
