@@ -48,6 +48,7 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         if (this.channel.outputPairingToPosition.has(id)) {
             return this.channel.setOutputDatapoint(id, value);
         }
+        console.error(this.channel.serialNumber, 'output datapoint', id, 'does not exist');
         return Promise.resolve();
     }
 

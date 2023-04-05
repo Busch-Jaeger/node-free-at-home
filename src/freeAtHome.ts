@@ -297,10 +297,9 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     async createEnergyInverterBatteryV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyV2Channels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "0C", capabilities);
         const channelIterator = device.getChannels();
-        const Iterator = channelIterator.next().value;
         const channels = {
-            battery: new EnergyBatteryV2Channel(Iterator),
-            inverter: new EnergyInverterV2Channel(Iterator)
+            battery: new EnergyBatteryV2Channel(channelIterator.next().value),
+            inverter: new EnergyInverterV2Channel(channelIterator.next().value)
         }
         return channels;
     }
