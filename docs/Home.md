@@ -19,6 +19,6 @@ No detailed knowledge of the free@home system is required, other than being able
 
 ### Overview
 
-To get started immediately, please refer to the [walkthrough](https://github.com/Busch-Jaeger/free-at-home-addon-development-kit-documentation-preview/wiki/Getting-started).
+To get started immediately, please refer to the [walkthrough](https://github.com/Busch-Jaeger/free-at-home-addon-development-kit-documentation-preview/wiki/Getting-started) [walkthrough](Getting-started) [[walkthrough|Getting started]].
 
 The remainder of this documentation gives further details on ABB free@home Addons.
