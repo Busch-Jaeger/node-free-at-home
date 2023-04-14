@@ -13,7 +13,7 @@ npm install @busch-jaeger/free-at-home
 
 # Documentation
 
-The Documentation of this project is available [here](https://busch-jaeger.github.io/free-at-home-addon-development-kit-documentation-preview).
+The Documentation of this project is available [here](https://github.com/Busch-Jaeger/node-free-at-home/wiki).
 
 # Example
 
