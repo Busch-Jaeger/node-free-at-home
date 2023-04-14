@@ -50,16 +50,16 @@ In this walkthrough we use the node-free∆home-example example addon. This exam
 
 - The js source code for the actual addon.
 
-First download the example from [here](https://developer.eu.mybuildings.abb.com) and extract the file on your development machine.
+Use the template example from [here](https://github.com/Busch-Jaeger/node-free-at-home-example) and clone the repository to your development machine.
 
-Next, open the extracted folder in a command line and type
+Next, open the folder in a command line and type
 
 ```shell
 npm install
 ```
 
 This will download (if needed) any dependencies and install the required packages, most notably the
-`free-at-home` package, into this example directory.
+`@busch-jaeger/free-at-home` package, into this example directory.
 
 ### Import the example to your IDE
 
@@ -96,7 +96,7 @@ there.
 Next, take a look at the `main.js` file in the `src` directory of the example. This is the full
 addon code:
 
-- Notice that this example uses the `free-at-home` library. This library is provided for addons and
+- Notice that this example uses the `@busch-jaeger/free-at-home` library. This library is provided for addons and
   does the heavy lifting of communicating with the System Access Point and provides a convenient TypeScript API
   for this.
 
