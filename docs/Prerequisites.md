@@ -28,7 +28,7 @@ control and extend the functionality of the System Access Point.
 
 In the free@home next App
 ([App Store](https://apps.apple.com/de/app/busch-free-home-next/id1501808668),
-[Play Store](https://apps.apple.com/de/app/busch-free-home-next/id1501808668)), the user must
+[Play Store](https://play.google.com/store/apps/details?id=de.buschjaeger.freeathomeflex)), the user must
 enable the `Activate Local API` setting in the System Access Point settings,
 found under `More -> Installation Settings -> Local API`.
 
