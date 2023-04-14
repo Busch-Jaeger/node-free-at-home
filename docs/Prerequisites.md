@@ -32,10 +32,10 @@ In the free@home next App
 enable the `Activate Local API` setting in the System Access Point settings,
 found under `More -> Installation Settings -> Local API`.
 
-![Screenshot of the More option in the app](img/enable_local_api_1.jpg)
-![Screenshot of the Installation Settings option in the app](img/enable_local_api_2.jpg)
-![Screenshot of the Local API option in the app](img/enable_local_api_3.jpg)
-![Screenshot of the Enable Local API Setting in the app](img/enable_local_api_4.jpg)
+![Screenshot of the More option in the app](img/prerequisites/enable_local_api_1.jpg)
+![Screenshot of the Installation Settings option in the app](img/prerequisites/enable_local_api_2.jpg)
+![Screenshot of the Local API option in the app](img/prerequisites/enable_local_api_3.jpg)
+![Screenshot of the Enable Local API Setting in the app](img/prerequisites/enable_local_api_4.jpg)
 
 ### Developer (addon development)
 

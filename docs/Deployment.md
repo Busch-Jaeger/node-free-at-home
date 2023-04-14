@@ -77,9 +77,9 @@ To do this, locate the `.tar` archive that was created by the
 When using the app: Transfer this file to your device, open the free@home next app and select
 `Upload` under `More -> Installation Settings -> Addons`.
 
-![Screenshot of the More option in the app](addon_upload_1.jpg "App Addon Upload step 1: Open More page")
-![Screenshot of the Installation Settings option in the app](addon_upload_2.jpg "App Addon Upload step 2: Open Installation Settings")
-![Screenshot of the Addons option in the app](addon_upload_3.jpg "App Addon Upload step 3: Open Addons")
-![Screenshot of the addon upload in the app](addon_upload_4.jpg "App Addons Upload step 4: Upload")
+![Screenshot of the More option in the app](img/deployment/addon_upload_1.jpg "App Addon Upload step 1: Open More page")
+![Screenshot of the Installation Settings option in the app](img/deployment/addon_upload_2.jpg "App Addon Upload step 2: Open Installation Settings")
+![Screenshot of the Addons option in the app](img/deployment/addon_upload_3.jpg "App Addon Upload step 3: Open Addons")
+![Screenshot of the addon upload in the app](img/deployment/addon_upload_4.jpg "App Addons Upload step 4: Upload")
 
 When using a web browser, open the System Access Point in the browser and navigate to the corresponding page.

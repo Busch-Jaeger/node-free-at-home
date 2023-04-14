@@ -13,7 +13,7 @@ This section is meant to get you started quickly with ABB free@home Addon develo
   beyond the scope of this document)
 
 - Activate the `Local API` in your System Access Point settings, see the
-  [prerequisites](https://github.com/Busch-Jaeger/free-at-home-addon-development-kit-documentation-preview/wiki/Prerequisites) for details
+  [prerequisites](Prerequisites) for details
 
 - Basic knowledge of javascript / typescript is required
 
@@ -22,7 +22,7 @@ This section is meant to get you started quickly with ABB free@home Addon develo
 - An IDE with typescript support is recommended, this walkthrough uses and recommends
   [Visual Studio Code](https://code.visualstudio.com/download)
 
-Please refer to [prerequisites](https://github.com/Busch-Jaeger/free-at-home-addon-development-kit-documentation-preview/wiki/Prerequisites) for details.
+Please refer to [prerequisites](Prerequisites) for details.
 
 ### Overview
 
@@ -109,7 +109,7 @@ addon code:
 
 Finally, run the example in vscode (`Run -> Start Debugging`). Keep in mind that the `Local API`
 must have been activated on the System Access Point for this step, see the
-[prerequisites]({{<relref prerequisites>}}) for details. If successful, your System Access Point should now
+[prerequisites](prerequisites) for details. If successful, your System Access Point should now
 provide the new devices.
 
 ![Screenshot of the App showing two virtual devices added by the Addon](https://user-images.githubusercontent.com/5108878/224991173-f80bfd03-99ce-4f86-8d3a-64d32c583726.png)
@@ -131,7 +131,7 @@ it to the System Access Point. Then the addon will directly run on the System Ac
 machine. The REST interface to the System Access Point that is used by the addon remains the same, so no
 additional changes are required.
 
-Refer to [deployment]({{<relref deployment>}}) for a more detailed deployment documentation. Steps
+Refer to [deployment](deployment) for a more detailed deployment documentation. Steps
 for this example:
 
 0. Make sure to stop the addon in your IDE first.
@@ -178,7 +178,7 @@ for this example:
 If successful, the `Addons` section in the free@home settings should now display your addon.
 Make sure it is displayed as `Active`, otherwise it must be manually started.
 
-![Screenshot of the More option in the app](https://user-images.githubusercontent.com/5108878/224991296-f722cc2e-92c1-4b87-80b5-4a0312b81b4c.png)
-![Screenshot of the Installation Settings option in the app](https://user-images.githubusercontent.com/5108878/224991310-cbb52ae4-adfb-451b-af12-99aef8c1c145.png)
-![Screenshot of the Addons option in the app](https://user-images.githubusercontent.com/5108878/224991333-b8129315-9def-4b33-84d1-fbffb4497c7f.png)
-![Screenshot of the Addons list in the app](https://user-images.githubusercontent.com/5108878/224991343-9f828695-b9d2-4081-8be5-51d71fa828ad.png)
+![Screenshot of the More option in the app](img/getting-started/addon_active_1.jpg)
+![Screenshot of the Installation Settings option in the app](img/getting-started/addon_active_2.jpg)
+![Screenshot of the Addons option in the app](img/getting-started/addon_active_3.jpg)
+![Screenshot of the Addons list in the app](img/getting-started/addon_active_4.jpg)

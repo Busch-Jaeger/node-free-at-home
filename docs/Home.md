@@ -15,10 +15,10 @@ REST API provided by that device) and so on.
 ### Target audience
 
 This documentation describes how to develop new addons for the free@home system. As such, this documentation is aimed primarily at developers - device vendors or simply enthusiasts with basic development experience.
-No detailed knowledge of the free@home system is required, other than being able to use it. Some basic knowledge of TypeScript and Node.js are expected though, see the [prerequisites](https://github.com/Busch-Jaeger/free-at-home-addon-development-kit-documentation-preview/wiki/Prerequisites) for details.
+No detailed knowledge of the free@home system is required, other than being able to use it. Some basic knowledge of TypeScript and Node.js are expected though, see the [prerequisites](Prerequisites) for details.
 
 ### Overview
 
-To get started immediately, please refer to the [walkthrough](https://github.com/Busch-Jaeger/free-at-home-addon-development-kit-documentation-preview/wiki/Getting-started) [walkthrough](Getting-started) [[walkthrough|Getting started]].
+To get started immediately, please refer to the [walkthrough](Getting-started).
 
 The remainder of this documentation gives further details on ABB free@home Addons.
