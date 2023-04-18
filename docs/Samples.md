@@ -16,7 +16,6 @@ etc.) to the local system, the Addon will then send them to that System Access P
 Windows
 ```shell
 $env:FREEATHOME_BASE_URL = 'http://[IP of System Access Point]'
-$env:FREEATHOME_API_BASE_URL = 'http://[IP of System Access Point]/fhapi/v1'
 $env:FREEATHOME_API_USERNAME = '[Username shown for local API in the free@home NEXT app]'
 $env:FREEATHOME_API_PASSWORD = '[Password shown for local API in the free@home NEXT app]'
 ```
@@ -24,7 +23,6 @@ $env:FREEATHOME_API_PASSWORD = '[Password shown for local API in the free@home N
 Linux / Unix
 ```bash
 export FREEATHOME_BASE_URL=http://[IP of System Access Point]
-export FREEATHOME_API_BASE_URL=http://[IP of System Access Point]/fhapi/v1
 export FREEATHOME_API_USERNAME=[Username shown for local API in the free@home NEXT app]
 export FREEATHOME_API_PASSWORD=[Password shown for local API in the free@home NEXT app]
 ```
@@ -33,7 +31,7 @@ export FREEATHOME_API_PASSWORD=[Password shown for local API in the free@home NE
 
 The following Visual Studio Code configuration file (`.vscode/launch.json`) can be used to allow debugging
 of a ABB free@home Addon that runs on a local development system. Replace the values for
-`FREEATHOME_API_BASE_URL`, `FREEATHOME_BASE_URL`, `FREEATHOME_API_USERNAME` and
+`FREEATHOME_BASE_URL`, `FREEATHOME_API_USERNAME` and
 `FREEATHOME_API_PASSWORD` to match your setup:
 
 ```json

@@ -80,7 +80,7 @@ there.
    2. Open the file `launch.json` in the subfolder `.vscode`. This configuration will be used by
       Visual Studio Code when starting the addon.
 
-   3. Find and edit the settings `FREEATHOME_API_BASE_URL`, `FREEATHOME_API_USERNAME` and
+   3. Find and edit the settings `FREEATHOME_API_USERNAME` and
       `FREEATHOME_API_PASSWORD`. These must be set to the address of the local API on your System Access Point,
       the username on that System Access Point that provides the local API, and the password of that user.
       ```
