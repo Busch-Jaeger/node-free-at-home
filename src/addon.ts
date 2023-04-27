@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 
 import fetch from 'cross-fetch';
 
-export {Configuration} from './scriptingApi';
+export {Configuration, ApplicationState} from './scriptingApi';
 
 export function readMetaData() {
     const data = fs.readFileSync('free-at-home-metadata.json', 'utf8');
