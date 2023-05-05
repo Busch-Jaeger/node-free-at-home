@@ -192,6 +192,40 @@ export type VirtualDevicesSuccess = {
         };
     };
 };
+export type NotificationContentEntry = {
+    title?: string;
+    body?: string;
+};
+export type Notification = {
+    formatVersion: number;
+    topicId: string;
+    timeoutMinutes: number;
+    displayHints?: ("styleInfo" | "styleWarn" | "styleAlert" | "modal" | "fixed" | "hideIfAnswered")[];
+    retention: number;
+    terminals: ("ui" | "panel" | "push-notification")[];
+    acknowledge?: number;
+    content: {
+        utf8?: {
+            en?: NotificationContentEntry;
+            es?: NotificationContentEntry;
+            fr?: NotificationContentEntry;
+            it?: NotificationContentEntry;
+            nl?: NotificationContentEntry;
+            de?: NotificationContentEntry;
+            zh?: NotificationContentEntry;
+            da?: NotificationContentEntry;
+            fi?: NotificationContentEntry;
+            nb?: NotificationContentEntry;
+            pl?: NotificationContentEntry;
+            pt?: NotificationContentEntry;
+            ru?: NotificationContentEntry;
+            sv?: NotificationContentEntry;
+            el?: NotificationContentEntry;
+            cs?: NotificationContentEntry;
+            tr?: NotificationContentEntry;
+        };
+    };
+};
 export type DeviceClass = "doorring" | "pushbutton" | "smokedetector" | "temperaturesensor";
 /**
  * Get configuration
@@ -326,6 +360,25 @@ export function putApiRestVirtualdeviceBySysapAndSerial(sysap: SysapUuid, serial
         ...opts,
         method: "PUT",
         body: virtualDevice
+    }));
+}
+/**
+ * Post a notification
+ */
+export function postnotification(notification: Notification, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: object;
+    } | {
+        status: 401;
+        data: string;
+    } | {
+        status: 502;
+        data: string;
+    }>("/api/rest/notification", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: notification
     }));
 }
 /**

@@ -46,7 +46,7 @@ import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
 import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
-import { Device } from './api';
+import { Device, Notification } from './api';
 import { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
 import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { BinarySensorChannel } from './virtualChannels/binarySensorChannel';
@@ -497,6 +497,10 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
 
     public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {
         return this.freeAtHomeApi.getAllChannels();
+    }
+
+    public async postNotification(notification: Notification) {
+        return this.freeAtHomeApi.postNotification(notification);
     }
 
     public activateSignalHandling() {

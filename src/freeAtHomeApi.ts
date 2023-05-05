@@ -426,6 +426,10 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         const devicesIterator = await this.getAllDevices();
         return new ApiChannelIterator(devicesIterator);
     }
+
+    public async postNotification(notification: api.Notification) {
+        return api.postnotification(notification, this.connectionOptions);
+    }
 }
 
 
