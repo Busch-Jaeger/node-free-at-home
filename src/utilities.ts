@@ -3,15 +3,7 @@
 // based on source: https://github.com/Olical/binary-search
 // License: UNLICENSE https://unlicense.org/
 
-
-
-
-interface Array<T> {
-	binaryIndexOf(item: number): number;
-}
-
-Array.prototype.binaryIndexOf = function binarySearch(item: number): number {
-	const list = this;
+export function binaryIndexOf(list: Array<number>, item: number): number {
 	let min = 0;
 	let max = list.length - 1;
 	let guess: number;
