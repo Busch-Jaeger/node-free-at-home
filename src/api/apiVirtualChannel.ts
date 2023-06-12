@@ -27,11 +27,14 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
     outputPairingToPosition: Map<PairingIds, number> = new Map();
     outputPositionToPairing: Map<number, PairingIds> = new Map();
 
+    parameters: Map<ParameterIds, string>;
+
     constructor(device: ApiVirtualDevice, apiChannel: api.Channel, channelNumber: number) {
         super();
         this.device = device;
         this.channelNumber = channelNumber;
         this.serialNumber = `${device.serialNumber}/ch${channelNumber.toString().padStart(4, '0')}`;
+        this.parameters = new Map();
 
         {
             const inputs = apiChannel?.inputs;
@@ -56,6 +59,16 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
                 this.outputPositionToPairing.set(i, pairingId as PairingIds);
             }
         }
+        if(apiChannel.parameters !== undefined) {
+            for (const entry in apiChannel.parameters) {
+                const parameterId = parseInt(entry.substring(3), 16) as ParameterIds;
+                this.parameters.set(parameterId, apiChannel.parameters[entry]);
+            }
+        }
+        setImmediate(() => {
+            for(const [key, value] of this.parameters)
+                this.emit("parameterChanged", key, value);
+        });
     }
 
     onInputDatapointChange(data: IndexedDatapoint) {
@@ -63,6 +76,11 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
         if (undefined === pairingId)
             return;
         this.emit("inputDatapointChanged", pairingId, data.value);
+    }
+
+    onParameterChanged( parameterId: ParameterIds, value: string) {
+        this.parameters.set(parameterId, value);
+        this.emit("parameterChanged", parameterId, value);
     }
 
     onSceneTriggered(data: Datapoint[]) {
