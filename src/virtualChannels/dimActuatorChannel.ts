@@ -232,31 +232,31 @@ export class DimActuatorChannel extends Mixin(Channel, (EventEmitter as { new():
     protected parameterChanged(id: ParameterIds, value: string): void {
         // throw new Error("Method not implemented.");
         switch (id) {
-            case ParameterIds.dimmingActuatorMinBrightness: {
+            case ParameterIds.PID_DIMMING_ACTUATOR_MIN_BRIGHTNESS: {
                 const parsedValue = parseInt(value);
                 if (parsedValue !== undefined)
                     this.minBrightness = parsedValue;
                 break;
             }
-            case ParameterIds.dimmingActuatorMaxBrightnessDay: {
+            case ParameterIds.PID_DIMMING_ACTUATOR_MAX_BRIGHTNESS_DAY: {
                 const parsedValue = parseInt(value);
                 if (parsedValue !== undefined)
                     this.maxBrightnessDay = parsedValue;
                 break;
             }
-            case ParameterIds.dimmingActuatorMaxBrightnessNight: {
+            case ParameterIds.PID_DIMMING_ACTUATOR_MAX_BRIGHTNESS_NIGHT: {
                 const parsedValue = parseInt(value);
                 if (parsedValue !== undefined)
                     this.maxBrightnessNight = parsedValue;
                 break;
             }
-            case ParameterIds.autonomousSwitchOffTimeDuration: {
+            case ParameterIds.PID_AUTONOMOUS_SWITCH_OFF_TIME_DURATION: {
                 const parsedValue = parseInt(value);
                 if (parsedValue !== undefined)
                     this.autonomousSwitchOffTimeDuration = parsedValue * 1000;
                 break;
             }
-            case ParameterIds.dimmerSwitchOnMode:
+            case ParameterIds.PID_DIMMER_SWITCH_ON_MODE:
                 this.dimmerSwitchOnMode = <DimmerSwitchOnMode>value;
                 break;
 

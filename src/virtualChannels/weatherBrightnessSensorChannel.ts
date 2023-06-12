@@ -38,16 +38,16 @@ export class WeatherBrightnessSensorChannel extends Mixin(Channel, (EventEmitter
     protected parameterChanged(id: ParameterIds, value: string): void {
 
         switch (id) {
-            case ParameterIds.brightnessAlertActivationLevel:
+            case ParameterIds.PID_BRIGHTNESS_ALERT_ACTIVATION_LEVEL:
                 this.alertActivationLevel = <number>parseInt(value);
                 console.log("Parameter brightness changed %s", this.alertActivationLevel);
                 break;
-            case ParameterIds.hysteresis:
+            case ParameterIds.PID_HYSTERESIS:
                 break;
-            case ParameterIds.alertActivationDelay:
+            case ParameterIds.PID_ALERT_ACTIVATION_DELAY:
 
                 break;
-            case ParameterIds.dealertActivationDelay:
+            case ParameterIds.PID_DEALERT_ACTIVATION_DELAY:
 
                 break;
             default:

@@ -39,16 +39,16 @@ export class WeatherTemperatureSensorChannel extends Mixin(Channel, (EventEmitte
     protected parameterChanged(id: ParameterIds, value: string): void {
 
         switch (id) {
-            case ParameterIds.frostAlarmActivationLevel:
+            case ParameterIds.PID_FROST_ALARM_ACTIVATION_LEVEL:
                 this.alertActivationLevel = <number>parseInt(value);
                 console.log("Parameter temperature alertActivationLevel changed %s", this.alertActivationLevel);
                 break;
-            case ParameterIds.hysteresis:
+            case ParameterIds.PID_HYSTERESIS:
                 break;
-            case ParameterIds.alertActivationDelay:
+            case ParameterIds.PID_ALERT_ACTIVATION_DELAY:
 
                 break;
-            case ParameterIds.dealertActivationDelay:
+            case ParameterIds.PID_DEALERT_ACTIVATION_DELAY:
 
                 break;
             default:
