@@ -67,6 +67,8 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     private inputs: string[] = [];
     private playlists: string[] = [];
 
+    private parameterMaxVolume: number = 100;
+
     protected dataPointChanged(id: PairingIds, value: string): void {
         switch (id) {
             case PairingIds.AL_MEDIA_PLAY: // play
@@ -98,10 +100,13 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 else if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeInc) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeInc);
                 break;
             case PairingIds.AL_ABSOLUTE_VOLUME_CONTROL:
-                this.emit("playVolumeChanged", parseInt(value));
-                this.emit("volume", parseInt(value));
+                let volume = parseInt(value);
+                if(volume > this.parameterMaxVolume)
+                    volume = this.parameterMaxVolume;
+                this.emit("playVolumeChanged", volume);
+                this.emit("volume", volume);
                 if (this.isAutoConfirm)
-                    this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, value);
+                    this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, volume.toString());
                 break;
             case PairingIds.AL_MEDIA_MUTE:
                 switch (parseInt(value)) {
@@ -202,7 +207,11 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     protected parameterChanged(id: ParameterIds, value: string): void {
-
+        switch(id) {
+            case ParameterIds.PID_SONOS_PLAYER_VOLUME_LIMIT:
+                this.parameterMaxVolume = parseInt(value);
+                break;
+        }
     }
 
     protected sceneTriggered(scene: Datapoint[]): void {
@@ -244,10 +253,14 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                             break;
                     }
                 case PairingIds.AL_INFO_ACTUAL_VOLUME:
-                    this.emit("playVolumeChanged", parseInt(value));
-                    this.emit("volume", parseInt(value));
+                    let volume = parseInt(value);
+                    if(volume > this.parameterMaxVolume)
+                        volume = this.parameterMaxVolume;
+
+                    this.emit("playVolumeChanged", volume);
+                    this.emit("volume", volume);
                     if (this.isAutoConfirm)
-                        this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, value);
+                        this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, volume.toString());
                     break;
                 case PairingIds.AL_INFO_GROUP_MEMBERSHIP:
                     break;
