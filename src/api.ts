@@ -215,7 +215,9 @@ export type Notification = {
     displayHints?: ("styleInfo" | "styleWarn" | "styleAlert" | "modal" | "fixed" | "hideIfAnswered")[];
     retention: number;
     terminals: ("ui" | "panel" | "push-notification")[];
-    acknowledge?: number;
+	subjectResource?: string;
+	senderResource?: string;
+	auxId?: string;
     content: {
         utf8?: {
             en?: NotificationContentEntry;
