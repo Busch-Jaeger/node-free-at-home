@@ -8,6 +8,10 @@ export enum Capabilities {
     CAP_ENERGY_TOTAL = 0x0012, // supports energy measurement and serves total value
     CAP_STATE_OF_CHARGE = 0x0013, // supports state of charge
     CAP_ENERGY_CURRENT_EXCESS_POWER = 0x0014, // supports energy measurement current excess power
+    CAP_ECO_CHARGING = 0x0015, // supports eco charging
+    CAP_PHASES = 0x0016, // supports different numbers of phases
+    CAP_FREE_VENDING = 0x0017, // supports free vending
+    CAP_DISABLE_CHARGING = 0x0018, // supports disable charging    
     CAP_SWITCH_ON_OFF = 0x0020, // supports switching on/off
     CAP_REMOTE_START = 0x0030, // supports remote start
     CAP_SWING_MODES = 0x0040, // supports swing modes

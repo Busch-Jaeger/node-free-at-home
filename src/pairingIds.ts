@@ -220,6 +220,12 @@ export enum PairingIds {
     AL_CONSUMED_GAS_TODAY = 0x04D1, // Consumed gas today
     AL_MEASURED_VOLTAGE = 0x04D2, // Measured voltage
     AL_MEASURED_CURRENT = 0x04D3, // Measured current
+    AL_MIN_CHARGING_CURRENT_ECO = 0x04D4, // Minimum charging current in eco mode
+    AL_INFO_MIN_CHARGING_CURRENT_ECO = 0x04D5, // Minimum charging current in eco mode
+    AL_USED_PHASES = 0x04D6, // Number of phases used for charging
+    AL_INFO_USED_PHASES = 0x04D7, // Number of phases used for charging
+    AL_FREE_VENDING = 0x04D8, // Allow free vending
+    AL_INFO_FREE_VENDING = 0x04D9, // Allow free vending
     AL_DISARM_SYSTEM = 0x0501, // Encrypted control datapoint for domus alarm center
     AL_DISARM_COUNTER = 0x0502, // Info about the next counter to disarm the system
     AL_INFO_INTRUSION_ALARM = 0x0504, // Intrusion Alarm

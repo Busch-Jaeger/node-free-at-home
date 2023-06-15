@@ -451,8 +451,8 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new CeilingFanChannel(channel);
     }
 
-    async createEvCharger(nativeId: string, name: string): Promise<EvChargerChannel> {
-        const device = await this.freeAtHomeApi.createDevice("evcharging", nativeId, name);
+    async createEvCharger(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EvChargerChannel> {
+        const device = await this.freeAtHomeApi.createDevice("evcharging", nativeId, name, "", capabilities);
         const channel = device.getChannels().next().value;
         return new EvChargerChannel(channel);
     }

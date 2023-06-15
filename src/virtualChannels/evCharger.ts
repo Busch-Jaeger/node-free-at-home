@@ -9,12 +9,14 @@ import { StrictEventEmitter } from 'strict-event-emitter-types';
 interface ChannelEvents {
     datapointChanged(id: PairingIds, value: string): void;
     parameterChanged(id: ParameterIds, value: string): void;
-    isBoostChanged(value: boolean): void;
     switchCharging(value: boolean): void;
     ecoCharging(value: boolean): void;
     isChargingEnabledChanged(value: boolean): void;
     currentPowerConsumed(value: number): void;
     chargerLimit(value: number): void;
+    minimumChargerLimit(value: number): void;
+    freeVending(value: boolean): void;
+    usedPhases(value: number): void;
     unlock(): void;
 }
 
@@ -99,11 +101,21 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     protected paused = false
     protected authorizeRemoteTxRequests = false
 
+    // capabilities
+    protected _supportsFreeVending: boolean = false;
+    protected _supportsEco: boolean = false;
+    protected _supportsPhases: boolean = false;
+
 
     constructor(channel: ApiVirtualChannel){
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
+
+        // check supported datapoints
+        this._supportsFreeVending = channel.outputPairingToPosition.has(PairingIds.AL_FREE_VENDING);
+        this._supportsPhases = channel.outputPairingToPosition.has(PairingIds.AL_USED_PHASES);
+        this._supportsEco = channel.outputPairingToPosition.has(PairingIds.AL_SWITCH_ECO_CHARGING_ON_OFF);
     }
 
     /**
@@ -112,11 +124,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
      * @param value 
      */
     protected dataPointChanged(id: PairingIds, value: string): void {
-        switch (<PairingIds>id) {
-            case PairingIds.AL_BOOST_ENABLE_REQUEST:
-                this.emit("isBoostChanged", value === "1")
-                break
-            
+        switch (<PairingIds>id) {           
             case PairingIds.AL_SWITCH_CHARGING:
                 this.emit("switchCharging", value === "1")
                 break
@@ -136,6 +144,18 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
             case PairingIds.AL_LIMIT_FOR_CHARGER:
                 this.emit("chargerLimit", parseFloat(value))
                 break
+
+            case PairingIds.AL_MIN_CHARGING_CURRENT_ECO:
+                this.emit("minimumChargerLimit", parseFloat(value))
+                break     
+            
+            case PairingIds.AL_FREE_VENDING:
+                this.emit("freeVending", value === "1")
+                break          
+            
+            case PairingIds.AL_USED_PHASES:
+                this.emit("usedPhases", parseFloat(value))
+                break               
 
             case PairingIds.AL_UNLOCK:
                 this.emit("unlock")
@@ -187,10 +207,6 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
         return this.setDatapoint(PairingIds.AL_INFO_WALLBOX_STATUS, this.encodeStatus());
     }
 
-    public setBoost(value: boolean): Promise<void>  {
-        return this.setDatapoint(PairingIds.AL_INFO_BOOST, value ? "1" : "0");
-    }
-
     public setCharging(value: boolean): Promise<void>  {
         return this.setDatapoint(PairingIds.AL_INFO_CHARGING, value ? "1" : "0");
     }
@@ -200,7 +216,17 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public setEcoCharging(value: boolean): Promise<void>  {
-        return this.setDatapoint(PairingIds.AL_INFO_ECO_CHARGING_ON_OFF, value ? "1" : "0");
+        if (this._supportsEco) {
+            return this.setDatapoint(PairingIds.AL_INFO_ECO_CHARGING_ON_OFF, value ? "1" : "0");
+        }
+        return Promise.resolve();
+    }
+
+    public setFreeVending(value: boolean): Promise<void> {
+        if (this._supportsFreeVending) {
+            return this.setDatapoint(PairingIds.AL_INFO_FREE_VENDING, value ? "1" : "0");
+        }
+        return Promise.resolve();
     }
 
     public setCarPluggedIn(value: boolean): Promise<void>  {
@@ -267,12 +293,17 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
         return this.setDatapoint(PairingIds.AL_INFO_LIMIT_FOR_CHARGER, value.toString());
     }
 
-    public setLimitForChargergroup(value: number) {
-        return this.setDatapoint(PairingIds.AL_INFO_LIMIT_FOR_CHARGER_GROUP, value.toString());
+    public setMinimumChargerLimit(value: number) {
+        return this.setDatapoint(PairingIds.AL_INFO_MIN_CHARGING_CURRENT_ECO, value.toString());
     }
 
-    public setCarRange(value: number) {
-        return this.setDatapoint(PairingIds.AL_INFO_CAR_RANGE, value.toString());
+    public setUsedPhases(value: number) {
+        if (this._supportsPhases) {
+            if (value >= 0 && value <= 3) {
+                return this.setDatapoint(PairingIds.AL_INFO_USED_PHASES, value.toString());
+            }
+        }
+        return Promise.resolve()
     }
 
     public setEnergyTransmitted(value: number) {
