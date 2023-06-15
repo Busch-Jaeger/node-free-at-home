@@ -54,6 +54,7 @@ interface ConnectionOptions {
 }
 
 const nativeIdRegExp = new RegExp("^[a-zA-Z0-9\-_]{1,64}$");
+const websocketParameterRegExp = new RegExp("([0-9A-Z]{12})\/(?:ch([0-9A-Z]{4})\/)?par([0-9a-zA-Z]{4})");
 
 interface Events {
     open: FreeAtHomeApi,
@@ -180,6 +181,10 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                     this.devicesBySerial.set(deviceId, deviceObject);
                 }
                 this.deviceAddedEmitter.emit(deviceId, device);
+                const virtualDevice = this.virtualDevicesBySerial.get(deviceId);
+                if (undefined !== virtualDevice) {
+                    virtualDevice.onDeviceChanged(device);
+                }
             }
             const scenesTriggered = dataObject[sysApId].scenesTriggered;
             for(const deviceId in scenesTriggered) {
@@ -193,6 +198,16 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                             virtualDevice.onSceneTriggered(channel, Object.values(outputs));
                     }
                 }
+            }
+            const parameters = dataObject[sysApId].parameters ?? {};
+            for (const parameter in parameters) {
+                const result = websocketParameterRegExp.exec(parameter)
+                if (null === result)
+                    break;
+                const virtualDevice = this.virtualDevicesBySerial.get(result[1]);
+                if (undefined === virtualDevice)
+                    break;
+                virtualDevice.onParameterChanged((result[2] !== undefined) ? parseInt(result[2], 16) : undefined, parseInt(result[3], 16) as ParameterIds, parameters[parameter]);
             }
         }
     }
@@ -425,6 +440,10 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {
         const devicesIterator = await this.getAllDevices();
         return new ApiChannelIterator(devicesIterator);
+    }
+
+    public async postNotification(notification: api.Notification) {
+        return api.postnotification(notification, this.connectionOptions);
     }
 }
 

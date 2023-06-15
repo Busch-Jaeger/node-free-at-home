@@ -30,6 +30,9 @@ export type Channel = {
     outputs?: {
         [key: string]: InOutPut;
     };
+    parameters?: {
+        [key: string]: string;
+    };
     "type"?: string;
 };
 export type Device = {
@@ -40,6 +43,9 @@ export type Device = {
     nativeId?: string;
     channels?: {
         [key: string]: Channel;
+    };
+    parameters?: {
+        [key: string]: string;
     };
 };
 export type Devices = {
@@ -94,6 +100,9 @@ export type ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse = {
         devices?: Devices;
     };
 };
+export type ApiRestDeviceSysapSerialPatchRequest = {
+    displayName?: string;
+};
 export type ChannelSerial = string;
 export type DatapointSerial = string;
 export type ApiRestDatapointSysapSerialGet200ApplicationJsonResponse = {
@@ -129,6 +138,9 @@ export type WebsocketMessage = {
         devicesAdded: string[];
         devicesRemoved: string[];
         scenesTriggered: ScenesTriggered;
+        parameters?: {
+            [key: string]: string;
+        };
     };
 };
 export type NativeSerial = string;
@@ -192,6 +204,40 @@ export type VirtualDevicesSuccess = {
         };
     };
 };
+export type NotificationContentEntry = {
+    title?: string;
+    body?: string;
+};
+export type Notification = {
+    formatVersion: number;
+    topicId: string;
+    timeoutMinutes: number;
+    displayHints?: ("styleInfo" | "styleWarn" | "styleAlert" | "modal" | "fixed" | "hideIfAnswered")[];
+    retention: number;
+    terminals: ("ui" | "panel" | "push-notification")[];
+    acknowledge?: number;
+    content: {
+        utf8?: {
+            en?: NotificationContentEntry;
+            es?: NotificationContentEntry;
+            fr?: NotificationContentEntry;
+            it?: NotificationContentEntry;
+            nl?: NotificationContentEntry;
+            de?: NotificationContentEntry;
+            zh?: NotificationContentEntry;
+            da?: NotificationContentEntry;
+            fi?: NotificationContentEntry;
+            nb?: NotificationContentEntry;
+            pl?: NotificationContentEntry;
+            pt?: NotificationContentEntry;
+            ru?: NotificationContentEntry;
+            sv?: NotificationContentEntry;
+            el?: NotificationContentEntry;
+            cs?: NotificationContentEntry;
+            tr?: NotificationContentEntry;
+        };
+    };
+};
 export type DeviceClass = "doorring" | "pushbutton" | "smokedetector" | "temperaturesensor";
 /**
  * Get configuration
@@ -246,6 +292,25 @@ export function getdevice(sysap: SysapUuid, device: DeviceSerial, opts?: Oazapft
     }>(`/api/rest/device/${sysap}/${device}`, {
         ...opts
     });
+}
+/**
+ * Modify device properties
+ */
+export function patchDevice(sysap: SysapUuid, device: DeviceSerial, apiRestDeviceSysapSerialPatchRequest: ApiRestDeviceSysapSerialPatchRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ApiRestDeviceSysapDeviceGet200ApplicationJsonResponse;
+    } | {
+        status: 401;
+        data: string;
+    } | {
+        status: 502;
+        data: string;
+    }>(`/api/rest/device/${sysap}/${device}`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: apiRestDeviceSysapSerialPatchRequest
+    }));
 }
 /**
  * Get datapoint value
@@ -326,6 +391,25 @@ export function putApiRestVirtualdeviceBySysapAndSerial(sysap: SysapUuid, serial
         ...opts,
         method: "PUT",
         body: virtualDevice
+    }));
+}
+/**
+ * Post a notification
+ */
+export function postnotification(notification: Notification, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: object;
+    } | {
+        status: 401;
+        data: string;
+    } | {
+        status: 502;
+        data: string;
+    }>("/api/rest/notification", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: notification
     }));
 }
 /**

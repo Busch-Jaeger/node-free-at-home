@@ -7,5 +7,8 @@ export enum Capabilities {
     CAP_ENERGY_TODAY = 0x0011, // supports energy measurement and serves today value
     CAP_ENERGY_TOTAL = 0x0012, // supports energy measurement and serves total value
     CAP_STATE_OF_CHARGE = 0x0013, // supports state of charge
+    CAP_ENERGY_CURRENT_EXCESS_POWER = 0x0014, // supports energy measurement current excess power
     CAP_SWITCH_ON_OFF = 0x0020, // supports switching on/off
+    CAP_REMOTE_START = 0x0030, // supports remote start
+    CAP_SWING_MODES = 0x0040, // supports swing modes
 }

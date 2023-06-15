@@ -7,6 +7,8 @@ import { Mixin } from 'ts-mixer';
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
 
+import { binaryIndexOf } from '../utilities';
+
 interface ChannelEvents {
 }
 
@@ -42,7 +44,7 @@ export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { 
     setWindSpeed(windSpeed: number): void {
         this.setDatapoint(PairingIds.AL_WIND_SPEED, <string><unknown>windSpeed);
 
-        const alarmLevel = windAlarmLevels.binaryIndexOf(windSpeed);
+        const alarmLevel = binaryIndexOf(windAlarmLevels, windSpeed);
         console.log("wind alarm level: %s", alarmLevel);
         this.setDatapoint(PairingIds.AL_WIND_FORCE, <string><unknown>alarmLevel);
 
@@ -61,7 +63,7 @@ export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { 
     protected parameterChanged(id: ParameterIds, value: string): void {
 
         switch (id) {
-            case ParameterIds.windForce:
+            case ParameterIds.PID_WIND_FORCE:
                 this.windAlarmLevel = <number>parseInt(value);
                 console.log("Parameter temperature alertActivationLevel changed %s", this.windAlarmLevel);
                 break;
