@@ -102,20 +102,54 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     protected authorizeRemoteTxRequests = false
 
     // capabilities
-    protected _supportsFreeVending: boolean = false;
     protected _supportsEco: boolean = false;
     protected _supportsPhases: boolean = false;
-
+    protected _supportsFreeVending: boolean = false;
+    protected _supportsSwitchOff: boolean = false;
+    protected _supportsDisableCharging: boolean = false;
 
     constructor(channel: ApiVirtualChannel){
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
 
-        // check supported datapoints
-        this._supportsFreeVending = channel.outputPairingToPosition.has(PairingIds.AL_FREE_VENDING);
-        this._supportsPhases = channel.outputPairingToPosition.has(PairingIds.AL_USED_PHASES);
-        this._supportsEco = channel.outputPairingToPosition.has(PairingIds.AL_SWITCH_ECO_CHARGING_ON_OFF);
+        // check capabilities
+
+        // CAP_ECO_CHARGING = 0x0015, supports eco charging
+        this._supportsEco = channel.inputPairingToPosition.has(PairingIds.AL_SWITCH_ECO_CHARGING_ON_OFF);        
+
+        // CAP_PHASES = 0x0016, supports different numbers of phases
+        this._supportsPhases = channel.inputPairingToPosition.has(PairingIds.AL_USED_PHASES);
+
+        // CAP_FREE_VENDING = 0x0017, supports free vending
+        this._supportsFreeVending = channel.inputPairingToPosition.has(PairingIds.AL_FREE_VENDING);
+
+        // CAP_DISABLE_CHARGING = 0x0018, supports disable charging
+        this._supportsDisableCharging = channel.inputPairingToPosition.has(PairingIds.AL_STOP_ENABLE_CHARGING_REQUEST);
+
+        // CAP_SWITCH_ON_OFF = 0x0020, supports switching on/off
+        this._supportsSwitchOff = channel.inputPairingToPosition.has(PairingIds.AL_SWITCH_CHARGING);
+    }
+    
+
+    get supportsEco() {
+        return this._supportsEco
+    }
+
+    get supportsPhases() {
+        return this._supportsPhases
+    }
+
+    get supportsFreeVending() {
+        return this._supportsFreeVending
+    }
+
+    get supportsSwitchOnOff() {
+        return this._supportsSwitchOff
+    }
+
+    get supportsDisableCharging() {
+        return this._supportsDisableCharging
     }
 
     /**
@@ -212,7 +246,10 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public setChargingEnabled(value: boolean): Promise<void>  {
-        return this.setDatapoint(PairingIds.AL_INFO_CHARGING_ENABLED, value ? "1" : "0");
+        if (this._supportsDisableCharging) {
+            return this.setDatapoint(PairingIds.AL_INFO_CHARGING_ENABLED, value ? "1" : "0");
+        }
+        return Promise.resolve();
     }
 
     public setEcoCharging(value: boolean): Promise<void>  {
