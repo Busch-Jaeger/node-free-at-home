@@ -226,6 +226,7 @@ export enum PairingIds {
     AL_INFO_USED_PHASES = 0x04D7, // Number of phases used for charging
     AL_FREE_VENDING = 0x04D8, // Allow free vending
     AL_INFO_FREE_VENDING = 0x04D9, // Allow free vending
+    AL_INFO_MAXIMUM_CHARGING_CURRENT_LIMIT = 0x04DA, // Maximum limit for charger (in A)
     AL_DISARM_SYSTEM = 0x0501, // Encrypted control datapoint for domus alarm center
     AL_DISARM_COUNTER = 0x0502, // Info about the next counter to disarm the system
     AL_INFO_INTRUSION_ALARM = 0x0504, // Intrusion Alarm

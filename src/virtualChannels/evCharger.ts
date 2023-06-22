@@ -12,7 +12,7 @@ interface ChannelEvents {
     switchCharging(value: boolean): void;
     ecoCharging(value: boolean): void;
     isChargingEnabledChanged(value: boolean): void;
-    currentPowerConsumed(value: number): void;
+    currentExcessPower(value: number): void;
     chargerLimit(value: number): void;
     minimumChargerLimit(value: number): void;
     freeVending(value: boolean): void;
@@ -171,8 +171,8 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 this.emit("ecoCharging", value === "1")
                 break
 
-            case PairingIds.AL_MEASURED_CURRENT_POWER_CONSUMED:
-                this.emit("currentPowerConsumed", parseInt(value))
+            case PairingIds.AL_MEASURED_CURRENT_EXCESS_POWER:
+                this.emit("currentExcessPower", parseInt(value))
                 break
 
             case PairingIds.AL_LIMIT_FOR_CHARGER:
@@ -332,6 +332,10 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public setMinimumChargerLimit(value: number) {
         return this.setDatapoint(PairingIds.AL_INFO_MIN_CHARGING_CURRENT_ECO, value.toString());
+    }
+
+    public setMaximumChargerLimit(value: number) {
+        return this.setDatapoint(PairingIds.AL_INFO_MAXIMUM_CHARGING_CURRENT_LIMIT, value.toString());
     }
 
     public setUsedPhases(value: number) {
