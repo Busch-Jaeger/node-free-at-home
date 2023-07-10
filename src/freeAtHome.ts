@@ -53,6 +53,7 @@ import { BinarySensorChannel } from './virtualChannels/binarySensorChannel';
 import { WaterMeterChannel } from './virtualChannels/waterMeterChannel';
 import { GasMeterChannel } from './virtualChannels/gasMeterChannel';
 import { Capabilities } from './capabilities';
+import { HVAC2Channel } from './virtualChannels/hvac2Channel';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -469,8 +470,14 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new BinarySensorChannel(channel);
     }
 
-    async createHVACDevice(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<HVACChannel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"HVAC", nativeId, name, undefined, capabilities);
+    async createHVACWithEnergyDevice(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<HVAC2Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"HVACWithEnergy", nativeId, name, undefined, capabilities);
+        const channel = device.getChannels().next().value;
+        return new HVAC2Channel(channel);
+    }
+
+    async createHVACDevice(nativeId: string, name: string): Promise<HVACChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"HVAC", nativeId, name);
         const channel = device.getChannels().next().value;
         return new HVACChannel(channel);
     }
