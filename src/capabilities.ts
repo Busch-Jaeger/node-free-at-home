@@ -12,6 +12,7 @@ export enum Capabilities {
     CAP_PHASES = 0x0016, // supports different numbers of phases
     CAP_FREE_VENDING = 0x0017, // supports free vending
     CAP_DISABLE_CHARGING = 0x0018, // supports disable charging    
+    CAP_ENERGY_COST = 0x0019, // supports delivery of energy cost information
     CAP_SWITCH_ON_OFF = 0x0020, // supports switching on/off
     CAP_REMOTE_START = 0x0030, // supports remote start
     CAP_SWING_MODES = 0x0040, // supports swing modes

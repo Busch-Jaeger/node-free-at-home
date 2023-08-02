@@ -227,6 +227,10 @@ export enum PairingIds {
     AL_FREE_VENDING = 0x04D8, // Allow free vending
     AL_INFO_FREE_VENDING = 0x04D9, // Allow free vending
     AL_INFO_MAXIMUM_CHARGING_CURRENT_LIMIT = 0x04DA, // Maximum limit for charger (in A)
+    AL_IMPORTED_ENERGY_COST_TODAY = 0x04DB, // Imported energy cost today
+    AL_EXPORTED_ENERGY_COST_TODAY = 0x04DC, // Exported energy cost today
+    AL_TOTAL_ENERGY_COST_IMPORTED = 0x04DD, // Total imported energy cost
+    AL_TOTAL_ENERGY_COST_EXPORTED = 0x04DE, // Total exported energy cost
     AL_DISARM_SYSTEM = 0x0501, // Encrypted control datapoint for domus alarm center
     AL_DISARM_COUNTER = 0x0502, // Info about the next counter to disarm the system
     AL_INFO_INTRUSION_ALARM = 0x0504, // Intrusion Alarm
