@@ -123,15 +123,15 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
             case PairingIds.AL_MEDIA_PLAY_MODE:
                 const intValue = parseInt(value);
 
-                if ((intValue & (1 << 4)) != 0) {
+                if ((intValue & (1 << 4)) !== 0) {
                     if (this.isShuffel === false)
-                        this.emit("shuffleOff");
+                        this.emit("shuffle");
                     if (this.isAutoConfirm)
                         this.isShuffel = true;
                 }
                 else {
                     if (this.isShuffel === true)
-                        this.emit("shuffle");
+                        this.emit("shuffleOff");
                     if (this.isAutoConfirm)
                         this.isShuffel = false;
                 }
@@ -160,7 +160,6 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 if (this.isAutoConfirm)
                     this.updatePlayMode();
 
-                console.log("playmode: ", value);
                 break;
             case PairingIds.AL_SELECT_PROFILE:
                 {
