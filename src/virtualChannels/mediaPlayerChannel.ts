@@ -383,6 +383,31 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         value = (undefined === value) ? 0 : value + 1;
         return this.setDatapoint(PairingIds.AL_INFO_AUDIO_INPUT, value.toString());
     }
+
+    async setShuffle(): Promise<void> {
+        this.isShuffel = true;
+        return this.updatePlayMode();
+    }
+
+    async setShuffleOff(): Promise<void> {
+        this.isShuffel = false;
+        return this.updatePlayMode();
+    }
+
+    async setRepeatOff(): Promise<void> {
+        this.repeadMode = MediaPlayerChannel.RepeadMode.off;
+        return this.updatePlayMode();
+    }
+
+    async setRepeat(): Promise<void> {
+        this.repeadMode = MediaPlayerChannel.RepeadMode.repeat;
+        return this.updatePlayMode();
+    }
+    
+    async setRepeatOne(): Promise<void> {
+        this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
+        return this.updatePlayMode();
+    }
 }
 
 
