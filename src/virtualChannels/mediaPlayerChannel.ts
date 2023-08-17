@@ -144,14 +144,14 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 }
 
                 if ((intValue & (1 << 3)) !== 0) {
-                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeatOne)
                         this.emit("repeatOne");
                     if (this.isAutoConfirm)
                         this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
                 }
 
                 if ((intValue & ((1 << 2) | 1 << 3)) === 0) {
-                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.off)
                         this.emit("repeatOff");
                     if (this.isAutoConfirm)
                         this.repeadMode = MediaPlayerChannel.RepeadMode.off;
