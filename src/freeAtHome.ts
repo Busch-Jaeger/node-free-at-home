@@ -277,20 +277,20 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new EnergyBatteryV2Channel(channel);
     }
 
-    async createEnergyInverterV2Device(nativeId: string, name: string): Promise<EnergyInverterV2Channel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "08");
+    async createEnergyInverterV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyInverterV2Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "08", capabilities);
         const channel = device.getChannels().next().value;
         return new EnergyInverterV2Channel(channel);
     }
 
-    async createEnergyTwoWayMeterV2Device(nativeId: string, name: string): Promise<EnergyTwoWayMeterV2Channel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "02");
+    async createEnergyTwoWayMeterV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyTwoWayMeterV2Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "02", capabilities);
         const channel = device.getChannels().next().value;
         return new EnergyTwoWayMeterV2Channel(channel);
     }
 
-    async createEnergyOneWayMeterV2Device(nativeId: string, name: string): Promise<EnergyOneWayMeterV2Channel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "01");
+    async createEnergyOneWayMeterV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyOneWayMeterV2Channel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "01", capabilities);
         const channel = device.getChannels().next().value;
         return new EnergyOneWayMeterV2Channel(channel);
     }
