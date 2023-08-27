@@ -123,15 +123,15 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
             case PairingIds.AL_MEDIA_PLAY_MODE:
                 const intValue = parseInt(value);
 
-                if ((intValue & (1 << 4)) != 0) {
+                if ((intValue & (1 << 4)) !== 0) {
                     if (this.isShuffel === false)
-                        this.emit("shuffleOff");
+                        this.emit("shuffle");
                     if (this.isAutoConfirm)
                         this.isShuffel = true;
                 }
                 else {
                     if (this.isShuffel === true)
-                        this.emit("shuffle");
+                        this.emit("shuffleOff");
                     if (this.isAutoConfirm)
                         this.isShuffel = false;
                 }
@@ -144,14 +144,14 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 }
 
                 if ((intValue & (1 << 3)) !== 0) {
-                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeatOne)
                         this.emit("repeatOne");
                     if (this.isAutoConfirm)
                         this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
                 }
 
                 if ((intValue & ((1 << 2) | 1 << 3)) === 0) {
-                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.off)
                         this.emit("repeatOff");
                     if (this.isAutoConfirm)
                         this.repeadMode = MediaPlayerChannel.RepeadMode.off;
@@ -160,7 +160,6 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 if (this.isAutoConfirm)
                     this.updatePlayMode();
 
-                console.log("playmode: ", value);
                 break;
             case PairingIds.AL_SELECT_PROFILE:
                 {
@@ -383,6 +382,31 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     async setInputIndex(value?: number): Promise<void> {
         value = (undefined === value) ? 0 : value + 1;
         return this.setDatapoint(PairingIds.AL_INFO_AUDIO_INPUT, value.toString());
+    }
+
+    async setShuffle(): Promise<void> {
+        this.isShuffel = true;
+        return this.updatePlayMode();
+    }
+
+    async setShuffleOff(): Promise<void> {
+        this.isShuffel = false;
+        return this.updatePlayMode();
+    }
+
+    async setRepeatOff(): Promise<void> {
+        this.repeadMode = MediaPlayerChannel.RepeadMode.off;
+        return this.updatePlayMode();
+    }
+
+    async setRepeat(): Promise<void> {
+        this.repeadMode = MediaPlayerChannel.RepeadMode.repeat;
+        return this.updatePlayMode();
+    }
+    
+    async setRepeatOne(): Promise<void> {
+        this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
+        return this.updatePlayMode();
     }
 }
 
