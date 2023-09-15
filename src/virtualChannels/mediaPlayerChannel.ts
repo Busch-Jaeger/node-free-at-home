@@ -64,8 +64,8 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     private isShuffel: boolean = false;
     private isCrossfade: boolean = false;
 
-    private inputs: string[] = [];
-    private playlists: string[] = [];
+    private favoriteCount: number = 0;
+    private lastSelectedFavorit: number | undefined = undefined;
 
     private parameterMaxVolume: number = 100;
 
@@ -125,7 +125,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 this.emit("pause");
                 if (this.isAutoConfirm) {
                     if (this.playMode !== MediaPlayerChannel.PlayMode.paused)
-                    this.playMode = MediaPlayerChannel.PlayMode.paused;
+                        this.playMode = MediaPlayerChannel.PlayMode.paused;
                     else
                         this.playMode = MediaPlayerChannel.PlayMode.playing;
                     this.updatePlayMode();
@@ -234,6 +234,17 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     this.updatePlayMode();
 
                 break;
+            case PairingIds.AL_PLAY_NEXT_FAVORITE:
+                if (0 === this.favoriteCount)
+                    return;
+                let index = (undefined !== this.lastSelectedFavorit) ? this.lastSelectedFavorit + 1 : 0;
+                if (index >= this.favoriteCount)
+                    index = 0;
+                this.emit("playlist", index);
+                if (this.isAutoConfirm) {
+                    this.setPlaylistIndex(index);
+                }
+                break;
             case PairingIds.AL_SELECT_PROFILE:
                 {
                     const intValue = parseInt(value);
@@ -242,6 +253,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     switch (topicIndex) {
                         case Topics.TOP_MEDIA_PLAYER_PLAYLIST:
                             this.emit("playlist", index);
+                            this.lastSelectedFavorit = index;
                             if (this.isAutoConfirm)
                                 this.setPlaylistIndex(index);
                             break;
@@ -342,6 +354,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     {
                         const intValue = parseInt(value) - 1;
                         this.emit("playlist", intValue);
+                        this.lastSelectedFavorit = intValue;
                         if (this.isAutoConfirm)
                             this.setPlaylistIndex(intValue);
                         break;
@@ -434,22 +447,22 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
      * @deprecated The method should not be used, use setPlazlists instead
      */
     setFavorites(favorites: string[]): Promise<void> {
-        this.playlists = favorites;
+        this.favoriteCount = favorites.length;
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_PLAYLIST, favorites);
     }
 
     setPlaylists(playlists: string[]): Promise<void> {
-        this.playlists = playlists;
+        this.favoriteCount = playlists.length;
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_PLAYLIST, playlists);
     }
 
     async setPlaylistIndex(value?: number): Promise<void> {
+        this.lastSelectedFavorit = value;
         value = (undefined === value) ? 0 : value + 1;
         return this.setDatapoint(PairingIds.AL_INFO_PLAYLIST, value.toString());
     }
 
     setInputs(inputs: string[]): Promise<void> {
-        this.inputs = inputs;
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_AUDIO_INPUT, inputs);
     }
 
