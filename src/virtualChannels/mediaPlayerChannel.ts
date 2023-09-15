@@ -69,6 +69,47 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
 
     private parameterMaxVolume: number = 100;
 
+    private lastVolume: number = 0;
+    static readonly volumeChangeInterval = 4;
+    static readonly volumeIntervalTime = 500;
+    private volumeIntervalTimer: NodeJS.Timer | undefined = undefined
+
+    private stopIntervalTimer() {
+        if (undefined !== this.volumeIntervalTimer) {
+            clearInterval(this.volumeIntervalTimer);
+            this.volumeIntervalTimer = undefined;
+        }
+    }
+
+    private startIntervalTimer(callback: () => void) {
+        this.stopIntervalTimer();
+        this.volumeIntervalTimer = setInterval(callback, MediaPlayerChannel.volumeIntervalTime);
+    }
+
+    private incrementVolume() {
+        let volume = this.lastVolume;
+        volume += MediaPlayerChannel.volumeChangeInterval;
+        if (volume > this.parameterMaxVolume)
+            volume = this.parameterMaxVolume;
+        this.emit("playVolumeChanged", volume);
+        this.emit("volume", volume);
+        if (this.isAutoConfirm)
+            this.setVolume(volume);
+    }
+
+    private decrementVolume() {
+        let volume = this.lastVolume;
+        volume -= MediaPlayerChannel.volumeChangeInterval;
+        if (volume < 0)
+            volume = 0;
+        if (volume > this.parameterMaxVolume)
+            volume = this.parameterMaxVolume;
+        this.emit("playVolumeChanged", volume);
+        this.emit("volume", volume);
+        if (this.isAutoConfirm)
+            this.setVolume(volume);
+    }
+
     protected dataPointChanged(id: PairingIds, value: string): void {
         switch (id) {
             case PairingIds.AL_MEDIA_PLAY: // play
@@ -98,6 +139,35 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
             case PairingIds.AL_RELATIVE_VOLUME_CONTROL:
                 if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeDec) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeDec);
                 else if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeInc) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeInc);
+                console.log(value);
+                switch (value) {
+                    case '12': //volume inc
+                        this.stopIntervalTimer();
+                        this.incrementVolume();
+                        break;
+                    case '4': //volume dec
+                        this.stopIntervalTimer();
+                        this.decrementVolume();
+                        break;
+                    case '9': //volume inc long presed
+                        this.incrementVolume();
+                        this.startIntervalTimer(() => {
+                            this.incrementVolume();
+                        });
+                        break;
+                    case '8': //volume inc long released
+                        this.stopIntervalTimer();
+                        break;
+                    case '1': //volume dec long presed 
+                        this.decrementVolume();
+                        this.startIntervalTimer(() => {
+                            this.decrementVolume();
+                        });
+                        break;
+                    case '0': //volume dec long released
+                        this.stopIntervalTimer();
+                        break;
+                }
                 break;
             case PairingIds.AL_ABSOLUTE_VOLUME_CONTROL:
                 let volume = parseInt(value);
@@ -106,7 +176,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 this.emit("playVolumeChanged", volume);
                 this.emit("volume", volume);
                 if (this.isAutoConfirm)
-                    this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, volume.toString());
+                    this.setVolume(volume);
                 break;
             case PairingIds.AL_MEDIA_MUTE:
                 switch (parseInt(value)) {
@@ -321,6 +391,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     setVolume(value: number): Promise<void> {
+        this.lastVolume = value;
         return this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, value.toString());
     }
 
