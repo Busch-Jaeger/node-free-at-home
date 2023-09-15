@@ -124,7 +124,10 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 this.emit("playModeChanged", MediaPlayerChannel.PlayMode.paused);
                 this.emit("pause");
                 if (this.isAutoConfirm) {
+                    if (this.playMode !== MediaPlayerChannel.PlayMode.paused)
                     this.playMode = MediaPlayerChannel.PlayMode.paused;
+                    else
+                        this.playMode = MediaPlayerChannel.PlayMode.playing;
                     this.updatePlayMode();
                 }
                 break;
