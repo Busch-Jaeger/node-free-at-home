@@ -213,9 +213,11 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     }
 
     async setOutputDatapoint(serialNumber: string, channel: number, datapointIndex: number, value: string) {
+        if(value === "") // work around for sysap not handling empty strings
+            value = " ";
+
         const channelString = channel.toString(16).padStart(6, "ch0000");
         const datapointString = datapointIndex.toString(16).padStart(7, "odp0000")
-
 
         const result = await api.putdatapoint(
             "00000000-0000-0000-0000-000000000000",

@@ -43,6 +43,9 @@ export enum PairingIds {
     AL_FAN_MANUAL_ON_OFF_REQUEST = 0x0041, // Request for switching fan in manual/auto mode
     AL_CONTROLLER_ON_OFF_REQUEST = 0x0042, // Request for switching controller on or off. Off means protection mode
     AL_ECO_ON_OFF_INDICATION = 0x0044, // Indicates ECO mode
+    AL_CONTROLLER_ON_OFF_REQUEST_EXT = 0x0045, // Request for switching controller on or off. Off means protection mode
+    AL_ECO_ON_OFF_EXT = 0x0046, // Switches eco mode on or off
+    AL_RELATIVE_SET_POINT_REQUEST_EXT = 0x0047, // Request for a new relative set point value
     AL_AWAY = 0x0050, // Indicates auto mode
     AL_INFO_ON_OFF = 0x0100, // Reflects the binary state of the actuator
     AL_INFO_FORCE = 0x0101, // Indicates the cause of forced operation (0 = not forced)
@@ -93,13 +96,16 @@ export enum PairingIds {
     AL_AUX_ON_OFF_RESPONSE = 0x0153, // Aux On/Off response
     AL_HEATING_ON_OFF_REQUEST = 0x0154, // Heating On/Off request
     AL_COOLING_ON_OFF_REQUEST = 0x0155, // Cooling On/Off request
-    AL_INFO_OPERATION_MODE = 0x0156, // 
-    AL_INFO_SWING_MODE = 0x0157, // 
+    AL_OPERATION_MODE = 0x0156, // 
+    AL_SWING_MODE = 0x0157, // 
     AL_SUPPORTED_FEATURES = 0x0158, // 
     AL_EXTENDED_STATUS = 0x0159, // 
     AL_EXTENDED_STATUS_US = 0x015A, // 
     AL_AUX_HEATING_ON_OFF_REQUEST = 0x015B, // 
     AL_EMERGENCY_HEATING_ON_OFF_REQUEST = 0x015C, // 
+    AL_OPERATION_MODE_32 = 0x015D, // 
+    AL_INFO_OPERATION_MODE_32 = 0x015E, // 
+    AL_INFO_SUPPORTED_OPERATION_MODE_32 = 0x015F, // 
     AL_RELATIVE_FAN_SPEED_CONTROL = 0x0160, // Relative control of the set value
     AL_ABSOLUTE_FAN_SPEED_CONTROL = 0x0161, // Absolute control of the set value
     AL_INFO_ABSOLUTE_FAN_SPEED = 0x0162, // Reflects the actual value of the actuator
@@ -110,6 +116,8 @@ export enum PairingIds {
     AL_LOCK_SENSOR = 0x0167, // Locks a sensor for local on-site operation
     AL_INFO_LOCKED_SENSOR = 0x0168, // Reflects the locked state of a sensor
     AL_SYSAP_INFO_LOCKED_SENSOR = 0x0169, // Reflects the locked state of a sensor group
+    AL_INFO_SWING_MODE = 0x016A, // 
+    AL_INFO_SUPPORTED_SWING_MODE = 0x016B, // 
     AL_INFO_VALUE_WHITE = 0x0170, // Feedback value white
     AL_SYSAP_INFO_VALUE_WHITE = 0x0171, // SysAP Feedback value white
     AL_NOTIFICATION_FLAGS = 0x01A0, // Notifications of RF devices (e. g. Battery low)
@@ -195,8 +203,7 @@ export enum PairingIds {
     AL_INFO_ENERGY_TRANSMITTED = 0x04B8, // Energy transmitted so far per session (in Wh)
     AL_INFO_CAR_RANGE = 0x04B9, // Car range in km per sessions
     AL_INFO_START_OF_CHARGING_SESSION = 0x04BA, // Start of charging session (in minutes in UTC)
-    AL_INFO_LIMIT_FOR_CHARGER = 0x04BB, // Limit for charger (in kW)
-    AL_INFO_LIMIT_FOR_CHARGER_GROUP = 0x04BC, // Limit for group of charger (in kW)
+    AL_INFO_LIMIT_FOR_CHARGER = 0x04BB, // Limit for charger (in A)
     AL_INFO_ALBUM_COVER_URL = 0x04BD, // Album cover URL
     AL_INFO_CURRENT_SOLAR_POWER = 0x04BE, // Current Solar power
     AL_INFO_CURRENT_INVERTER_OUTPUT_POWER = 0x04BF, // Output power of inverter (pbatt+Psun)
@@ -212,7 +219,7 @@ export enum PairingIds {
     AL_MEASURED_TOTAL_ENERGY_EXPORTED = 0x04C9, // Total consumption and export of energy (grid feed-in, battery charging, consumer consumption)
     AL_SWITCH_ECO_CHARGING_ON_OFF = 0x04CA, // 
     AL_INFO_ECO_CHARGING_ON_OFF = 0x04CB, // 
-    AL_LIMIT_FOR_CHARGER = 0x04CC, // Limit for charger (in kW)
+    AL_LIMIT_FOR_CHARGER = 0x04CC, // Limit for charger (in A)
     AL_MEASURED_CURRENT_EXCESS_POWER = 0x04CD, // Current excess power
     AL_MEASURED_TOTAL_WATER = 0x04CE, // Measured total water consumption
     AL_MEASURED_TOTAL_GAS = 0x04CF, // Measured total gas consumption
@@ -289,6 +296,8 @@ export enum PairingIds {
     AL_INFO_PLAYLIST = 0x062D, // 
     AL_INFO_AUDIO_INPUT = 0x062E, // 
     AL_SELECT_PROFILE = 0x062F, // 
+    AL_INFO_RUNNING = 0x0630, // Feedback: Operation is running
+    AL_REMOTE_START = 0x0631, // Remotely starts operation
     AL_TIME_OF_DAY = 0xF001, // Current local time
     AL_DATE = 0xF002, // Curent local date
     AL_MESSAGE_CENTER_NOTIFICATION = 0xF003, // Notification from message center

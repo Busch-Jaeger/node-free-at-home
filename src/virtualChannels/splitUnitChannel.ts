@@ -75,7 +75,7 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 }
                 this.emit("setFanSpeed", parseInt(value));
                 break;
-            case PairingIds.AL_INFO_OPERATION_MODE:
+            case PairingIds.AL_OPERATION_MODE:
                 {
                     const intValue = Number.parseInt(value);
                     if (this.isAutoConfirm)
