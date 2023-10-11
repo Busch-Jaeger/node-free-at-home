@@ -113,4 +113,8 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
     public async setAuxiliaryData(channel: number, index: number, auxiliaryData: string[]): Promise<void> {
         return this.freeAtHomeApi.setAuxiliaryData(this.serialNumber, channel, index, auxiliaryData);
     }
+
+    public async patchDevice(patch: api.ApiRestDeviceSysapSerialPatchRequest): Promise<void> {
+        return this.freeAtHomeApi.patch(this.serialNumber, patch);
+    }
 }

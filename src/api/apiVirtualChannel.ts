@@ -113,4 +113,8 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
     public async setAuxiliaryData(index: number, auxiliaryData: string[]): Promise<void> {
         return this.device.setAuxiliaryData(this.channelNumber, index, auxiliaryData);
     }
+
+    public async setDeviceName(value: string) {
+        return this.device.patchDevice({ displayName: value });
+    }
 }

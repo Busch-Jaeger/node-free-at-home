@@ -63,6 +63,10 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         return this.channel.setAuxiliaryData(index, auxiliaryData);
     }
 
+    public async setDeviceName(value: string) {
+        return this.channel.setDeviceName(value);
+    }
+
     public async setUnresponsive(): Promise<void>  {
         return this.channel.setUnresponsive();
     }
