@@ -387,6 +387,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             return existingDevice;
         const device = new ApiVirtualDevice(this, apiDevice, deviceId, nativeId, deviceType, flavor, capabilities);
         this.virtualDevicesBySerial.set(deviceId, device);
+        device.on("destroyed", () => {
+            this.virtualDevicesBySerial.delete(deviceId);
+        })
         return device;
     }
 

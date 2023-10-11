@@ -21,6 +21,13 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         this.channel = channel;
     }
 
+    async destroy()
+    {
+        this.removeAllListeners();
+        this.setAutoKeepAlive(false);
+        return this.channel.destroy();
+    }
+
     public setAutoKeepAlive(value: boolean) {
         if (value == true) {
             if (this.autoKeepAliveTimer === undefined)

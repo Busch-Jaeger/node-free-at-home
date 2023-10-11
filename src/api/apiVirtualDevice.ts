@@ -9,7 +9,8 @@ import { Capabilities } from '../capabilities';
 import { channel } from 'diagnostics_channel';
 
 interface DeviceEvents {
-    parameterChanged(id: ParameterIds, value: string): void
+    parameterChanged(id: ParameterIds, value: string): void,
+    destroyed(): void
 }
 
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
@@ -56,6 +57,11 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
             for(const [key, value] of this.parameters)
                 this.emit("parameterChanged", key, value);
         });
+    }
+
+    async destroy() {
+        this.emit("destroyed");
+        this.removeAllListeners();
     }
 
     onInputDatapointChange(channelIndex: number, data: IndexedDatapoint) {

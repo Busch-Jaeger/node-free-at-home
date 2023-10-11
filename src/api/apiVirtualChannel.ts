@@ -71,6 +71,12 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
         });
     }
 
+    async destroy() {
+        this.removeAllListeners();
+        await this.setUnresponsive();
+        return this.device.destroy();
+    }
+
     onInputDatapointChange(data: IndexedDatapoint) {
         const pairingId = this.inputPositionToPairing.get(data.index);
         if (undefined === pairingId)
