@@ -381,12 +381,25 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         
     }
 
+    public async patch(serialNumber: string, patch: api.ApiRestDeviceSysapSerialPatchRequest): Promise<void> {
+        const result = await api.patchDevice(
+            "00000000-0000-0000-0000-000000000000",
+            serialNumber,
+            patch,
+            this.connectionOptions);
+        if (result.status !== 200)
+            return Promise.reject("HTTP status code: " + result.status + " Reason: " + result.data);
+    }
+
     private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): ApiVirtualDevice {
         const existingDevice = this.virtualDevicesBySerial.get(deviceId);
         if(undefined !== existingDevice)
             return existingDevice;
         const device = new ApiVirtualDevice(this, apiDevice, deviceId, nativeId, deviceType, flavor, capabilities);
         this.virtualDevicesBySerial.set(deviceId, device);
+        device.on("destroyed", () => {
+            this.virtualDevicesBySerial.delete(deviceId);
+        })
         return device;
     }
 

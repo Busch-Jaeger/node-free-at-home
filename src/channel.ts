@@ -21,6 +21,13 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         this.channel = channel;
     }
 
+    async destroy()
+    {
+        this.removeAllListeners();
+        this.setAutoKeepAlive(false);
+        return this.channel.destroy();
+    }
+
     public setAutoKeepAlive(value: boolean) {
         if (value == true) {
             if (this.autoKeepAliveTimer === undefined)
@@ -54,6 +61,10 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
 
     public async setAuxiliaryData(index: number, auxiliaryData: string[]): Promise<void> {
         return this.channel.setAuxiliaryData(index, auxiliaryData);
+    }
+
+    public async setDeviceName(value: string) {
+        return this.channel.setDeviceName(value);
     }
 
     public async setUnresponsive(): Promise<void>  {
