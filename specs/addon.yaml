@@ -166,7 +166,7 @@ paths:
         content:
           text/plain:
             schema:
-              $ref: "#/components/schemas/Sha256"
+              $ref: "#/components/schemas/Reference"
             example: "de.busch-jaeger.freeathome.i-net-radio"
       responses:
         "200":
@@ -313,7 +313,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Configuration"
-            example: { test: "test" }
+            example: { group: {items: {param1: "test1"}} }
       responses:
         "200":
           description: Success
@@ -521,15 +521,11 @@ components:
     References:
       type: object
       additionalProperties:
-        $ref: "#/components/schemas/Sha256"
+        $ref: "#/components/schemas/Reference"
     Reference:
       type: string
       pattern: "^[a-zA-Z0-9\\-/\\\\_.]{4,64}$"
       maxLength: 128
-    Sha256:
-      type: string
-      pattern: "^[a-zA-Z0-9]{64}$"
-      maxLength: 64
     Metadata:
       type: object
       additionalProperties: false
@@ -547,8 +543,8 @@ components:
         version:
           type: string
         id:
-          type: string
-        name:
+          type: string   
+        name: 
           $ref: "#/components/schemas/TranslatedString"
         description:
           $ref: "#/components/schemas/TranslatedString"
@@ -588,10 +584,12 @@ components:
         entryPoint:
           type: string
           maxLength: 1024
-          pattern: "^/|//|(/[a-zA-Z0-9_-]+)+$"
+          pattern: "^(/?[a-zA-Z0-9_\\-\\.]+)+$"
         type:
           type: string
           enum: ["app", "runtime", "standalone"]
+        beta:
+          type: boolean
         parameters:
           $ref: "#/components/schemas/Parameters"
         wizards:
@@ -616,6 +614,8 @@ components:
           description: "Test add-on description",
           url: "http://busch-jaeger.de",
           author: "Busch Jaeger",
+          type: "app",
+          entryPoint: "index.js"
         }
 
     Parameters:
@@ -629,68 +629,98 @@ components:
         $ref: "#/components/schemas/Wizard"
 
     ParameterGroup:
-      type: object
-      required:
-        - "name"
-        - "items"
-      properties:
-        name:
-          $ref: "#/components/schemas/TranslatedString"
-        multiple:
-          type: boolean
-        items:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/Parameter"
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+            - "name"
+            - "items"
+          properties:
+            name:
+              type: string
+            multiple:
+              type: boolean
+            items:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Parameter"
 
     Wizard: 
-      type: object
-      required:
-        - "name"
-        - "sections"
-        - "steps"
-        - "create"
-        - "edit"
-      properties:
-        name:
-          $ref: "#/components/schemas/TranslatedString"
-        create:
-          type: boolean
-        edit:
-          type: boolean
-        sections:
-          type: array
-          items:
-            type: string
-        steps:
-          type: array
-          items:
-            $ref: "#/components/schemas/WizardStep"
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+            - "name"
+            - "sections"
+            - "steps"
+            - "create"
+            - "edit"
+          properties:
+            name:
+              type: string
+            create:
+              type: boolean
+            edit:
+              type: boolean
+            sections:
+              type: array
+              items:
+                type: string
+            steps:
+              type: array
+              items:
+                $ref: "#/components/schemas/WizardStep"
 
-    WizardStep: 
-      type: object
-      required:
-        - "id"
-        - "name"
-      properties:
-        id:
-          type: string
-        name:
-          $ref: "#/components/schemas/TranslatedString"
-        conditions:
-          type: array
-          items: 
-            oneOf:
-              - $ref: "#/components/schemas/WizardModeCondition"
-              - $ref: "#/components/schemas/WizardParameterCondition"
-        steps:
-          type: array
-          items: 
-            $ref: "#/components/schemas/WizardStep"        
-        items:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/Parameter"
+    BaseWizardStep: 
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+            - "id"
+          properties:
+            id:
+              type: string            
+            steps:
+              type: array
+              items: 
+                $ref: "#/components/schemas/WizardSubStep"        
+            items:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Parameter"
+
+    WizardStep:
+      allOf: 
+        - $ref: "#/components/schemas/BaseWizardStep"
+        - type: object
+          required:
+            - "name"
+          properties:
+            name:
+              type: string
+            conditions:
+              type: array
+              items: 
+                oneOf:
+                  - $ref: "#/components/schemas/WizardModeCondition"
+                  - $ref: "#/components/schemas/WizardParameterCondition"
+
+    WizardSubStep:
+      allOf: 
+        - $ref: "#/components/schemas/BaseWizardStep"
+        - type: object
+          required:
+            - "conditions"
+          properties:
+            name:
+              type: string
+            conditions:
+              type: array
+              items: 
+                oneOf:
+                  - $ref: "#/components/schemas/WizardModeCondition"
+                  - $ref: "#/components/schemas/WizardParameterCondition"
+
 
     Parameter:
       oneOf:
@@ -699,89 +729,116 @@ components:
         - $ref: "#/components/schemas/ChannelParameter"
         - $ref: "#/components/schemas/SelectParameter"
         - $ref: "#/components/schemas/BasicParameter"
+        - $ref: "#/components/schemas/JsonParameter"
+        - $ref: "#/components/schemas/SeparatorParameter"
       discriminator:
         propertyName: type
         mapping:
-          string: "#/components/schemas/stringParameter"
-          multilinestring: "#/components/schemas/stringParameter"
-          number: "#/components/schemas/numberParameter"
-          boolean: "#/components/schemas/basicParameter"
-          date: "#/components/schemas/basicParameter"
-          time: "#/components/schemas/basicParameter"
-          ipv4: "#/components/schemas/basicParameter"
-          channel: "#/components/schemas/channelParameter"
-          select: "#/components/schemas/selectParameter"
-          room: "#/components/schemas/basicParameter"
-          button: "#/components/schemas/basicParameter"
-          text: "#/components/schemas/basicParameter"
-          error: "#/components/schemas/basicParameter"
-          displayQRCode: "#/components/schemas/basicParameter"
-          scanQRCode: "#/components/schemas/basicParameter"
-          jsonSelector: "#/components/schemas/jsonParameter"
+          string: "#/components/schemas/StringParameter"
+          multilinestring: "#/components/schemas/StringParameter"
+          password: "#/components/schemas/StringParameter"
+          number: "#/components/schemas/NumberParameter"
+          boolean: "#/components/schemas/BasicParameter"
+          date: "#/components/schemas/BasicParameter"
+          time: "#/components/schemas/BasicParameter"
+          weekdays: "#/components/schemas/StringParameter"
+          ipv4: "#/components/schemas/BasicParameter"
+          floor: "#/components/schemas/BasicParameter"
+          room: "#/components/schemas/BasicParameter"
+          channel: "#/components/schemas/ChannelParameter"
+          select: "#/components/schemas/SelectParameter"
+          button: "#/components/schemas/BasicParameter"
+          text: "#/components/schemas/BasicParameter"
+          error: "#/components/schemas/BasicParameter"
+          displayQRCode: "#/components/schemas/BasicParameter"
+          scanQRCode: "#/components/schemas/BasicParameter"
+          hidden: "#/components/schemas/BasicParameter"
+          jsonSelector: "#/components/schemas/JsonParameter"
+          separator: "#/components/schemas/SeparatorParameter"
+
+    SeparatorParameter:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "type"
+          properties:              
+            type:
+              type: string
+              enum:
+                - "separator"
+            dependsOn:
+              type: string
+            dependsOnValues:
+              type: array
+              items: 
+                type: string
 
     BasicParameter:
-      type: object
-      required:
-        - "name"
-        - "type"
-      properties:
-        name:
-          $ref: "#/components/schemas/TranslatedString"
-        type:
-          type: string
-          enum:
-            - "string"
-            - "multilinestring"
-            - "password"
-            - "number"
-            - "boolean"
-            - "date"
-            - "time"
-            - "duration"
-            - "weekdays"
-            - "ipv4"
-            - "floor"
-            - "room"
-            - "channel"
-            - "select"
-            - "button"
-            - "text"
-            - "error"
-            - "displayQRCode"
-            - "scanQRCode"
-            - "select"
-            - "hidden"
-            - "jsonSelector"
-        required:
-          type: boolean
-        description:
-          $ref: "#/components/schemas/TranslatedString"
-        default:
-          anyOf:
-            - type: string
-            - type: number
-            - type: boolean
-        dependsOn:
-          type: string
-        dependsOnValues:
-          type: array
-          items: 
-            type: string
-        dependsOnOptions:
-          type: array
-          items:
-            type: object
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "name"
+            - "type"
+          properties:              
+            type:
+              type: string
+              enum:
+                - "string"
+                - "multilinestring"
+                - "password"
+                - "number"
+                - "boolean"
+                - "date"
+                - "time"
+                - "weekdays"
+                - "ipv4"
+                - "floor"
+                - "room"
+                - "channel"
+                - "select"
+                - "button"
+                - "text"
+                - "error"
+                - "displayQRCode"
+                - "scanQRCode"
+                - "hidden"
+                - "jsonSelector"
+                - "separator"                
+            name:
+              type: string
             required:
-              - "values"
-              - "options"
-            properties:
-              values:
-                type: array
-                items:
-                  type: string
-              options:
-                type: array
-                $ref: "#/components/schemas/SelectOption"                  
+              type: boolean
+            default:
+              anyOf:
+                - type: string
+                - type: number
+                - type: boolean
+            dependsOn:
+              type: string
+            dependsOnValues:
+              type: array
+              items: 
+                type: string
+            dependsOnOptions:
+              type: array
+              items:
+                type: object
+                required:
+                  - "values"
+                  - "options"
+                properties:
+                  values:
+                    type: array
+                    items:
+                      type: string
+                  options:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SelectOption"                  
 
     StringParameter:
       allOf:
@@ -862,14 +919,14 @@ components:
             type: string
 
     SelectOption:
-      type: object
-      required:
-      - "key"
-      properties:
-        key: 
-          type: string
-        name:
-          $ref: "#/components/schemas/TranslatedString"
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+          - "key"
+          properties:
+            key: 
+              type: string
 
     TranslatedString:
       oneOf:
@@ -911,7 +968,85 @@ components:
             cs:
               type: string
             tr:
-              type: string
+              type: string              
+
+    TranslatedName:
+      type: object
+      properties:
+        name@en:
+          type: string
+        name@es:
+          type: string
+        name@fr:
+          type: string
+        name@it:
+          type: string
+        name@nl:
+          type: string
+        name@de:
+          type: string
+        name@zh:
+          type: string
+        name@da:
+          type: string
+        name@fi:
+          type: string
+        name@nb:
+          type: string
+        name@pl:
+          type: string
+        name@pt:
+          type: string
+        name@ru:
+          type: string
+        name@sv:
+          type: string
+        name@el:
+          type: string
+        name@cs:
+          type: string
+        name@tr:
+          type: string
+
+    TranslatedDescription:
+      type: object
+      properties:
+        description:
+          type: string
+        description@en:
+          type: string
+        description@es:
+          type: string
+        description@fr:
+          type: string
+        description@it:
+          type: string
+        description@nl:
+          type: string
+        description@de:
+          type: string
+        description@zh:
+          type: string
+        description@da:
+          type: string
+        description@fi:
+          type: string
+        description@nb:
+          type: string
+        description@pl:
+          type: string
+        description@pt:
+          type: string
+        description@ru:
+          type: string
+        description@sv:
+          type: string
+        description@el:
+          type: string
+        description@cs:
+          type: string
+        description@tr:
+          type: string
 
     Uri:
       type: string

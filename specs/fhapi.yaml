@@ -313,7 +313,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/AuxilaryDataId"
-          example: "0"
+          example: 0
       requestBody:
         description: New value
         required: true
@@ -1033,7 +1033,6 @@ components:
           devices:
             $ref: "#/components/schemas/Devices"
       example:
-        {
           "00000000-0000-0000-0000-000000000000":
             {
               "devices":
@@ -1071,12 +1070,10 @@ components:
                             },
                         },
                       "displayName": "Test",
-                      "nativeId": "47110815AA",
-                      "unresponsive": false,
+                      "nativeId": "47110815AA"
                     },
                 },
-            },
-        }
+            }
     ApiRestDevice_sysap__device_Get502TextPlainResponse:
       type: string
       example: FreeAtHome Connection Timeout
@@ -1089,7 +1086,8 @@ components:
             type: array
             items:
               type: string
-      example: { "00000000-0000-0000-0000-000000000000": { "values": ["1"] } }
+      example: 
+        "00000000-0000-0000-0000-000000000000": { "values": ["1"] }
     ApiRestDatapoint_sysap__serial_PutRequest:
       type: string
       example: "1"
@@ -1110,7 +1108,13 @@ components:
         ["Song 1", "Song 2"]
     ApiRestDatapoint_sysap__serial_Put200TextPlainResponse:
       type: object
-      example: { "00000000-0000-0000-0000-000000000000": { "result": "OK" } }
+      additionalProperties:
+        type: object
+        properties:
+          result:
+            type: string
+      example: 
+        "00000000-0000-0000-0000-000000000000": { "result": "OK" }
     ApiRestDatapoint_sysap__serial_Put502TextPlainResponse:
       type: string
       example: FreeAtHome Connection Timeout
@@ -1128,10 +1132,8 @@ components:
                 serial:
                   type: string
       example:
-        {
-          "00000000-0000-0000-0000-000000000000":
-            { "devices": { "abcd12345": { "serial": "6000D2CB27B2" } } },
-        }
+        "00000000-0000-0000-0000-000000000000":
+          { "devices": { "abcd12345": { "serial": "6000D2CB27B2" } } }
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid
