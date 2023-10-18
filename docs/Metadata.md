@@ -106,7 +106,13 @@ attributes marked as `optional` can be omitted, if it provides no benefit for th
   can be used to configure the Addon for a specific user. One possible example use for this is
   address, username and password of an external device that should be controlled by the Addon.
 
-  See the dedicated parameters section below for details.
+  See the dedicated [parameters](Metadata#abb-freehome-addon-parameters) section below for details.
+
+- `wizards` (optional)
+
+  This attribute can contain a JSON object that define wizards that help the user to configure the parameters.
+
+  See the dedicated [wizards](Metadata#abb-freehome-addon-wizards) section below for details.
 
 A sample metadata JSON file looks like this:
 
@@ -182,25 +188,54 @@ With this file, the free@home next App and the System Access Point web interface
 
 ![Screenshot of parameters in the app](img/metadata/parameters.png)
 
-What type of input field is displayed to the user, depends on the `type` field and depending on the
-`type`, possibly additional data (most notably `min` and `max`, specifying the range and `value` for
-the default value to use). The `name` is what is displayed to the user for this parameter.
+All parameters can show additional information to explain what the user can configure with it by adding an optional `description`, e.g.
+
+```json
+"address": {
+    "name": "Address",
+    "description": "Enter the IP address of the server.",
+    "type": "ipv4"
+}
+```
+
+#### Translatable attributes
+
+Some attributes inside the parameter definition can be defined for multiple languages. Those are `name` and `description`. Example:
+
+```json
+"address": {
+    "name": "Address",
+    "name@de": "Adresse",
+    "description": "Enter the IP address of the server.",
+    "description@de": "Geben Sie die IP-Adresse des Servers ein.",
+    "type": "ipv4"
+}
+```
+
+#### Types
+
+What type of input field is displayed to the user, depends on the `type` attribute and depending on the `type`, possibly additional data (most notably `min` and `max`, specifying the range and `default` for the default value to use). The `name` is what is displayed to the user for this parameter.
+
 
 Possible types are:
 
+##### Editable types
+
 - `number`
 
-  This type has a `min` and a `max` argument, in addition to the `name` and `type`, specifying the
-  range of valid values.
+  This type has additional `min` and `max` fields, specifying the range of valid values.
 
 - `string`
 
   The user can enter a normal string here.
 
+- `multilinestring`
+
+  The user can enter a string with multiple lines here.
+
 - `password`
 
-  Similar to `string`, but will be displayed as password instead, i.e. the text is not visible in
-  clear text when displayed to the user.
+  Similar to `string`, but will be displayed as password instead, i.e. the text is not visible in clear text when displayed to the user.
 
 - `boolean`
 
@@ -210,18 +245,176 @@ Possible types are:
 
   This type allows the user to enter an IPv4 address.
 
+- `date`
+
+  The user can enter a date here.
+
+- `time`
+
+  Shows a time field where the user can enter a time value in format `HH:MM`
+
+- `weekdays`
+
+  The user can select weekdays here. The result value is a string with a concatenated list of weekday numbers (1 = Monday to 7 = Sunday), e.g. a selection
+  of Tuesday, Thursday and Saturday would result in a value of "246".
+
+- `select`
+
+  Shows a list of values to select one. The list of selections has to be added as `options`:
+
+  ```json
+  "meterType": {
+      "name": "Type",
+      "type": "select",
+      "options": [
+          {"key": "main-meter", "name": "Main meter"},
+          {"key": "sub-meter", "name": "Consumer meter"},
+          {"key": "inverter", "name": "Inverter"},
+          {"key": "battery", "name": "Battery"}
+      ]
+  }
+  ```
+
+  The `name` attribute in the options is also translatable:
+
+  ```json
+  {"key": "main-meter", "name": "Main meter", "name@de": "Hauptzähler"},
+  ```
+
+- `floor`
+
+  Shows a list of floors to select one.
+
+- `room`
+
+  Shows a list of rooms to select one.
+
+- `channel`
+
+  Shows a list of free@home channels to select one.
+
+- `scanQRCode`
+
+  Shows a text-field where you can enter a code manually or scan it from
+  an QR-Code.
+
+- `jsonSelector`
+
+  Allows the user to select a value from a complex json object. Example:
+
+  ```json
+  "power": {
+      "name": "Power",
+      "type": "jsonSelector",
+      "json": {
+        "ENERGY": {
+          "Power": 10,
+          "EnergyTotal": 678,
+          "EnergyToday": 5
+        }
+      }
+  }
+  ```
+
+  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.
+
+##### Read-only types
+
 - `text`
 
-  This is a read-only type. The specified text is simply displayed to the user.
+  The specified text is displayed to the user.
 
-- `date`
-- `time`
-- `duration`
-- `weekdays`
-- `floor`
-- `room`
-- `channel`
-- `select`
+- `error`
+
+  Like `text` but the content is displayed with red color.
+
+- `separator`
+
+  Shows a horizontal line. Can be used to separate a some parameters from others. If you add a `name` it is shown as a title for this groups, if you add a `description` it is shown as text below the title.
+
+- `displayQRCode`
+
+  Shows the value as QR-Code.
+
+#### Additional parameter attributes
+
+Beside the already explained `name`, `type` and `description` attributes there are some special attributes that can be optionally added to a parameter definition:
+
+- `required`
+
+  If this is added with a `true` value this parameter value is required. The user can not save the settings unless this parameter has a value.
+
+- `default`
+
+  Specifies a default value for this parameter.
+
+- `event`
+
+  The value of this parameter is not saved in the settings but send as an event when the user clicks on the send button that is show underneath this parameter.
+
+- `dependsOn`
+
+  Allows to define that a parameter is only shown, when another parameter has a specific value. Also requires the additional `dependsOnValues` attribute. Example:
+
+  ```json
+  "connectionType": {
+      "name": "Connection",
+      "type": "select",
+      "required": true,
+      "options": [{"key": "USB"}, {"key": "MQTT"}],
+  },
+  "mqttType": {
+      "name": "MQTT type",
+      "type": "select",
+      "options": [
+        {"key": "generic", "name": "Generic"}, 
+        {"key": "tasmota", "name": "tasmota"}
+      ],
+      "dependsOn": "connectionType",
+      "dependsOnValues": ["MQTT"]
+  }
+  ```
+
+  In this example the `mqttType` parameter is only shown when the `connectionType` parameter has the value `MQTT`. `dependsOnValues` is an array of possible values to check.
+
+  The `dependsOn` attribute has another special usage only for parameters of the `select`-type. You can change the list of `options` depending on another parameters value. Example:
+
+  ```json
+  "meterType": {
+        "name": "Type",
+        "type": "select",
+        "required": true,
+        "options": [
+            {"key": "main-meter", "name": "Main meter"},
+            {"key": "sub-meter", "name": "Consumer meter"},
+            {"key": "inverter", "name": "Inverter"},
+            {"key": "battery", "name": "Battery"},
+            {"key": "gas-meter", "name": "Gas meter"},
+            {"key": "water-meter", "name": "Water meter"}
+        ]
+    },
+    "connectionType": {
+        "name": "Connection",
+        "type": "select",
+        "required": true,
+        "options": [{"key": "USB"}, {"key": "MQTT"}],
+        "dependsOn": "meterType",
+        "dependsOnOptions": [
+              {
+                "values": ["gas-meter", "water-meter"], 
+                "options": [{"key": "MQTT"}]
+              }
+        ]
+    }
+    ```
+
+    In this example the `connectionType` shows the options `"options": [{"key": "MQTT"}]` when `meterType` has the value `gas-meter` or `water-meter`.
+
+
+- `debug`
+
+  If this is added with a `true` value this parameter is only shown, when the app is in debug mode.
+
 
 #### Parameter groups
 
@@ -274,3 +467,11 @@ the Addon. The configured value will show up in the `Configuration`of the Addon,
 
 Please see the [writing Addons section](Writing-addons) for more information about using
 the configuration parameters in the Addon.
+
+### ABB free@home Addon wizards
+
+> **NOTE:** Requires free@home app version >= 2.4.0
+
+For complex parameter settings you have to option to divide the
+configuration into separate consecutive steps by using a wizard.
+A wizard can create and/or edit a parameter group.

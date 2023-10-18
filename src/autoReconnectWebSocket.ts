@@ -6,7 +6,7 @@ import { EventEmitter } from 'events';
 interface Events {
     open(): void,
     close(code: number, reason: string): void,
-    message(message: string): void,
+    message(message: WebSocket.Data): void,
 }
 
 export declare interface AutoReconnectWebSocket {
@@ -36,7 +36,7 @@ export class AutoReconnectWebSocket extends EventEmitter {
         this.websocketBaseUrl = (useUnixSocket)
             ? "ws+unix:///run" + url.pathname + ":" + subApiPath
             : baseUrl.replace(/^(http)/, "ws") + subApiPath;
-        console.log(this.websocketBaseUrl);
+        console.log('using socket:', this.websocketBaseUrl);
 
         this.headers = {
             ...authenticationHeader
@@ -44,6 +44,7 @@ export class AutoReconnectWebSocket extends EventEmitter {
 
         this.connectWebsocket();
 
+        // @ts-ignore
         if (typeof window === 'undefined') {
             this.pingTimer = setInterval(() => {
                 if (this.websocket !== undefined && this.websocket.OPEN == this.websocket.readyState) {
@@ -60,6 +61,7 @@ export class AutoReconnectWebSocket extends EventEmitter {
     private connectWebsocket() {
         this.pongReceived = true;
         try {
+            // @ts-ignore
             if (typeof window === 'undefined') {
                 this.websocket = new WebSocket(this.websocketBaseUrl, {
                     headers: {
@@ -122,7 +124,7 @@ export class AutoReconnectWebSocket extends EventEmitter {
         this.pongReceived = true;
     }
 
-    private onMmessage(message: string) {
+    private onMmessage(message: WebSocket.Data) {
         this.emit('message', message);
     };
 

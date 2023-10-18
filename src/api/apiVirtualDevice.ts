@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
-import * as api from "../api";
+import * as api from "../fhapi";
 import { PairingIds } from "../pairingIds";
 import { ParameterIds } from '../parameterIds';
 import { FreeAtHomeApi, IndexedDatapoint, Datapoint } from '../freeAtHomeApi';
@@ -114,7 +114,7 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
         return this.freeAtHomeApi.setAuxiliaryData(this.serialNumber, channel, index, auxiliaryData);
     }
 
-    public async patchDevice(patch: api.ApiRestDeviceSysapSerialPatchRequest): Promise<void> {
+    public async patchDevice(patch: api.ApiRestDevice_sysap__serial_PatchRequest): Promise<void> {
         return this.freeAtHomeApi.patch(this.serialNumber, patch);
     }
 }

@@ -1,0 +1,1174 @@
+openapi: 3.0.1
+info:
+  title: free@home API
+  description: free@home is the leading Smart Home System from ABB.
+  version: v1
+servers:
+  - url: https://{hostname}/fhapi/v1
+    variables:
+      hostname:
+        default: 192.168.2.1
+        description: Hostname of the System Access Point or IP Address
+paths:
+  /api/rest/configuration:
+    get:
+      tags:
+        - api
+      summary: Get configuration
+      description:
+        "Get configuration for all user registered System Access Points, this
+        includes the schema for all devices, channels and data points, the floorplan and
+        current user information.
+        \n\n
+        The response body is a JSON object that uses the SysAP UUID of each SysAP of the
+        requesting user account as key. The configuration of that SysAP is the corresponding
+        value and is again a JSON object.
+        \n\n
+        You can find further description and an example of the returned data model in the
+        [documentation](https://developer.eu.mybuildings.abb.com/fah_cloud/concepts/#data-model)
+        and an example of this request in the
+        [samples](https://developer.eu.mybuildings.abb.com/fah_cloud/samples/#query-the-configuration)."
+      operationId: getconfiguration
+      responses:
+        "200":
+          description: Configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Configuration"
+        "502":
+          description: free@home error
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiRestConfigurationGet502TextPlainResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /api/rest/devicelist:
+    get:
+      tags:
+        - api
+      summary: Get devicelist
+      description: "Get list of devices for all System Access Points.
+        \n\n
+        This endpoint is similar to the /api/rest/configuration endpoint,
+        but only provides access to the list of Device IDs that are known
+        by each SysAP, not their corresponding configuration."
+      operationId: getdevicelist
+      responses:
+        "200":
+          description: Devicelist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Devicelist"
+        "502":
+          description: free@home error
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiRestDevicelistGet502TextPlainResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/api/rest/device/{sysap}/{device}":
+    get:
+      tags:
+        - api
+      summary: Get device
+      description: "Get configuration information for given device.
+        \n\n
+        This endpoint is similar to the /api/rest/configuration endpoint,
+        but except for returning the full configuration of all SysAPs,
+        it returns the configuration of a single device in a single SysAP
+        only and therefore is much faster and requires less bandwidth.
+        \n\n
+        The response body is a JSON object that maps the (single) SysAP
+        UUID to an object that contains \"devices\" object (only) which
+        in turn holds the specified device object (only).
+        \n\n
+        See also the [documentation](https://developer.eu.mybuildings.abb.com/fah_cloud/concepts/#data-model)
+        for the meaning of the contents of the device object."
+      operationId: getdevice
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: device
+          in: path
+          description: Device Serial
+          required: true
+          schema:
+            $ref: "#/components/schemas/DeviceSerial"
+          example: "6000D2CB27B2"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRestDevice_sysap__device_Get200ApplicationJsonResponse"
+        "502":
+          $ref: "#/components/responses/BadGatewayError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      tags:
+        - api
+      summary: Modify device properties
+      description: "Modify device properties"
+      operationId: patchDevice
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: device
+          in: path
+          description: Device Serial
+          required: true
+          schema:
+            $ref: "#/components/schemas/DeviceSerial"
+          example: "6000361C823E"
+      requestBody:
+        description: New value
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRestDevice_sysap__serial_PatchRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRestDevice_sysap__device_Get200ApplicationJsonResponse"
+        "502":
+          $ref: "#/components/responses/BadGatewayError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/api/rest/datapoint/{sysap}/{device}.{channel}.{datapoint}":
+    get:
+      tags:
+        - api
+      summary: Get datapoint value
+      description: "Get the current value of a given datapoint.
+        See the
+        [documentation on datapoints](https://developer.eu.mybuildings.abb.com/fah_cloud/concepts/#input-and-output-datapoints)
+        for further information and the
+        [samples](https://developer.eu.mybuildings.abb.com/fah_cloud/samples/#query-a-datapoint)
+        for an example."
+      operationId: getdatapoint
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: device
+          in: path
+          description: "Datapoint Serial.
+            as obtained from e.g. a
+            /api/rest/configuration call."
+          required: true
+          schema:
+            $ref: "#/components/schemas/DeviceSerial"
+          example: "6000D2CB27B2"
+        - name: channel
+          in: path
+          description: "Channel of a device.
+            Selects a channel in a device, as obtained from e.g. a
+            /api/rest/configuration call."
+          required: true
+          schema:
+            $ref: "#/components/schemas/ChannelSerial"
+          example: "ch0000"
+        - name: datapoint
+          in: path
+          description: "Datapoint Serial.
+            Selects a datapoint in a channel of a device."
+          required: true
+          schema:
+            $ref: "#/components/schemas/DatapointSerial"
+          example: "odp0000"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRestDatapoint_sysap__serial_Get200ApplicationJsonResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      tags:
+        - api
+      summary: Set datapoint value
+      description: "Set a new value for a given datapoint.
+        See the
+        [documentation on datapoints](https://developer.eu.mybuildings.abb.com/fah_cloud/concepts/#input-and-output-datapoints)
+        for further information and the
+        [samples](https://developer.eu.mybuildings.abb.com/fah_cloud/samples/#set-a-datapoint)
+        for an example."
+      operationId: putdatapoint
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: device
+          in: path
+          description: "Datapoint Serial.
+            as obtained from e.g. a
+            /api/rest/configuration call."
+          required: true
+          schema:
+            $ref: "#/components/schemas/DeviceSerial"
+          example: "6000D2CB27B2"
+        - name: channel
+          in: path
+          description: "Channel of a device.
+            Selects a channel in a device, as obtained from e.g. a
+            /api/rest/configuration call."
+          required: true
+          schema:
+            $ref: "#/components/schemas/ChannelSerial"
+          example: "ch0000"
+        - name: datapoint
+          in: path
+          description: "Datapoint Serial.
+            Selects a datapoint in a channel of a device."
+          required: true
+          schema:
+            $ref: "#/components/schemas/DatapointSerial"
+          example: "odp0000"
+      requestBody:
+        description: New value
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/ApiRestDatapoint_sysap__serial_PutRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRestDatapoint_sysap__serial_Put200TextPlainResponse"
+        "502":
+          $ref: "#/components/responses/BadGatewayError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/api/rest/auxiliarydata/{sysap}/{device}/{channel}/{index}":
+    put:
+      tags:
+        - api
+      summary: Set auxiliary data for a channel
+      description: "Set auxiliary data for a channel."
+      operationId: putAuxiliaryData
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: device
+          in: path
+          description: "Datapoint Serial.
+            as obtained from e.g. a
+            /api/rest/configuration call."
+          required: true
+          schema:
+            $ref: "#/components/schemas/DeviceSerial"
+          example: "6000D2CB27B2"
+        - name: channel
+          in: path
+          description: "Channel of a device.
+            Selects a channel in a device, as obtained from e.g. a
+            /api/rest/configuration call."
+          required: true
+          schema:
+            $ref: "#/components/schemas/ChannelSerial"
+          example: "ch0000"
+        - name: index
+          in: path
+          description: "Index of the auxilary data.
+            Selects auxilary data in a channel of a device."
+          required: true
+          schema:
+            $ref: "#/components/schemas/AuxilaryDataId"
+          example: "0"
+      requestBody:
+        description: New value
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRestAuxiliarydata"
+      responses:
+        "200":
+          description: Success
+        "502":
+          $ref: "#/components/responses/BadGatewayError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /api/ws:
+    get:
+      summary: Websocket connection
+      description: "This endpoint is used to open a websocket connection.
+        In order to use this endpoint, you must use a websocket implementation and use the \"wss://\"
+        protocol schema instead of \"https\",a normal http request on this URL will fail.
+        \n\n
+        When the websocket has been opened successfully, the client will receive events from the
+        free@home cloud for all registered SysAPs in the account of the requester.
+        \n\n
+        Also note that this call can NOT be tested by using the swagger ui frontend (the \"Try it\" button).
+        You must use a websocket implementation for this request, the portal does not support this.
+        See the [websocket section](https://developer.eu.mybuildings.abb.com/fah_cloud/concepts/#websocket) in the documentation for an example."
+      operationId: ws
+      responses:
+        "101":
+          description: "Switching protocols (websocket success).
+            This response code is sent to indicate that the connection is upgraded from an HTTP to a websocket connection.
+            You should normally not see this response code, the library/code that implements the websocket should have handled this."
+        "418":
+          description: "This code will never replied from the server.
+            This response code only exists to document the schema of messages that are send by the server on the websocket."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsocketMessage"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/api/rest/virtualdevice/{sysap}/{serial}":
+    put:
+      tags:
+        - api
+      summary: Create virtual device
+      description: "Create a virtual device inside free@home.
+        You can choose a serialnumber freely.
+        The following devices can be created:
+        <ul>
+        <li>BinarySensor</li>
+        <li>SwitchingActuator </li>
+        <li>CeilingFanActuator </li>
+        <li>RTC </li>
+        <li>DimActuator </li>
+        <li>WindowSensor </li>
+        <li>ShutterActuator </li>
+        <li>WeatherStation </li>
+        <li>Weather-TemperatureSensor </li>
+        <li>Weather-WindSensor </li>
+        <li>Weather-BrightnessSensor </li>
+        <li>Weather-RainSensor </li>
+        <li>CODetector </li>
+        <li>FireDetector</li>
+        <li>KNX-SwitchSensor</li>
+        <li>MediaPlayer</li>
+        <li>EnergyBattery</li>
+        <li>EnergyInverter</li>
+        <li>EnergyMeter</li>
+        <li>EnergyInverterBattery</li>
+        <li>EnergyInverterMeter</li>
+        <li>EnergyInverterMeterBattery</li>
+        <li>EnergyMeterBattery</li>
+        <li>AirQualityCO2</li>
+        <li>AirQualityCO</li>
+        <li>AirQualityFull</li>
+        <li>AirQualityHumidity</li>
+        <li>AirQualityNO2</li>
+        <li>AirQualityO3</li>
+        <li>AirQualityPM10</li>
+        <li>AirQualityPM25</li>
+        <li>AirQualityPressure</li>
+        <li>AirQualityTemperature</li>
+        <li>AirQualityVOC</li>
+        </ul>
+        \n\n
+        As response you should recieve a success message with internal serialnumber granted by the SysAP for that virtual device.
+        Now you can continue working with that virtual device as with any other native free@home component via free@home API.
+        \n\n
+        This endpoint is also used to update the TTL regularly per device.
+        When the application does not call this endpoint every TTL seconds (defaults to 180),
+        the SysAP will mark the virtual device as unresponsive until a newlife sign is send.
+        Changes to the datapoints can be sent via the /api/rest/datapoint/ endpoint.
+        \n\n
+        Please find further description in the [virtual device documentation](https://developer.eu.mybuildings.abb.com/fah_cloud/concepts/#virtual-devices)
+        and an example in the [samples](https://developer.eu.mybuildings.abb.com/fah_cloud/samples/#how-to-register-a-virtual-device)."
+      operationId: create-virtual-device
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: serial
+          in: path
+          description: serialnumber for virtual device (choose freely)
+          required: true
+          schema:
+            $ref: "#/components/schemas/NativeSerial"
+          example: "abcd12345"
+      requestBody:
+        description: Optional description in *JSON*
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VirtualDevice"
+      responses:
+        "200":
+          description: successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualDevicesSuccess"
+        "502":
+          $ref: "#/components/responses/BadGatewayError"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /api/rest/notification:
+    post:
+      tags:
+        - api
+      summary: Post a notification
+      description:
+        "Post a notification"
+      operationId: postnotification
+      requestBody:
+        description: New value
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Notification"
+      responses:
+        "200":
+          description: Notification
+          content:
+            application/json:
+              schema:
+                type: object
+        "502":
+          description: free@home error
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiRestConfigurationGet502TextPlainResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/api/rest/proxydevice/{sysap}/{deviceClass}/{device}/action/{action}":
+    get:
+      tags:
+        - "experimental api"
+      summary: Trigger proxy device
+      description: "Trigger proxy device"
+      operationId: proxydevice
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: deviceClass
+          in: path
+          description: "device class"
+          required: true
+          schema:
+            $ref: "#/components/schemas/DeviceClass"
+          example: "pushbutton"
+        - name: device
+          in: path
+          description: "individual device ID"
+          required: true
+          schema:
+            $ref: "#/components/schemas/NativeSerial"
+          example: "shelly"
+        - name: action
+          in: path
+          description: "action to execute"
+          required: true
+          schema:
+            type: string
+            enum:
+              - "shortpress"
+              - "doublepress"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRestDevice_sysap__device_Get200ApplicationJsonResponse"
+        "502":
+          $ref: "#/components/responses/BadGatewayError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/api/rest/proxydevice/{sysap}/{deviceClass}/{device}/value/{value}":
+    put:
+      tags:
+        - "experimental api"
+      summary: Set proxy device value
+      description: "Set proxy device value"
+      operationId: proxydevice_value
+      parameters:
+        - name: sysap
+          in: path
+          description: SysAP UUID
+          required: true
+          schema:
+            $ref: "#/components/schemas/SysapUuid"
+          example: "00000000-0000-0000-0000-000000000000"
+        - name: deviceClass
+          in: path
+          description: "device class"
+          required: true
+          schema:
+            $ref: "#/components/schemas/DeviceClass"
+          example: "temperaturesensor"
+        - name: device
+          in: path
+          description: "individual device ID"
+          required: true
+          schema:
+            $ref: "#/components/schemas/NativeSerial"
+          example: "shelly"
+        - name: value
+          in: path
+          description: "value to be set"
+          required: true
+          schema:
+            type: string
+            enum:
+              - "temperature"
+              - "alarm"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRestDevice_sysap__device_Get200ApplicationJsonResponse"
+        "502":
+          $ref: "#/components/responses/BadGatewayError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        detail:
+          type: string
+        title:
+          type: string
+      nullable: true
+      example:
+        code: "2010"
+        detail: FreeAtHome connection timeout
+        title: Connection Error
+    SysapUuid:
+      type: string
+      pattern: "^0{8}-0{4}-0{4}-0{4}-0{12}$"
+    DeviceSerial:
+      type: string
+      pattern: "^[0-9A-Fa-f]{12}$"
+    ChannelSerial:
+      type: string
+      pattern: "^ch[0-9A-Fa-f]{4}$"
+    DatapointSerial:
+      type: string
+      pattern: "^[io]dp[0-9A-Fa-f]{4}$"
+    DeviceAndEndPontSerial:
+      type: string
+      pattern: "^[0-9A-Fa-f]{12}.ch[0-9A-Fa-f]{4}.[io]dp[0-9A-Fa-f]{4}$"
+    NativeSerial:
+      type: string
+      pattern: "^[a-zA-Z0-9\\-_]{1,64}$"
+    AuxilaryDataId:
+      type: integer
+      minimum: 0
+    DeviceClass:
+      type: string
+      enum:
+        - "doorring"
+        - "pushbutton"
+        - "smokedetector"
+        - "temperaturesensor"
+    Rooms:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          name:
+            type: string
+    Floors:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          name:
+            type: string
+          rooms:
+            $ref: "#/components/schemas/Rooms"
+    InOutPut:
+      type: object
+      properties:
+        pairingID:
+          type: integer
+        value:
+          type: string
+    Channel:
+      type: object
+      properties:
+        displayName:
+          type: string
+        functionID:
+          type: string
+        room:
+          type: string
+        floor:
+          type: string
+        inputs:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/InOutPut"
+        outputs:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/InOutPut"
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+        type:
+          type: string
+    Devices:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/Device"
+    Device:
+      type: object
+      properties:
+        displayName:
+          type: string
+        room:
+          type: string
+        floor:
+          type: string
+        interface:
+          type: string
+        nativeId:
+          type: string
+        channels:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Channel"
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+    Users:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+          flags:
+            type: array
+            items:
+              type: string
+          grantedPermissions:
+            type: array
+            items:
+              type: string
+          jid:
+            type: string
+          name:
+            type: string
+          requestedPermissions:
+            type: array
+            items:
+              type: string
+          role:
+            type: string
+      example:
+        foobar-fhapi:
+          enabled: true
+          flags:
+            - oauth
+            - randomPassword
+            - system
+          grantedPermissions:
+            - ""
+            - oauth
+            - randomPassword
+            - system
+          requestedPermissions:
+            - ""
+            - oauth
+            - randomPassword
+            - system
+          role: switch
+          name: foobar-fhapi
+          jid: foobar-fhapi@busch-jaeger.de
+    SysAP:
+      type: object
+      properties:
+        devices:
+          $ref: "#/components/schemas/Devices"
+        floorplan:
+          type: object
+          properties:
+            floors:
+              $ref: "#/components/schemas/Floors"
+        sysapName:
+          type: string
+        users:
+          $ref: "#/components/schemas/Users"
+        error:
+          $ref: "#/components/schemas/Error"
+      description: SysAP
+    Configuration:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/SysAP"
+      description: Configuration for all SysAPs
+    Devicelist:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string
+          description: Device Serial Number
+      example:
+        3c542979-abe2-43ad-9ce0-f7d2b14b8d48:
+          - ABB700000000
+    VirtualDeviceType:
+      type: string
+      enum:
+        - "BinarySensor"
+        - "BlindActuator"
+        - "SwitchingActuator"
+        - "CeilingFanActuator"
+        - "RTC"
+        - "DimActuator"
+        - "evcharging"
+        - "WindowSensor"
+        - "simple_doorlock"
+        - "ShutterActuator"
+        - "WeatherStation"
+        - "Weather-TemperatureSensor"
+        - "Weather-WindSensor"
+        - "Weather-BrightnessSensor"
+        - "Weather-RainSensor"
+        - "WindowActuator"
+        - "CODetector"
+        - "FireDetector"
+        - "KNX-SwitchSensor"
+        - "MediaPlayer"
+        - "EnergyBattery"
+        - "EnergyInverter"
+        - "EnergyMeter"
+        - "EnergyInverterBattery"
+        - "EnergyInverterMeter"
+        - "EnergyInverterMeterBattery"
+        - "EnergyMeterBattery"
+        - "AirQualityCO2"
+        - "AirQualityCO"
+        - "AirQualityFull"
+        - "AirQualityHumidity"
+        - "AirQualityNO2"
+        - "AirQualityO3"
+        - "AirQualityPM10"
+        - "AirQualityPM25"
+        - "AirQualityPressure"
+        - "AirQualityTemperature"
+        - "AirQualityVOC"
+        - "EnergyMeterv2"
+        - "HomeAppliance-Laundry"
+        - "HVAC"
+        - "SplitUnit"
+    VirtualDevice:
+      type: object
+      required:
+        - "type"
+      properties:
+        type:
+          $ref: "#/components/schemas/VirtualDeviceType"
+        properties:
+          type: "object"
+          properties:
+            ttl:
+              type: "string"
+            displayname:
+              type: "string"
+            flavor:
+              type: "string"
+            capabilities:
+              type: array      
+              items:
+                type: integer
+      example:
+        {
+          "type": "SwitchingActuator",
+          "properties": { "ttl": "180", "displayname": "Virtual switch" },
+        }
+    NotificationContentEntry:
+      type: object
+      properties:
+        title:
+          type: "string"
+        body:
+          type: "string"
+    Notification:
+      type: object
+      properties:
+        formatVersion:
+          type: "integer"
+          minimum: 1
+          maximum: 1
+        topicId:
+          type: "string"
+        timeoutMinutes:
+          type: "integer"
+          minimum: 0
+          maximum: 129600
+        displayHints:
+          type: "array"
+          items:
+            type: "string"
+            enum:
+              - "styleInfo"
+              - "styleWarn"
+              - "styleAlert"
+              - "modal"
+              - "fixed"
+              - "hideIfAnswered"
+        retention:
+          type: "number"
+          minimum: 1
+          maximum: 30
+        terminals:
+          type: "array"
+          items:
+            type: "string"
+            enum:
+              - "ui"
+              - "panel"
+              - "push-notification"
+        subjectResource:
+          type: "string"
+        senderResource:
+          type: "string"
+        auxId:
+          type: "string"
+        content:
+          type: object
+          properties:
+            utf8:
+              type: object
+              properties:
+                  en:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  es:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  fr:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  it:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  nl:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  de:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  zh:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  da:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  fi:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  nb:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  pl:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  pt:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  ru:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  sv:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  el:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  cs:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+                  tr:
+                    $ref: "#/components/schemas/NotificationContentEntry"
+      required:
+        - "formatVersion"
+        - "topicId"
+        - "timeoutMinutes"
+        - "retention"
+        - "terminals"
+        - "content"
+      example:
+        {
+          "formatVersion": 1,
+          "topicId": "org.example.test",
+          "timeoutMinutes": 1,
+          "displayHints": [
+            "styleInfo"
+          ],
+          "retention": 1,
+          "terminals": [
+            "ui"
+          ],
+          "content": {
+            "utf8": {
+              "de": {
+                "title": "Test Nachricht",
+                "body": "Test"
+              },
+              "en": {
+                "title": "Test message",
+                "body": "Test"
+              }
+            }
+          }
+        }
+    ScenesTriggered:
+      type: object
+      additionalProperties:
+        type: object
+        required:
+          - "channels"
+        properties:
+          channels:
+            type: object
+            additionalProperties:
+              type: object
+              required:
+                - "outputs"
+              properties:
+                outputs:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    required:
+                      - "value"
+                      - "pairingID"
+                    properties:
+                      value:
+                        type: string
+                      pairingID:
+                        type: integer
+    WebsocketMessage:
+      type: object
+      additionalProperties:
+        type: object
+        required:
+          - datapoints
+          - devices
+          - devicesAdded
+          - devicesRemoved
+          - scenesTriggered
+        properties:
+          datapoints:
+            type: object
+            additionalProperties:
+              type: string
+          devices:
+            type: object
+            additionalProperties:
+              $ref: "#/components/schemas/Devices"
+          devicesAdded:
+            type: array
+            items:
+              type: string
+          devicesRemoved:
+            type: array
+            items:
+              type: string
+          scenesTriggered:
+            $ref: "#/components/schemas/ScenesTriggered"
+          parameters:
+            type: object
+            additionalProperties:
+              type: string
+    ApiRestConfigurationGet502TextPlainResponse:
+      type: string
+      example: FreeAtHome Connection Timeout
+    ApiRestDevicelistGet502TextPlainResponse:
+      type: string
+      example: FreeAtHome Connection Timeout
+    ApiRestDevice_sysap__device_Get200ApplicationJsonResponse:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          devices:
+            $ref: "#/components/schemas/Devices"
+      example:
+        {
+          "00000000-0000-0000-0000-000000000000":
+            {
+              "devices":
+                {
+                  "600028E1ED13":
+                    {
+                      "channels":
+                        {
+                          "ch0000":
+                            {
+                              "displayName": "Test",
+                              "functionID": "0007",
+                              "inputs":
+                                {
+                                  "idp0000": { "pairingID": 1, "value": "0" },
+                                  "idp0001": { "pairingID": 2, "value": "0" },
+                                  "idp0002": { "pairingID": 3, "value": "0" },
+                                  "idp0003": { "pairingID": 4, "value": "0" },
+                                  "idp0004": { "pairingID": 6, "value": "0" },
+                                  "idp0005": { "pairingID": 48, "value": "" },
+                                  "idp0006": { "pairingID": 323, "value": "" },
+                                  "idp0007": { "pairingID": 333, "value": "" },
+                                  "idp0008": { "pairingID": 334, "value": "" },
+                                },
+                              "outputs":
+                                {
+                                  "odp0000": { "pairingID": 256, "value": "0" },
+                                  "odp0001": { "pairingID": 257, "value": "0" },
+                                  "odp0002": { "pairingID": 273, "value": "" },
+                                  "odp0003": { "pairingID": 305, "value": "" },
+                                  "odp0004": { "pairingID": 321, "value": "" },
+                                  "odp0005": { "pairingID": 335, "value": "" },
+                                  "odp0006": { "pairingID": 336, "value": "" },
+                                },
+                            },
+                        },
+                      "displayName": "Test",
+                      "nativeId": "47110815AA",
+                      "unresponsive": false,
+                    },
+                },
+            },
+        }
+    ApiRestDevice_sysap__device_Get502TextPlainResponse:
+      type: string
+      example: FreeAtHome Connection Timeout
+    ApiRestDatapoint_sysap__serial_Get200ApplicationJsonResponse:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          values:
+            type: array
+            items:
+              type: string
+      example: { "00000000-0000-0000-0000-000000000000": { "values": ["1"] } }
+    ApiRestDatapoint_sysap__serial_PutRequest:
+      type: string
+      example: "1"
+    ApiRestDevice_sysap__serial_PatchRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+      example:
+        {
+          "displayName": "Kitchen switch"
+        }
+    ApiRestAuxiliarydata:
+      type: array
+      items:
+        type: string
+      example:
+        ["Song 1", "Song 2"]
+    ApiRestDatapoint_sysap__serial_Put200TextPlainResponse:
+      type: object
+      example: { "00000000-0000-0000-0000-000000000000": { "result": "OK" } }
+    ApiRestDatapoint_sysap__serial_Put502TextPlainResponse:
+      type: string
+      example: FreeAtHome Connection Timeout
+    VirtualDevicesSuccess:
+      description: payload contains new generated device id
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          devices:
+            type: object
+            additionalProperties:
+              type: object
+              properties:
+                serial:
+                  type: string
+      example:
+        {
+          "00000000-0000-0000-0000-000000000000":
+            { "devices": { "abcd12345": { "serial": "6000D2CB27B2" } } },
+        }
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        text/plain:
+          schema:
+            type: string
+    
+    NotFoundError:
+      description: Resource not found
+      content:
+        text/plain:
+          schema:
+            type: string
+    
+    BadRequestError:
+      description: Bad Request from Client
+      content:
+        text/plain:
+          schema:
+            type: string
+
+    BadGatewayError:
+      description: Could not connect to internal service. Is the local API enabled?
+      content:
+        text/plain:
+          schema:
+            type: string
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+security:
+  - basicAuth: []
+tags:
+  - name: api
+    description: Main API
+  - name: "experimental api"
+    description: Experimental API

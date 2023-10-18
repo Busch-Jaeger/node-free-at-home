@@ -72,7 +72,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     private lastVolume: number = 0;
     static readonly volumeChangeInterval = 4;
     static readonly volumeIntervalTime = 500;
-    private volumeIntervalTimer: NodeJS.Timer | undefined = undefined
+    private volumeIntervalTimer: ReturnType<typeof setInterval> | undefined = undefined
 
     private stopIntervalTimer() {
         if (undefined !== this.volumeIntervalTimer) {

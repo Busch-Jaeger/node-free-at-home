@@ -1,8 +1,11 @@
 import { FreeAtHomeWebsocket } from "./freeAtHomeWebsocket";
 import { createWebSocketStream } from 'ws';
-import stream from "stream";
-import { getConnectionOptions } from "./connectionOptions";
-import * as API from './serialApi';
+import * as stream from "stream";
+import * as API from './serial';
+import { SerialPortStream } from '@serialport/stream'
+import type { ErrorCallback } from '@serialport/stream'
+import rewiremock from 'rewiremock';
+import { handleRequestError } from "./utilities";
 
 const baseUrl = process.env.FREEATHOME_SERIAL_API_BASE_URL
     ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/serial/v1" : "http://localhost/api/serial/v1");
@@ -11,6 +14,12 @@ const password = process.env.FREEATHOME_API_PASSWORD ?? "12345";
 const authenticationHeader = {
     Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64')
 };
+
+const apiClient = new API.SerialClient({
+    BASE: baseUrl + "/api/serial/v1",
+    USERNAME: username,
+    PASSWORD: password
+});
 
 export function CreateSerialWebSocket(options: OpenOptions) {
     let params = "?";
@@ -111,27 +120,29 @@ export class SerialPortBinding implements BindingPortInterface {
 
 export class SerialBinding implements BindingInterface {
     async list(): Promise<PortInfo[]> {
-        const result = await API.getSettings(getConnectionOptions("/api/serial/v1"));
-        return result.data.map((device): PortInfo => {
-            return {
-                path: device.sysName,
-                manufacturer: undefined,
-                serialNumber: device.serialNumber,
-                pnpId: undefined,
-                locationId: undefined,
-                productId: device.pID,
-                vendorId: device.vID,
-            }
-        });
+        try {
+            const result = await apiClient.serial.getSettings();
+            return result.map((device): PortInfo => {
+                return {
+                    path: device.sysName,
+                    manufacturer: undefined,
+                    serialNumber: device.serialNumber,
+                    pnpId: undefined,
+                    locationId: undefined,
+                    productId: device.pID,
+                    vendorId: device.vID,
+                }
+            });
+        } catch (e) {
+            handleRequestError(e);
+            return [];
+        }
     }
     async open(options: OpenOptions): Promise<BindingPortInterface> {
         const binding = new SerialPortBinding(options);
         return binding.waitForOpen();
     }
 }
-
-import { SerialPortStream } from '@serialport/stream'
-import rewiremock from 'rewiremock';
 
 class FreeAtHomeSerialPortStream extends SerialPortStream {
     constructor(options: OpenOptions, openCallback?: ErrorCallback) {

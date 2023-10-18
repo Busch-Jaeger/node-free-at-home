@@ -1,30 +1,25 @@
 import EventSource from 'eventsource';
-import net from 'net';
-import http from 'http';
-import fs from 'fs';
-import * as API from './scriptingApi';
+import { Metadata, Configuration, ApplicationState, Event, AddonClient, OpenAPIConfig } from './scripting';
+import * as fs from 'fs';
+import * as http from 'http';
+import * as net from 'net';
 
 import { EventEmitter } from 'events';
-
-import fetch from 'cross-fetch';
-
-export {Configuration, ApplicationState} from './scriptingApi';
+import { handleRequestError } from './utilities';
 
 export function readMetaData() {
     const data = fs.readFileSync('free-at-home-metadata.json', 'utf8');
     const metaData = JSON.parse(data);
-    return metaData as API.Metadata;
+    return metaData as Metadata
 }
 
-interface ConnectionOptions {
-    headers: {
-        Authorization: string;
-        Range: string;
-    };
-    baseUrl: string;
-    fetch: any;
-    createConnection: ((options: http.ClientRequestArgs, connectionListener?: (() => void) | undefined) => net.Socket) | undefined;
-    agent: http.Agent;
+interface EventSourceOptions {
+    withCredentials?: boolean | undefined;
+    headers?: object | undefined;
+    proxy?: string | undefined;
+    https?: object | undefined;
+    rejectUnauthorized?: boolean | undefined;
+    createConnection: ((options: http.ClientRequestArgs, connectionListener?: (() => void) | undefined) => net.Socket) | undefined
 }
 
 export type ConnectionState = "init" | "connected" | "error";
@@ -39,9 +34,9 @@ interface Events<ConfigurationType, EventType> {
 }
 
 export declare interface AddOn<
-    ConfigurationType  extends API.Configuration = API.Configuration,
-    StateType  extends API.ApplicationState = API.ApplicationState,
-    EventType extends API.Event = API.Event> {
+    ConfigurationType  extends Configuration = Configuration,
+    StateType  extends ApplicationState = ApplicationState,
+    EventType extends Event = Event> {
     on<U extends keyof Events<ConfigurationType, EventType>>(
         event: U, listener: Events<ConfigurationType, EventType>[U]
     ): this;
@@ -52,11 +47,13 @@ export declare interface AddOn<
 }
 
 export class AddOn<
-    ConfigurationType = API.Configuration,
-    StateType = API.ApplicationState,
-    EventType = API.Event> extends EventEmitter {
+    ConfigurationType = Configuration,
+    StateType = ApplicationState,
+    EventType = Event> extends EventEmitter {
     private id: string;
-    private connectionOptions: ConnectionOptions;
+    private eventSourceOptions: EventSourceOptions;
+    private connectionConfig: Partial<OpenAPIConfig>;
+    private api: AddonClient;
     private configurationEventSource?: EventSource;
     private applicationStateEventSource?: EventSource;
     private eventEventSource?: EventSource;
@@ -81,15 +78,20 @@ export class AddOn<
             socketPath: "/run/api/scripting/v1",
         })
 
-        this.connectionOptions = {
+        this.connectionConfig = {
+            BASE: (useUnixSocket) ? "http://localhost" : baseUrl,
+            USERNAME: username,
+            PASSWORD: password
+        }
+
+        this.api = new AddonClient(this.connectionConfig);
+
+        this.eventSourceOptions = {
             headers: {
                 "Range": "0",
                 ...authenticationHeader
             },
-            baseUrl:  (useUnixSocket) ? "http://localhost" : baseUrl,
-            fetch: fetch,
-            createConnection: (useUnixSocket) ? connectToUnixSocket : undefined, // used in EventSource
-            agent: (useUnixSocket) ? unixSocketAgent : http.globalAgent          // used in fetch
+            createConnection: (useUnixSocket) ? connectToUnixSocket : undefined
         }
     }
 
@@ -97,10 +99,10 @@ export class AddOn<
         if (undefined !== this.configurationEventSource)
             return;
 
-        const url = this.connectionOptions.baseUrl + "/rest/container/" + this.id + "/configuration";
+        const url = this.connectionConfig.BASE + "/rest/container/" + this.id + "/configuration";
 
         this.configurationEventSource = new EventSource(
-            url, this.connectionOptions);
+            url, this.eventSourceOptions);
         this.configurationEventSource.onopen = (event: MessageEvent) => {
             console.log("open configuration");
             this.emit("configurationConnectionChanged", "connected");
@@ -125,10 +127,10 @@ export class AddOn<
         if (undefined !== this.applicationStateEventSource)
             return;
 
-        const url = this.connectionOptions.baseUrl + "/rest/container/" + this.id + "/applicationstate";
+        const url = this.connectionConfig.BASE + "/rest/container/" + this.id + "/applicationstate";
 
         this.applicationStateEventSource = new EventSource(
-            url, this.connectionOptions);
+            url, this.eventSourceOptions);
         this.applicationStateEventSource.onopen = (event: MessageEvent) => {
             console.log("open application state");
             this.emit("applicationStateConnectionChanged", "connected");
@@ -153,10 +155,10 @@ export class AddOn<
         if (undefined !== this.eventEventSource)
             return;
 
-        const url = this.connectionOptions.baseUrl + "/rest/container/" + this.id + "/events";
+        const url = this.connectionConfig.BASE + "/rest/container/" + this.id + "/events";
 
         this.eventEventSource = new EventSource(
-            url, this.connectionOptions);
+            url, this.eventSourceOptions);
             this.eventEventSource.onopen = (event: MessageEvent) => {
             console.log("open events");
             this.emit("eventConnectionChanged", "connected");
@@ -178,15 +180,27 @@ export class AddOn<
     }
 
     async setApplicationState(state: StateType) {
-        return API.setContainerApplicationState(this.id, state, this.connectionOptions);
+        try {
+            return this.api.container.setContainerApplicationState(this.id, state);
+        } catch (e) {
+            handleRequestError(e);
+        }
     }
 
     async setConfiguration(configuration: ConfigurationType) {
-        return API.setContainerConfiguration(this.id, configuration, this.connectionOptions);
+        try {
+            return this.api.container.setContainerConfiguration(this.id, configuration);
+        } catch (e) {
+            handleRequestError(e);
+        }
     }
 
     async triggerEvent(event: EventType) {
-        return API.putContainerEvents(this.id, event, this.connectionOptions);
+        try {
+            return this.api.container.putContainerEvents(this.id, event);
+        } catch (e) {
+            handleRequestError(e);
+        }
     }
 
     dispose() {

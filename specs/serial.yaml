@@ -1,0 +1,60 @@
+openapi: 3.0.1
+info:
+  title: free@home serial port API
+  description: free@home serial port API
+  version: v1
+servers:
+  - url: https://{hostname}/api/serial/v1
+    variables:
+      hostname:
+        default: 192.168.2.1
+        description: Hostname of the System Access Point or IP Address
+paths:
+  "/devices":
+    get:
+      tags:
+        - serial
+      summary: Get serial devices connected to the System Access Point
+      operationId: getSettings
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Devices"
+components:
+  schemas:
+    Devices:
+      type: array
+      items:
+        $ref: '#/components/schemas/Device'
+
+    Device:
+      type: object
+      required:
+        - sysName
+      properties:
+        sysName:
+          type: string
+        vID:
+          type: string
+        pID:
+          type: string
+        serialNumber:
+          type: string
+
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+security:
+  - basicAuth: []
+tags:
+  - name: serial
+    description: SysAp serial API

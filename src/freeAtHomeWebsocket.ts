@@ -24,6 +24,7 @@ export class FreeAtHomeWebsocket extends WebSocket {
 
         this.pongReceived = true;
 
+        // @ts-ignore
         if (typeof window === 'undefined') {
             this.on('pong', this.onPong.bind(this));
             this.pingTimer = setInterval(() => {
