@@ -2,6 +2,17 @@
 
 const OpenAPI = require('openapi-typescript-codegen');
 
+const help = `
+Usage: generate.js <options>
+
+Options:
+
+ -i     (optional, default = ./spec ) source of the yaml files. 
+        Either a directory with the files or the URL of a sysap http://<ip>
+
+ -o     (optional, default = ./src ) target directory fpr generation
+`
+
 console.log('Generate addon api...')
 const commonOptions = {
     useUnionTypes: true,
@@ -31,6 +42,9 @@ for (let i = 2; i < args.length; i++) {
         }
         output = args[i+1];
         i++;
+    } else if (args[i] === '--help') {
+        console.log(help);
+        process.exit(0);
     } else {
         exitWithError('wrong argument:', args[i]);
     }
