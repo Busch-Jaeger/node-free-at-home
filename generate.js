@@ -35,18 +35,18 @@ for (let i = 2; i < args.length; i++) {
             exitWithError('missing input value');
         }
         input = args[i+1];
-        i++;
+        i++; // NOSONAR
     } else if (args[i] === '-o') {
         if (!args[i+1] || args[i+1].startsWith('-')) {
             exitWithError('missing output value');
         }
         output = args[i+1];
-        i++;
+        i++; // NOSONAR
     } else if (args[i] === '--help') {
         console.log(help);
         process.exit(0);
     } else {
-        exitWithError('wrong argument:', args[i]);
+        exitWithError('wrong argument: ' + args[i]);
     }
 }
 
