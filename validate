@@ -20,18 +20,18 @@ function exitWithError(error) {
 }
 
 const help = `
-Validates free@home addon metadata files.
+Validates free@home openapi schema and addon metadata files.
 
 Usage: validate <options> <dirs>
 
 Options:
 
  -e     <code>      exit with error code when validation failed 
-                    default: 0 when option is missin, 1 when open is used without <code>
+                    default: 0 when option is missing, 1 when open is used without <code>
 
  --help             show this text
 
-<dirs>      List of addon directories 
+<dirs>      List of directories to check for YAML or free-at-home-metadata.json files to validate.
 `;
 
 let hasDirs = false;
