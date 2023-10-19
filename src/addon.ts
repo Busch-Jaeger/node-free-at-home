@@ -74,10 +74,6 @@ export class AddOn<
             return net.createConnection("/run/api/scripting/v1", connectionListener);
         }
 
-        const unixSocketAgent = new http.Agent(<object>{
-            socketPath: "/run/api/scripting/v1",
-        })
-
         this.connectionConfig = {
             BASE: (useUnixSocket) ? "http://localhost" : baseUrl,
             USERNAME: username,
@@ -108,7 +104,7 @@ export class AddOn<
             this.emit("configurationConnectionChanged", "connected");
         };
         this.configurationEventSource.onerror = (event: MessageEvent) => {
-            console.log("error in  event source");
+            console.log("error in event source");
             this.emit("configurationConnectionChanged", "error");
             console.log(event);
         };
@@ -136,7 +132,7 @@ export class AddOn<
             this.emit("applicationStateConnectionChanged", "connected");
         };
         this.applicationStateEventSource.onerror = (event: MessageEvent) => {
-            console.log("error in  event source");
+            console.log("error in event source");
             this.emit("applicationStateConnectionChanged", "error");
             console.log(event);
         };

@@ -8,5 +8,9 @@ import type { SelectOption } from './SelectOption';
 
 export type SelectParameter = (BasicParameter & {
     options?: Array<SelectOption>;
+    dependsOnOptions?: Array<{
+        values: Array<string>;
+        options: Array<SelectOption>;
+    }>;
 });
 

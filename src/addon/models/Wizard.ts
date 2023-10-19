@@ -3,14 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { TranslatedString } from './TranslatedString';
+import type { TranslatedName } from './TranslatedName';
 import type { WizardStep } from './WizardStep';
 
-export type Wizard = {
-    name: TranslatedString;
+export type Wizard = (TranslatedName & {
+    name: string;
     create: boolean;
     edit: boolean;
     sections: Array<string>;
     steps: Array<WizardStep>;
-};
+});
 

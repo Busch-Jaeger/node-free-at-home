@@ -3,20 +3,15 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { SelectOption } from './SelectOption';
-import type { TranslatedString } from './TranslatedString';
+import type { TranslatedDescription } from './TranslatedDescription';
+import type { TranslatedName } from './TranslatedName';
 
-export type BasicParameter = {
-    name: TranslatedString;
-    type: 'BasicParameter';
+export type BasicParameter = (TranslatedName & TranslatedDescription & {
+    type: 'string' | 'multilinestring' | 'password' | 'number' | 'boolean' | 'date' | 'time' | 'weekdays' | 'ipv4' | 'floor' | 'room' | 'channel' | 'select' | 'button' | 'text' | 'error' | 'description' | 'displayQRCode' | 'scanQRCode' | 'hidden' | 'jsonSelector';
+    name: string;
     required?: boolean;
-    description?: TranslatedString;
     default?: (string | number | boolean);
     dependsOn?: string;
     dependsOnValues?: Array<string>;
-    dependsOnOptions?: Array<{
-        values: Array<string>;
-        options: SelectOption;
-    }>;
-};
+});
 

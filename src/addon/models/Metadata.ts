@@ -26,6 +26,7 @@ export type Metadata = {
     };
     entryPoint: string;
     type: 'app' | 'runtime' | 'standalone';
+    beta?: boolean;
     parameters?: Parameters;
     wizards?: Wizards;
     minAuxFileUploadIntervalMinutes?: number;

@@ -3,6 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Sha256 } from './Sha256';
+import type { Reference } from './Reference';
 
-export type References = Record<string, Sha256>;
+export type References = Record<string, Reference>;

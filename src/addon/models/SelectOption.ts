@@ -3,10 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { TranslatedString } from './TranslatedString';
+import type { TranslatedName } from './TranslatedName';
 
-export type SelectOption = {
+export type SelectOption = (TranslatedName & {
     key: string;
-    name?: TranslatedString;
-};
+});
 

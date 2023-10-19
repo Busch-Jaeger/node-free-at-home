@@ -12,11 +12,13 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { ApplicationState } from './models/ApplicationState';
 export type { ApplicationStateEntry } from './models/ApplicationStateEntry';
+export type { BaseWizardStep } from './models/BaseWizardStep';
 export type { BasicParameter } from './models/BasicParameter';
 export type { ButtonEvent } from './models/ButtonEvent';
 export type { ChannelParameter } from './models/ChannelParameter';
 export type { Configuration } from './models/Configuration';
 export type { ConfigurationEntry } from './models/ConfigurationEntry';
+export type { DescriptionParameter } from './models/DescriptionParameter';
 export type { Event } from './models/Event';
 export type { JsonParameter } from './models/JsonParameter';
 export type { Metadata } from './models/Metadata';
@@ -29,9 +31,11 @@ export type { Reference } from './models/Reference';
 export type { References } from './models/References';
 export type { SelectOption } from './models/SelectOption';
 export type { SelectParameter } from './models/SelectParameter';
-export type { Sha256 } from './models/Sha256';
+export type { SeparatorParameter } from './models/SeparatorParameter';
 export type { State } from './models/State';
 export type { StringParameter } from './models/StringParameter';
+export type { TranslatedDescription } from './models/TranslatedDescription';
+export type { TranslatedName } from './models/TranslatedName';
 export type { TranslatedString } from './models/TranslatedString';
 export type { TranslatedUri } from './models/TranslatedUri';
 export type { Uri } from './models/Uri';
@@ -42,6 +46,7 @@ export type { WizardParameterCondition } from './models/WizardParameterCondition
 export type { Wizards } from './models/Wizards';
 export type { WizardStep } from './models/WizardStep';
 export type { WizardStepEvent } from './models/WizardStepEvent';
+export type { WizardSubStep } from './models/WizardSubStep';
 
 export { ContainerService } from './services/ContainerService';
 export { ExperimentalService } from './services/ExperimentalService';

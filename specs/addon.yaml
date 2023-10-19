@@ -731,6 +731,7 @@ components:
         - $ref: "#/components/schemas/BasicParameter"
         - $ref: "#/components/schemas/JsonParameter"
         - $ref: "#/components/schemas/SeparatorParameter"
+        - $ref: "#/components/schemas/DescriptionParameter"
       discriminator:
         propertyName: type
         mapping:
@@ -749,6 +750,7 @@ components:
           select: "#/components/schemas/SelectParameter"
           button: "#/components/schemas/BasicParameter"
           text: "#/components/schemas/BasicParameter"
+          description: "#/components/schemas/DescriptionParameter"
           error: "#/components/schemas/BasicParameter"
           displayQRCode: "#/components/schemas/BasicParameter"
           scanQRCode: "#/components/schemas/BasicParameter"
@@ -768,6 +770,26 @@ components:
               type: string
               enum:
                 - "separator"
+            dependsOn:
+              type: string
+            dependsOnValues:
+              type: array
+              items: 
+                type: string
+
+    DescriptionParameter:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "description"
+          properties:              
+            type:
+              type: string
+              enum:
+                - "description"            
+            description:
+              type: string
             dependsOn:
               type: string
             dependsOnValues:
@@ -803,11 +825,11 @@ components:
                 - "button"
                 - "text"
                 - "error"
+                - "description"
                 - "displayQRCode"
                 - "scanQRCode"
                 - "hidden"
-                - "jsonSelector"
-                - "separator"                
+                - "jsonSelector"            
             name:
               type: string
             required:
@@ -822,23 +844,7 @@ components:
             dependsOnValues:
               type: array
               items: 
-                type: string
-            dependsOnOptions:
-              type: array
-              items:
-                type: object
-                required:
-                  - "values"
-                  - "options"
-                properties:
-                  values:
-                    type: array
-                    items:
-                      type: string
-                  options:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/SelectOption"                  
+                type: string               
 
     StringParameter:
       allOf:
@@ -891,6 +897,22 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/SelectOption"
+            dependsOnOptions:
+              type: array
+              items:
+                type: object
+                required:
+                  - "values"
+                  - "options"
+                properties:
+                  values:
+                    type: array
+                    items:
+                      type: string
+                  options:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SelectOption"   
                
     WizardModeCondition:
       type: object

@@ -7,7 +7,6 @@ import type { Configuration } from '../models/Configuration';
 import type { Event } from '../models/Event';
 import type { Metadata } from '../models/Metadata';
 import type { Reference } from '../models/Reference';
-import type { Sha256 } from '../models/Sha256';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -24,7 +23,7 @@ export class ContainerService {
      * @throws ApiError
      */
     public postContainer(
-        requestBody?: Sha256,
+        requestBody?: Reference,
     ): CancelablePromise<Metadata> {
         return this.httpRequest.request({
             method: 'POST',

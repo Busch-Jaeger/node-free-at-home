@@ -5,10 +5,11 @@
 
 import type { Parameter } from './Parameter';
 import type { TranslatedName } from './TranslatedName';
+import type { WizardSubStep } from './WizardSubStep';
 
-export type ParameterGroup = (TranslatedName & {
-    name: string;
-    multiple?: boolean;
-    items: Record<string, Parameter>;
+export type BaseWizardStep = (TranslatedName & {
+    id: string;
+    steps?: Array<WizardSubStep>;
+    items?: Record<string, Parameter>;
 });
 

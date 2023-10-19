@@ -3,4 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ApiRestDatapoint_sysap__serial_Put200TextPlainResponse = Record<string, any>;
+export type ApiRestDatapoint_sysap__serial_Put200TextPlainResponse = Record<string, {
+    result?: string;
+}>;
