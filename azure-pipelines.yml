@@ -12,7 +12,7 @@ pool:
 steps:
 - task: NodeTool@0
   inputs:
-    versionSpec: '12.x'
+    versionSpec: '18.x'
 - task: SonarQubePrepare@5
   inputs:
     SonarQube: 'codescan.abb.com'
