@@ -7,6 +7,8 @@ import * as net from 'net';
 import { EventEmitter } from 'events';
 import { handleRequestError } from './utilities';
 
+export {Configuration, ApplicationState};
+
 export function readMetaData() {
     const data = fs.readFileSync('free-at-home-metadata.json', 'utf8');
     const metaData = JSON.parse(data);
