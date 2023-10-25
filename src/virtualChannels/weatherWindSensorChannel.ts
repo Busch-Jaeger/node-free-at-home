@@ -65,7 +65,7 @@ export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { 
         switch (id) {
             case ParameterIds.PID_WIND_FORCE:
                 this.windAlarmLevel = <number>parseInt(value);
-                console.log("Parameter temperature alertActivationLevel changed %s", this.windAlarmLevel);
+                console.log("Parameter wind Alarm activation level changed %s", this.windAlarmLevel);
                 break;
 
             default:
