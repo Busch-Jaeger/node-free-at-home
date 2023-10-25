@@ -3,11 +3,15 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { BasicDependsOnConfig } from './BasicDependsOnConfig';
 import type { BasicParameter } from './BasicParameter';
 
 export type NumberParameter = (BasicParameter & {
     min?: number;
     max?: number;
-    unit?: string;
+    dependsOnConfig?: Array<(BasicDependsOnConfig & {
+        min?: number;
+        max?: number;
+    })>;
 });
 

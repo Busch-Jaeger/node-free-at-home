@@ -352,6 +352,10 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   The value of this parameter is not saved in the settings but send as an event when the user clicks on the send button that is show underneath this parameter.
 
+- `visible`
+
+  Show/Hide this parameter in the UI. (default: `true`)
+
 - `dependsOn`
 
   Allows to define that a parameter is only shown, when another parameter has a specific value. Also requires the additional `dependsOnValues` attribute. Example:
@@ -377,7 +381,36 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   In this example the `mqttType` parameter is only shown when the `connectionType` parameter has the value `MQTT`. `dependsOnValues` is an array of possible values to check.
 
-  The `dependsOn` attribute has another special usage only for parameters of the `select`-type. You can change the list of `options` depending on another parameters value. Example:
+  - `dependsOnConfig`
+
+    Replaces other settings in this parameter configuration when one of the values matches. The former example using `dependsOnValues` in only a shortcut for:
+
+  ```json
+  "connectionType": {
+      "name": "Connection",
+      "type": "select",
+      "required": true,
+      "options": [{"key": "USB"}, {"key": "MQTT"}],
+  },
+  "mqttType": {
+      "name": "MQTT type",
+      "type": "select",
+      "options": [
+        {"key": "generic", "name": "Generic"}, 
+        {"key": "tasmota", "name": "tasmota"}
+      ],
+      "visible": false,
+      "dependsOn": "connectionType",
+      "dependsOnConfig": [
+        { "values": "MQTT", "visible": true }
+      ]
+  }
+  ```
+
+    Most of the configuration options can be overridden this way, but there are exceptions. You cannot change `type`, `dependsOn`, `dependsOnValues`
+    and `dependsOnConfig`.
+
+    Another example of a common use case for this feature is the replacement of options in a select-type parameter.
 
   ```json
   "meterType": {
@@ -399,7 +432,7 @@ Beside the already explained `name`, `type` and `description` attributes there a
         "required": true,
         "options": [{"key": "USB"}, {"key": "MQTT"}],
         "dependsOn": "meterType",
-        "dependsOnOptions": [
+        "dependsOnConfig": [
               {
                 "values": ["gas-meter", "water-meter"], 
                 "options": [{"key": "MQTT"}]
@@ -410,11 +443,9 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
     In this example the `connectionType` shows the options `"options": [{"key": "MQTT"}]` when `meterType` has the value `gas-meter` or `water-meter`.
 
-
 - `debug`
 
   If this is added with a `true` value this parameter is only shown, when the app is in debug mode.
-
 
 #### Parameter groups
 

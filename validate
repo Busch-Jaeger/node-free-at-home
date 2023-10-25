@@ -70,6 +70,15 @@ if (!hasDirs) {
     const meta = path.join(process.cwd(), 'free-at-home-metadata.json');
     if (fs.existsSync(meta)) {
         config.addonMetaFiles.push(meta);
+    } else {
+        const specs = path.join(process.cwd(), 'specs');
+        if (fs.existsSync(specs)) {
+            for (const file of fs.readdirSync(specs)) {
+                if (file.endsWith(".yaml")) {
+                    config.schemaFiles.push(path.join(specs, file));
+                }
+            }
+        }
     }
 }
 

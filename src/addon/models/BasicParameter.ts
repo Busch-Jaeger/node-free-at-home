@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { BasicDependsOnConfig } from './BasicDependsOnConfig';
 import type { TranslatedDescription } from './TranslatedDescription';
 import type { TranslatedName } from './TranslatedName';
 
@@ -11,7 +12,9 @@ export type BasicParameter = (TranslatedName & TranslatedDescription & {
     name: string;
     required?: boolean;
     default?: (string | number | boolean);
+    visible?: boolean;
     dependsOn?: string;
     dependsOnValues?: Array<string>;
+    dependsOnConfig?: Array<BasicDependsOnConfig>;
 });
 

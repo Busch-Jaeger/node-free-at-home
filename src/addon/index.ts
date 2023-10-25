@@ -13,6 +13,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { ApplicationState } from './models/ApplicationState';
 export type { ApplicationStateEntry } from './models/ApplicationStateEntry';
 export type { BaseWizardStep } from './models/BaseWizardStep';
+export type { BasicDependsOnConfig } from './models/BasicDependsOnConfig';
 export type { BasicParameter } from './models/BasicParameter';
 export type { ButtonEvent } from './models/ButtonEvent';
 export type { ChannelParameter } from './models/ChannelParameter';

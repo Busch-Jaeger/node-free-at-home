@@ -797,6 +797,30 @@ components:
               items: 
                 type: string
 
+    BasicDependsOnConfig:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object   
+          required:
+            - "values"
+          properties:
+            values:
+                type: array
+                items:
+                  type: string
+            name:
+              type: string
+            required:
+              type: boolean
+            default:
+              anyOf:
+                - type: string
+                - type: number
+                - type: boolean            
+            visible:
+              type: boolean    
+
     BasicParameter:
       allOf: 
         - $ref: "#/components/schemas/TranslatedName"
@@ -838,13 +862,20 @@ components:
               anyOf:
                 - type: string
                 - type: number
-                - type: boolean
+                - type: boolean            
+            visible:
+              type: boolean         
             dependsOn:
               type: string
             dependsOnValues:
               type: array
               items: 
-                type: string               
+                type: string
+            dependsOnConfig:
+              type: array
+              items:
+                $ref: "#/components/schemas/BasicDependsOnConfig"
+                  
 
     StringParameter:
       allOf:
@@ -857,6 +888,17 @@ components:
               type: number
             regex:
               type: string
+            dependsOnConfig:
+              type: array
+              items:
+                allOf: 
+                  - $ref: "#/components/schemas/BasicDependsOnConfig"
+                  - type: object
+                    properties:
+                      min:
+                        type: number
+                      max:
+                        type: number
 
     NumberParameter:
       allOf:
@@ -867,8 +909,17 @@ components:
               type: number
             max:
               type: number
-            unit:
-              type: string
+            dependsOnConfig:
+              type: array
+              items:
+                allOf: 
+                  - $ref: "#/components/schemas/BasicDependsOnConfig"
+                  - type: object                      
+                    properties:
+                      min:
+                        type: number
+                      max:
+                        type: number
 
     ChannelParameter:
       allOf:
@@ -897,23 +948,19 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/SelectOption"
-            dependsOnOptions:
+            dependsOnConfig:
               type: array
               items:
                 type: object
-                required:
-                  - "values"
-                  - "options"
-                properties:
-                  values:
-                    type: array
-                    items:
-                      type: string
-                  options:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/SelectOption"   
-               
+                allOf: 
+                  - $ref: "#/components/schemas/BasicDependsOnConfig"
+                  - type: object   
+                    properties:
+                      options:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SelectOption"   
+              
     WizardModeCondition:
       type: object
       required:
