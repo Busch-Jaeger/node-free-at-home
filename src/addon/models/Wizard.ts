@@ -10,7 +10,7 @@ export type Wizard = (TranslatedName & {
     name: string;
     create: boolean;
     edit: boolean;
-    sections: Array<string>;
+    parameterGroups: Array<string>;
     steps: Array<WizardStep>;
 });
 

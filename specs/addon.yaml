@@ -640,6 +640,11 @@ components:
               type: string
             multiple:
               type: boolean
+            display: 
+              allOf: 
+                - $ref: "#/components/schemas/TranslatedTitle"
+                - $ref: "#/components/schemas/TranslatedSubtitle"
+                - $ref: "#/components/schemas/TranslatedError"
             items:
               type: object
               additionalProperties:
@@ -651,7 +656,7 @@ components:
         - type: object
           required:
             - "name"
-            - "sections"
+            - "parameterGroups"
             - "steps"
             - "create"
             - "edit"
@@ -662,7 +667,7 @@ components:
               type: boolean
             edit:
               type: boolean
-            sections:
+            parameterGroups:
               type: array
               items:
                 type: string
@@ -679,7 +684,9 @@ components:
             - "id"
           properties:
             id:
-              type: string            
+              type: string                        
+            parameterGroup: 
+              type: string
             steps:
               type: array
               items: 
@@ -804,6 +811,7 @@ components:
         - type: object   
           required:
             - "values"
+          minProperties: 2
           properties:
             values:
                 type: array
@@ -1115,6 +1123,126 @@ components:
         description@cs:
           type: string
         description@tr:
+          type: string
+
+    TranslatedTitle:
+      type: object
+      properties:
+        title:
+          type: string
+        title@en:
+          type: string
+        title@es:
+          type: string
+        title@fr:
+          type: string
+        title@it:
+          type: string
+        title@nl:
+          type: string
+        title@de:
+          type: string
+        title@zh:
+          type: string
+        title@da:
+          type: string
+        title@fi:
+          type: string
+        title@nb:
+          type: string
+        title@pl:
+          type: string
+        title@pt:
+          type: string
+        title@ru:
+          type: string
+        title@sv:
+          type: string
+        title@el:
+          type: string
+        title@cs:
+          type: string
+        title@tr:
+          type: string
+
+    TranslatedSubtitle:
+      type: object
+      properties:
+        subtitle:
+          type: string
+        subtitle@en:
+          type: string
+        subtitle@es:
+          type: string
+        subtitle@fr:
+          type: string
+        subtitle@it:
+          type: string
+        subtitle@nl:
+          type: string
+        subtitle@de:
+          type: string
+        subtitle@zh:
+          type: string
+        subtitle@da:
+          type: string
+        subtitle@fi:
+          type: string
+        subtitle@nb:
+          type: string
+        subtitle@pl:
+          type: string
+        subtitle@pt:
+          type: string
+        subtitle@ru:
+          type: string
+        subtitle@sv:
+          type: string
+        subtitle@el:
+          type: string
+        subtitle@cs:
+          type: string
+        subtitle@tr:
+          type: string
+
+    TranslatedError:
+      type: object
+      properties:
+        error:
+          type: string
+        error@en:
+          type: string
+        error@es:
+          type: string
+        error@fr:
+          type: string
+        error@it:
+          type: string
+        error@nl:
+          type: string
+        error@de:
+          type: string
+        error@zh:
+          type: string
+        error@da:
+          type: string
+        error@fi:
+          type: string
+        error@nb:
+          type: string
+        error@pl:
+          type: string
+        error@pt:
+          type: string
+        error@ru:
+          type: string
+        error@sv:
+          type: string
+        error@el:
+          type: string
+        error@cs:
+          type: string
+        error@tr:
           type: string
 
     Uri:

@@ -9,6 +9,7 @@ import type { WizardSubStep } from './WizardSubStep';
 
 export type BaseWizardStep = (TranslatedName & {
     id: string;
+    parameterGroup?: string;
     steps?: Array<WizardSubStep>;
     items?: Record<string, Parameter>;
 });
