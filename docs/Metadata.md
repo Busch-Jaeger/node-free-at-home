@@ -15,10 +15,8 @@ attributes marked as `optional` can be omitted, if it provides no benefit for th
 
   A unique identifier for an Addon. The developer must chose an id such that it does not conflict
   with any other Addon that the user may want to install. The value uses a typical reversed domain
-  name, e.g. an Addon `example1` written by Busch-Jaeger would use
-  ```
-  de.busch-jaeger.freeathome.example1
-  ```
+  name, e.g. an Addon `example1` written by Busch-Jaeger would use `de.busch-jaeger.freeathome.example1`.
+
   Typically you would use your own company name here, or real-name if no company name is available.
   Note that it is preferred to use an actual domain name (in reverse notation), but not a
   requirement, i.e. the domain name does not have to actually exist.
@@ -215,7 +213,6 @@ Some attributes inside the parameter definition can be defined for multiple lang
 #### Types
 
 What type of input field is displayed to the user, depends on the `type` attribute and depending on the `type`, possibly additional data (most notably `min` and `max`, specifying the range and `default` for the default value to use). The `name` is what is displayed to the user for this parameter.
-
 
 Possible types are:
 
@@ -511,7 +508,7 @@ settings that the user will normally not changed in an `Advanced Settings` group
 If you need multiple configuration entries for a parameter group you can add `"multiple": true` to it.
 
 If you have many parameter groups or a group with many parameters in it the UI can be a bit confusing. To avoid that you can show a list item
-instead of the complete form of a configured parameter group entry. When the user clicks on that list item the form is opened. For the 
+instead of the complete form of a configured parameter group entry. When the user clicks on that list item the form is opened. For the
 example above you can show the configured username in that entry with this configuration:
 
 ```json
