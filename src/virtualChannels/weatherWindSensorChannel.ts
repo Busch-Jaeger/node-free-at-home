@@ -43,8 +43,7 @@ export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { 
 
     setWindSpeed(windSpeed: number): void {
         this.setDatapoint(PairingIds.AL_WIND_SPEED, <string><unknown>windSpeed);
-
-        const alarmLevel = binaryIndexOf(windAlarmLevels, windSpeed);
+        const alarmLevel = this.getBeaufortLevel(windSpeed);
         console.log("wind alarm level: %s", alarmLevel);
         this.setDatapoint(PairingIds.AL_WIND_FORCE, <string><unknown>alarmLevel);
 
@@ -65,11 +64,20 @@ export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { 
         switch (id) {
             case ParameterIds.PID_WIND_FORCE:
                 this.windAlarmLevel = <number>parseInt(value);
-                console.log("Parameter wind Alarm activation level changed %s", this.windAlarmLevel);
+                console.log("Parameter wind alarm activation level changed %s", this.windAlarmLevel);
                 break;
 
             default:
                 console.log("unexpected Parameter id: %s value: %s", id, value);
         }
+    }
+
+    private getBeaufortLevel(windSpeed:number) {
+        for(let i = 0; i < windAlarmLevels.length; i++) {
+            if(windSpeed < windAlarmLevels[i]) {
+                return i-1;
+            }
+        }
+        return 12; // If the wind speed is beyond the highest value in the array
     }
 }
