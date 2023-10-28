@@ -1,20 +1,18 @@
-import { PairingIds, ParameterIds } from '../freeAtHomeApi';
-import { ApiVirtualChannel } from "../api/apiVirtualChannel";
+import {PairingIds, ParameterIds} from '../freeAtHomeApi';
+import {ApiVirtualChannel} from "../api/apiVirtualChannel";
 
-import { Channel } from '../channel';
-import { Mixin } from 'ts-mixer';
+import {Channel} from '../channel';
+import {Mixin} from 'ts-mixer';
 
-import { EventEmitter } from 'events';
-import { StrictEventEmitter } from 'strict-event-emitter-types';
-
-import { binaryIndexOf } from '../utilities';
+import {EventEmitter} from 'events';
+import {StrictEventEmitter} from 'strict-event-emitter-types';
+import '../utilities';
+import {DelayedAlertSystem} from "./delayedAlertSystem";
 
 interface ChannelEvents {
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
-
-import '../utilities';
 
 const windAlarmLevels = [
     0,    //  0
@@ -33,10 +31,12 @@ const windAlarmLevels = [
 ]
 
 export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
+    private alarmSystem : DelayedAlertSystem;
     constructor(channel: ApiVirtualChannel){
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("parameterChanged", this.parameterChanged.bind(this));
+        this.alarmSystem = new DelayedAlertSystem();
     }
 
     windAlarmLevel: number | undefined = undefined;
@@ -49,9 +49,9 @@ export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { 
 
         if (this.windAlarmLevel !== undefined) {
             if (this.windAlarmLevel <= alarmLevel) {
-                this.setDatapoint(PairingIds.AL_WIND_ALARM, "1");
+                this.alarmSystem.alertDelayed(this,PairingIds.AL_WIND_ALARM)
             } else {
-                this.setDatapoint(PairingIds.AL_WIND_ALARM, "0");
+                this.alarmSystem.dealertDelayed(this, PairingIds.AL_WIND_ALARM);
             }
         }
     }
@@ -60,13 +60,22 @@ export class WeatherWindSensorChannel extends Mixin(Channel, (EventEmitter as { 
     }
 
     protected parameterChanged(id: ParameterIds, value: string): void {
-
         switch (id) {
             case ParameterIds.PID_WIND_FORCE:
                 this.windAlarmLevel = <number>parseInt(value);
                 console.log("Parameter wind alarm activation level changed %s", this.windAlarmLevel);
                 break;
-
+            case ParameterIds.PID_ALERT_ACTIVATION_DELAY:
+                //TODO Delay value ist Minuten ??
+                const alertActivationDelay = <number>parseInt(value);
+                console.log("Parameter wind alarm activation delay changed %s", alertActivationDelay);
+                this.alarmSystem.setActivationDelay(alertActivationDelay)
+                break;
+            case ParameterIds.PID_DEALERT_ACTIVATION_DELAY:
+                const dealertActivationDelay = <number>parseInt(value);
+                console.log("Parameter wind alarm deactivation delay changed %s", dealertActivationDelay);
+                this.alarmSystem.setDeactivatoinDelay(dealertActivationDelay)
+                break;
             default:
                 console.log("unexpected Parameter id: %s value: %s", id, value);
         }
