@@ -18,6 +18,7 @@ interface ChannelEvents {
     freeVending(value: boolean): void;
     usedPhases(value: number): void;
     unlock(): void;
+    togglePause(): void;
 }
 
 enum STATE {
@@ -97,7 +98,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     // OCPP StatusNotification.errorCode
     protected errorState: string = ""
     // OCPP StatusNotification.status
-    protected status: string = ""
+    protected _status: string = ""
     protected paused = false
     protected authorizeRemoteTxRequests = false
 
@@ -107,6 +108,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     protected _supportsFreeVending: boolean = false;
     protected _supportsSwitchOff: boolean = false;
     protected _supportsDisableCharging: boolean = false;
+    protected _supportsCurrentLimit: boolean = false;
 
     constructor(channel: ApiVirtualChannel){
         super(channel);
@@ -129,6 +131,9 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
         // CAP_SWITCH_ON_OFF = 0x0020, supports switching on/off
         this._supportsSwitchOff = channel.inputPairingToPosition.has(PairingIds.AL_SWITCH_CHARGING);
+
+        // CAP_CURRENT_LIMIT = 0x001E, supports limitation of current
+        this._supportsCurrentLimit = channel.inputPairingToPosition.has(PairingIds.AL_LIMIT_FOR_CHARGER);
     }
     
 
@@ -194,6 +199,9 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
             case PairingIds.AL_UNLOCK:
                 this.emit("unlock")
                 break
+
+            case PairingIds.AL_PAUSE_CHARGING:
+                this.emit("togglePause");
         }
     }
 
@@ -226,11 +234,11 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
         } else if (this.errorState) {
             console.log("unhandled error state", this.errorState)
         }
-        if (statusMapping.has(this.status)) {
-            const statusMask = 1 << (statusMapping.get(this.status)!)
+        if (statusMapping.has(this._status)) {
+            const statusMask = 1 << (statusMapping.get(this._status)!)
             value |= statusMask
-        } else if (this.status) {
-            console.log("unhandled status", this.status)
+        } else if (this._status) {
+            console.log("unhandled status", this._status)
         }
         return value.toString(10)
     }
@@ -312,8 +320,8 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public setStatus(status: string) {
         if (statusMapping.has(status)) {
-            if (this.status !== status) {
-                this.status = status
+            if (this._status !== status) {
+                this._status = status
                 return this.sendStatus();
             }
         } else {
@@ -322,12 +330,18 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
         return Promise.resolve(undefined)
     }
 
+    public status() {
+        return this._status
+    }
+
     public setInstalledPower(value: number) {
         return this.setDatapoint(PairingIds.AL_INFO_INSTALLED_POWER, value.toString());
     }
 
     public setLimitForCharger(value: number) {
-        return this.setDatapoint(PairingIds.AL_INFO_LIMIT_FOR_CHARGER, value.toString());
+        if (this._supportsCurrentLimit) {
+            return this.setDatapoint(PairingIds.AL_INFO_LIMIT_FOR_CHARGER, value.toString());
+        }
     }
 
     public setMinimumChargerLimit(value: number) {
