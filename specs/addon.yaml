@@ -875,6 +875,8 @@ components:
               type: boolean         
             dependsOn:
               type: string
+            rpc:
+              type: string
             dependsOnValues:
               type: array
               items: 

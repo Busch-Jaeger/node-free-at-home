@@ -14,6 +14,7 @@ export type BasicParameter = (TranslatedName & TranslatedDescription & {
     default?: (string | number | boolean);
     visible?: boolean;
     dependsOn?: string;
+    rpc?: string;
     dependsOnValues?: Array<string>;
     dependsOnConfig?: Array<BasicDependsOnConfig>;
 });
