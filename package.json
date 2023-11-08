@@ -12,7 +12,7 @@
     "build": "tsc -p .",
     "buildProd": "tsc  -p . --sourceMap false --declarationMap false",
     "spellcheck": "cspell 'src/**/*.ts'",
-    "generate": "nodejs ./generate.js",
+    "generate": "./generate.js",
     "validate": "./validate -e ./specs"
   },
   "keywords": [],
