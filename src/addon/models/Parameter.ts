@@ -3,14 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { ArrayParameter } from './ArrayParameter';
 import type { BasicParameter } from './BasicParameter';
 import type { ChannelParameter } from './ChannelParameter';
 import type { DescriptionParameter } from './DescriptionParameter';
+import type { EmptyParameter } from './EmptyParameter';
 import type { JsonParameter } from './JsonParameter';
 import type { NumberParameter } from './NumberParameter';
 import type { SelectParameter } from './SelectParameter';
 import type { SeparatorParameter } from './SeparatorParameter';
 import type { StringParameter } from './StringParameter';
 
-export type Parameter = (StringParameter | NumberParameter | ChannelParameter | SelectParameter | BasicParameter | JsonParameter | SeparatorParameter | DescriptionParameter);
+export type Parameter = (StringParameter | NumberParameter | ChannelParameter | SelectParameter | BasicParameter | JsonParameter | SeparatorParameter | DescriptionParameter | ArrayParameter | EmptyParameter);
 

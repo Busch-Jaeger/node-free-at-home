@@ -739,6 +739,8 @@ components:
         - $ref: "#/components/schemas/JsonParameter"
         - $ref: "#/components/schemas/SeparatorParameter"
         - $ref: "#/components/schemas/DescriptionParameter"
+        - $ref: "#/components/schemas/ArrayParameter"
+        - $ref: "#/components/schemas/EmptyParameter"
       discriminator:
         propertyName: type
         mapping:
@@ -764,6 +766,12 @@ components:
           hidden: "#/components/schemas/BasicParameter"
           jsonSelector: "#/components/schemas/JsonParameter"
           separator: "#/components/schemas/SeparatorParameter"
+          array: "#/components/schemas/ArrayParameter"
+          chart: "#/components/schemas/BasicParameter"
+          uuid: "#/components/schemas/EmptyParameter"
+
+    EmptyParameter:
+      type: object
 
     SeparatorParameter:
       allOf: 
@@ -861,7 +869,10 @@ components:
                 - "displayQRCode"
                 - "scanQRCode"
                 - "hidden"
-                - "jsonSelector"            
+                - "jsonSelector"
+                - "array"
+                - "chart"
+                - "uuid"
             name:
               type: string
             required:
@@ -938,6 +949,12 @@ components:
           properties:
             multiSelect:
               type: boolean
+            filters:
+              type: array
+              items: 
+                anyOf:
+                  - $ref: "#/components/schemas/ChannelFunctionGroup"
+                  - $ref: "#/components/schemas/ChannelDatapoints"
 
     JsonParameter:
       allOf:
@@ -969,8 +986,55 @@ components:
                       options:
                         type: array
                         items:
-                          $ref: "#/components/schemas/SelectOption"   
-              
+                          $ref: "#/components/schemas/SelectOption" 
+    ArrayParameter:
+      allOf:
+        - $ref: "#/components/schemas/BasicParameter"
+        - type: object
+          properties:
+            items:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Parameter"
+
+    ChannelFunctionGroup:
+      type: object
+      properties:
+        context:
+          type: string
+          enum: [logics, identification, category, devicelist, meter]
+        type:
+          type: string
+
+    ChannelDatapoints:
+      type: object 
+      properties:
+        groups:
+          type: boolean
+          description: Allow groups in the filtered list (input/output are inversed for filtering)
+        outputs: 
+          type: object
+          properties:            
+            allOf: 
+              $ref: "#/components/schemas/Datapoints"
+            anyOf:
+              $ref: "#/components/schemas/Datapoints"
+
+        inputs:
+          type: object
+          properties:            
+            allOf: 
+              $ref: "#/components/schemas/Datapoints"
+            anyOf:
+              $ref: "#/components/schemas/Datapoints"
+
+    Datapoints: 
+      type: array
+      items:
+        anyOf:
+          - type: number
+          - type: string
+            
     WizardModeCondition:
       type: object
       required:
@@ -1005,7 +1069,10 @@ components:
           - "key"
           properties:
             key: 
-              type: string
+              oneOf:
+               - type: string
+               - type: number
+               - type: boolean
 
     TranslatedString:
       oneOf:

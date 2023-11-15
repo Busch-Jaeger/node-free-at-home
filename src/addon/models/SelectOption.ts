@@ -6,6 +6,6 @@
 import type { TranslatedName } from './TranslatedName';
 
 export type SelectOption = (TranslatedName & {
-    key: string;
+    key: (string | number | boolean);
 });
 
