@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import { FreeAtHomeApi, VirtualDeviceType, Datapoint, Parameter } from './freeAtHomeApi';
+import { FreeAtHomeApi } from './freeAtHomeApi';
+import { VirtualDeviceType } from './fhapi';
 
 import { BlindActuatorChannel } from './virtualChannels/blindActuatorChannel';
 import { DimActuatorChannel } from './virtualChannels/dimActuatorChannel'
@@ -46,7 +47,7 @@ import { StrictEventEmitter } from 'strict-event-emitter-types';
 import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
 import { RoomTemperatureControllerChannel } from './virtualChannels/roomTemperatureControllerChannel';
-import { Device, Notification } from './api';
+import { Device, Notification } from './fhapi';
 import { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
 import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { BinarySensorChannel } from './virtualChannels/binarySensorChannel';

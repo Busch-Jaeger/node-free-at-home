@@ -2,10 +2,7 @@ import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import WebSocket from 'isomorphic-ws';
 import { AutoReconnectWebSocket } from "./autoReconnectWebSocket";
-import net from 'net';
-import http from 'http';
-import * as api from "./api";
-import fetch from 'cross-fetch';
+import * as API from "./fhapi";
 
 import { PairingIds } from "./pairingIds";
 import { ParameterIds } from "./parameterIds";
@@ -15,7 +12,7 @@ import { ApiVirtualDevice } from './api/apiVirtualDevice';
 import { ApiDevice } from './api/apiDevice';
 import { ApiChannel } from './api/apiChannel';
 import { ApiChannelIterator } from './api/apiChannelIterator';
-import { WebsocketMessage } from './api';
+import { handleRequestError } from './utilities';
 
 export { PairingIds, ParameterIds, Topics };
 
@@ -35,22 +32,12 @@ export interface IndexedDatapoint {
     value: string
 }
 
-export { VirtualDeviceType } from './api';
-
 export enum ConnectionStates {
     connecting,
     open,
     closing,
     closed,
     unknown,
-}
-
-interface ConnectionOptions {
-    headers: Record<string, string | undefined> | undefined;
-    baseUrl: string;
-    fetch: any;
-    createConnection: ((options: http.ClientRequestArgs, connectionListener?: (() => void) | undefined) => net.Socket) | undefined;
-    agent: http.Agent;
 }
 
 const nativeIdRegExp = new RegExp("^[a-zA-Z0-9\-_]{1,64}$");
@@ -65,7 +52,7 @@ interface Events {
 type Emitter = StrictEventEmitter<EventEmitter, Events>;
 
 export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
-    private connectionOptions: ConnectionOptions;
+    private apiClient: API.FahClient;
     websocket: AutoReconnectWebSocket;
     pingTimer: NodeJS.Timeout | undefined = undefined;
     pongReceived: boolean = true;
@@ -80,30 +67,10 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     constructor(baseUrl: string, authenticationHeader: object = {}) {
         super();
 
-        const useUnixSocket: boolean = process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined;
-
-        function connectToUnixSocket(options: http.ClientRequestArgs, connectionListener?: () => void) {
-            return net.createConnection("/run/api/fhapi/v1", connectionListener);
-        }
-
-        const unixSocketAgent = new http.Agent(<object>{
-            socketPath: "/run/api/fhapi/v1",
+        this.apiClient = new API.FahClient({
+            BASE: baseUrl,
+            HEADERS: authenticationHeader as Record<string, string>
         });
-
-        const tcpSocketAgent = new http.Agent(<object>{
-            maxSockets: 4,
-        });
-
-        this.connectionOptions = {
-            headers: {
-                "Range": "0",
-                ...authenticationHeader
-            },
-            baseUrl: (useUnixSocket) ? "http://localhost" : baseUrl,
-            fetch: fetch,
-            createConnection: (useUnixSocket) ? connectToUnixSocket : undefined, // used in EventSource
-            agent: (useUnixSocket) ? unixSocketAgent : tcpSocketAgent          // used in fetch
-        }
 
         this.websocket = new AutoReconnectWebSocket(baseUrl, "/api/ws", {
             ...authenticationHeader
@@ -139,7 +106,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     }
 
     private parseWebsocketData(data: WebSocket.Data) {
-        const dataObject = <WebsocketMessage> JSON.parse(data as string);
+        const dataObject = <API.WebsocketMessage> JSON.parse(data as string);
         for (const sysApId in dataObject) {
             const datapoints = dataObject[sysApId].datapoints;
             for (const element in datapoints) {
@@ -219,103 +186,94 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         const channelString = channel.toString(16).padStart(6, "ch0000");
         const datapointString = datapointIndex.toString(16).padStart(7, "odp0000")
 
-        const result = await api.putdatapoint(
-            "00000000-0000-0000-0000-000000000000",
-            serialNumber,
-            channelString,
-            datapointString,
-            value,
-            this.connectionOptions
-        );
-        if(this.enableLogging && result.status != 200) {
-            console.error("Error in call to setOutputDatapoint status:", result.status);
+        try {
+            await this.apiClient.api.putdatapoint(
+                "00000000-0000-0000-0000-000000000000",
+                serialNumber,
+                channelString,
+                datapointString,
+                value
+            );
+        } catch (e) {
+            return Promise.reject(handleRequestError(e, this.enableLogging));
         }
-        if(result.status !== 200)
-            return Promise.reject("HTTP status code: " + result.status + "Reason: " + result.data);
     }
 
     async setInputDatapoint(serialNumber: string, channel: number, datapointIndex: number, value: string) {
         const channelString = channel.toString(16).padStart(6, "ch0000");
         const datapointString = datapointIndex.toString(16).padStart(7, "idp0000")
 
-        const result = await api.putdatapoint(
-            "00000000-0000-0000-0000-000000000000",
-            serialNumber,
-            channelString,
-            datapointString,
-            value,
-            this.connectionOptions
-        );
-        if (this.enableLogging && result.status != 200) {
-            console.error("Error in call to setInputDatapoint status:", result.status);
+        try {
+            await this.apiClient.api.putdatapoint(
+                "00000000-0000-0000-0000-000000000000",
+                serialNumber,
+                channelString,
+                datapointString,
+                value
+            );
+        } catch (e) {
+            return Promise.reject(handleRequestError(e, this.enableLogging));
         }
-        if(result.status !== 200)
-            return Promise.reject("HTTP status code: " + result.status + " Reason: " + result.data);
     }
-
-    async setDeviceToUnresponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string, capabilities?: Capabilities[]) {
-        const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
-            "00000000-0000-0000-0000-000000000000",
-            nativeId,
-            {
-                type: deviceType,
-                properties: {
-                    ttl: "0",
-                    flavor: flavor,
-                    capabilities: capabilities
+    async setDeviceToUnresponsive(deviceType: API.VirtualDeviceType, nativeId: string, flavor?: string, capabilities?: Capabilities[]) {
+        try {
+            await this.apiClient.api.createVirtualDevice(
+                "00000000-0000-0000-0000-000000000000",
+                nativeId,
+                {
+                    type: deviceType,
+                    properties: {
+                        ttl: "0",
+                        flavor: flavor,
+                        capabilities: capabilities
+                    }
                 }
-            },
-            this.connectionOptions
-        );
-        if (this.enableLogging && res.status != 200) {
-            console.error("Could not set device to unresponsive: " + res.status);
-        }
-        if(res.status !== 200)
-            return Promise.reject("HTTP status code: " + res.status + " Reason: " + res.data);
+            );
+        } catch (e) {
+            handleRequestError(e, this.enableLogging);
+            throw e;
+        }        
     }
 
-    async setDeviceToResponsive(deviceType: api.VirtualDeviceType, nativeId: string, flavor?: string, capabilities?: Capabilities[]) {
-        const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
-            "00000000-0000-0000-0000-000000000000",
-            nativeId,
-            {
-                type: deviceType,
-                properties: {
-                    ttl: "180",
-                    flavor: flavor,
-                    capabilities: capabilities
+    async setDeviceToResponsive(deviceType: API.VirtualDeviceType, nativeId: string, flavor?: string, capabilities?: Capabilities[]) {
+        try {
+            await this.apiClient.api.createVirtualDevice(
+                "00000000-0000-0000-0000-000000000000",
+                nativeId,
+                {
+                    type: deviceType,
+                    properties: {
+                        ttl: "180",
+                        flavor: flavor,
+                        capabilities: capabilities
+                    }
                 }
-            },
-            this.connectionOptions
-        );
-        if (this.enableLogging && res.status != 200) {
-            console.error("Could not set device to responsive: " + res.status);
+            );
+        } catch (e) {
+            handleRequestError(e, this.enableLogging);
+            throw e;
         }
-        if(res.status !== 200)
-            return Promise.reject("HTTP status code: " + res.status + " Reason: " + res.data);
     }
 
-    async createDevice(deviceType: api.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
+    async createDevice(deviceType: API.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
         if(false === nativeIdRegExp.test(nativeId))
             throw new Error("nativeId contains not supported characters");
-        const res = await api.putApiRestVirtualdeviceBySysapAndSerial(
-            "00000000-0000-0000-0000-000000000000",
-            nativeId,
-            {
-                type: deviceType,
-                properties: {
-                    ttl: "180",
-                    displayname: displayName,
-                    flavor: flavor,
-                    capabilities: capabilities
+        try {
+            const res : API.VirtualDevicesSuccess = await this.apiClient.api.createVirtualDevice(
+                "00000000-0000-0000-0000-000000000000",
+                nativeId,
+                {
+                    type: deviceType,
+                    properties: {
+                        ttl: "180",
+                        displayname: displayName,
+                        flavor: flavor,
+                        capabilities: capabilities
+                    }
                 }
-            },
-            this.connectionOptions
-        );
-        if (res.status === 200) {
-            const dataObject = res.data;
-            for (const sysApId in dataObject) {
-                const devices = dataObject[sysApId].devices;
+            );
+            for (const sysApId in res) {
+                const devices = res[sysApId].devices;
                 for (const deviceId in devices) {
                     const responseNativeId = devices[deviceId].serial;
                     if (responseNativeId === nativeId) {
@@ -325,15 +283,14 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 }
             }
             throw new Error("data in response not found");
-        }
-        else {
-            throw new Error("Could not create virtual device " + deviceType +" error code: " + res.status + " Description: " + res.data);
+        } catch (e) {
+            throw new Error("Could not create virtual device " + deviceType +" error: " + (e as Error).message);
         }
     }
 
-    private async getCreatedDevice(deviceId: string, nativeId: string, deviceType: api.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
+    private async getCreatedDevice(deviceId: string, nativeId: string, deviceType: API.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
         const devicePromiseWithTimeout = new Response();
-        const websocketDeviceAddedCallback = (device: api.Device) => {
+        const websocketDeviceAddedCallback = (device: API.Device) => {
             const deviceObject = this.addDevice(deviceId, nativeId, device, deviceType, flavor, capabilities);
             devicePromiseWithTimeout.clearTimeout();
             this.deviceAddedEmitter.off(deviceId, websocketDeviceAddedCallback);
@@ -344,13 +301,12 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         });
         this.deviceAddedEmitter.on(deviceId, websocketDeviceAddedCallback);
 
-        const deviceRequest = await api.getdevice(
-            "00000000-0000-0000-0000-000000000000",
-            deviceId,
-            this.connectionOptions
-        );
-        if (deviceRequest.status === 200) {
-            const device = deviceRequest.data?.["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
+        try {
+            const deviceRequest = await this.apiClient.api.getdevice(
+                "00000000-0000-0000-0000-000000000000",
+                deviceId
+            );
+            const device = deviceRequest["00000000-0000-0000-0000-000000000000"]?.devices?.[deviceId];
             if (device !== undefined) {
                 if(undefined !== device.channels &&  0 == Object.keys(device.channels).length )
                     return await devicePromiseWithTimeout.promise;
@@ -362,8 +318,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
             else {
                 throw new Error("device not found in response");
             }
-        }
-        else {
+        } catch (e) {
             return await devicePromiseWithTimeout.promise;
             // throw new Error("Could not read device from ata model error code: " + res.status);
         }
@@ -371,27 +326,25 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
     public async setAuxiliaryData(serialNumber: string, channel: number, index: number, auxiliaryData: string[]): Promise<void> {
         const channelString = channel.toString(16).padStart(6, "ch0000");
-        const result = await api.putAuxiliaryData(
-            "00000000-0000-0000-0000-000000000000",
-            serialNumber,
-            channelString, index, auxiliaryData,
-            this.connectionOptions);
-        if(result.status !== 200)
-            return Promise.reject("HTTP status code: " + result.status + " Reason: " + result.data);
-        
+        try {
+            await this.apiClient.api.putAuxiliaryData(
+                "00000000-0000-0000-0000-000000000000",
+                serialNumber,
+                channelString, index, auxiliaryData);
+        } catch(e) {
+            return Promise.reject(handleRequestError(e, this.enableLogging));
+        }
     }
 
-    public async patch(serialNumber: string, patch: api.ApiRestDeviceSysapSerialPatchRequest): Promise<void> {
-        const result = await api.patchDevice(
-            "00000000-0000-0000-0000-000000000000",
-            serialNumber,
-            patch,
-            this.connectionOptions);
-        if (result.status !== 200)
-            return Promise.reject("HTTP status code: " + result.status + " Reason: " + result.data);
+    public async patch(serialNumber: string, patch: API.ApiRestDevice_sysap__serial_PatchRequest): Promise<void> {
+        try {
+            await this.apiClient.api.patchDevice("00000000-0000-0000-0000-000000000000", serialNumber, patch);        
+        } catch(e) {
+            handleRequestError(e, this.enableLogging);
+        }
     }
 
-    private addDevice(deviceId: string, nativeId: string, apiDevice: api.Device, deviceType: api.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): ApiVirtualDevice {
+    private addDevice(deviceId: string, nativeId: string, apiDevice: API.Device, deviceType: API.VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): ApiVirtualDevice {
         const existingDevice = this.virtualDevicesBySerial.get(deviceId);
         if(undefined !== existingDevice)
             return existingDevice;
@@ -403,27 +356,25 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         return device;
     }
 
-    public async getDevice(deviceId: string) : Promise<api.Device> {
-        let result: api.Device = {
-            
-        };
-        const deviceRequest = await api.getdevice(
-            "00000000-0000-0000-0000-000000000000",
-            deviceId,
-            this.connectionOptions
-        );
-        if (deviceRequest.status === 200) {
-            const deviceObject = deviceRequest.data;
-            for (const sysApId in deviceObject) {
-                const device = deviceObject[sysApId].devices;
+    public async getDevice(deviceId: string) : Promise<API.Device> {
+        let result: API.Device = {};
+
+        try {
+            const deviceRequest = await this.apiClient.api.getdevice(
+                "00000000-0000-0000-0000-000000000000",
+                deviceId
+            );
+
+            for (const sysApId in deviceRequest) {
+                const device = deviceRequest[sysApId].devices;
                 for (const deviceId in device) {
                     result = device[deviceId];                    
                 }
             }
+        } catch (e) {
+            handleRequestError(e, this.enableLogging);
         }
-        else {
-            throw new Error("Could not read configuration from data model. Error code: " + deviceRequest.status);
-        }
+        
         return result;
     }
 
@@ -431,11 +382,11 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         if(this.devicesBySerial.size !== 0) {
             return this.devicesBySerial.values();
         }
-        const configurationRequest = await api.getconfiguration(this.connectionOptions);
-        if (configurationRequest.status === 200) {
-            const configurationObject = configurationRequest.data;
-            for (const sysApId in configurationObject) {
-                const devices = configurationObject[sysApId].devices;
+        
+        try {
+            const configurationRequest = await this.apiClient.api.getconfiguration();
+            for (const sysApId in configurationRequest) {
+                const devices = configurationRequest[sysApId].devices;
                 for (const deviceId in devices) {
                     if( false == this.devicesBySerial.has(deviceId))
                     {
@@ -445,10 +396,10 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                     }
                 }
             }
+        } catch (e) {
+            handleRequestError(e, this.enableLogging);
         }
-        else {  
-            throw new Error("Could not read configuration from data model. Error code: " + configurationRequest.status);
-        }
+        
         return this.devicesBySerial.values();
     }
 
@@ -457,8 +408,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         return new ApiChannelIterator(devicesIterator);
     }
 
-    public async postNotification(notification: api.Notification) {
-        return api.postnotification(notification, this.connectionOptions);
+    public async postNotification(notification: API.Notification) {
+        return this.apiClient.api.postnotification(notification);
     }
 }
 

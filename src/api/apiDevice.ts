@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
-import * as api from "../api";
+import * as api from "../fhapi";
 import { PairingIds } from "../pairingIds";
 import { ParameterIds } from '../parameterIds';
 import { FunctionIds } from '../functionIds';
