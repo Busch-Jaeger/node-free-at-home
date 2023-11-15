@@ -238,6 +238,7 @@ export enum PairingIds {
     AL_EXPORTED_ENERGY_COST_TODAY = 0x04DC, // Exported energy cost today
     AL_TOTAL_ENERGY_COST_IMPORTED = 0x04DD, // Total imported energy cost
     AL_TOTAL_ENERGY_COST_EXPORTED = 0x04DE, // Total exported energy cost
+    AL_PAUSE_CHARGING = 0x04DF, // Pauses the charging
     AL_DISARM_SYSTEM = 0x0501, // Encrypted control datapoint for domus alarm center
     AL_DISARM_COUNTER = 0x0502, // Info about the next counter to disarm the system
     AL_INFO_INTRUSION_ALARM = 0x0504, // Intrusion Alarm

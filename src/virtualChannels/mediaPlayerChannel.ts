@@ -186,10 +186,14 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     case MediaPlayerChannel.SetMute.Mute:
                         this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
                         this.emit("mute");
+                        if (this.isAutoConfirm)
+                            this.setMute();
                         break;
                     case MediaPlayerChannel.SetMute.Unmute:
                         this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
                         this.emit("unMute");
+                        if (this.isAutoConfirm)
+                            this.setUnMute();
                         break;
                 }
                 break;
@@ -330,12 +334,17 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                         case MediaPlayerChannel.SetMute.Mute:
                             this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
                             this.emit("mute");
+                            if (this.isAutoConfirm)
+                                this.setMute();
                             break;
                         case MediaPlayerChannel.SetMute.Unmute:
                             this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
                             this.emit("unMute");
+                            if (this.isAutoConfirm)
+                                this.setUnMute();
                             break;
                     }
+                    break;
                 case PairingIds.AL_INFO_ACTUAL_VOLUME:
                     let volume = parseInt(value);
                     if(volume > this.parameterMaxVolume)
