@@ -767,7 +767,7 @@ components:
           jsonSelector: "#/components/schemas/JsonParameter"
           separator: "#/components/schemas/SeparatorParameter"
           array: "#/components/schemas/ArrayParameter"
-          chart: "#/components/schemas/BasicParameter"
+          svg: "#/components/schemas/BasicParameter"
           uuid: "#/components/schemas/EmptyParameter"
 
     EmptyParameter:
@@ -824,7 +824,10 @@ components:
             values:
                 type: array
                 items:
-                  type: string
+                  anyOf:
+                  - type: string
+                  - type: number
+                  - type: boolean 
             name:
               type: string
             required:
@@ -871,7 +874,7 @@ components:
                 - "hidden"
                 - "jsonSelector"
                 - "array"
-                - "chart"
+                - "svg"
                 - "uuid"
             name:
               type: string
@@ -888,10 +891,22 @@ components:
               type: string
             rpc:
               type: string
+              enum:
+              - "getParameterValue"
+              - "getParameterConfig"
+            rpcCallOn:
+              type: string
+              default: "initial"
+              enum:
+                - "initial"
+                - "everyChange"
             dependsOnValues:
               type: array
               items: 
-                type: string
+                anyOf:
+                - type: string
+                - type: number
+                - type: boolean
             dependsOnConfig:
               type: array
               items:
@@ -1012,6 +1027,9 @@ components:
         groups:
           type: boolean
           description: Allow groups in the filtered list (input/output are inversed for filtering)
+        scenes:
+          type: boolean
+          description: Allow scenes in the filtered list (input/output are inversed for filtering)
         outputs: 
           type: object
           properties:            

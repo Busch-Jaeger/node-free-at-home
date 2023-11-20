@@ -10,6 +10,10 @@ export type ChannelDatapoints = {
      * Allow groups in the filtered list (input/output are inversed for filtering)
      */
     groups?: boolean;
+    /**
+     * Allow scenes in the filtered list (input/output are inversed for filtering)
+     */
+    scenes?: boolean;
     outputs?: {
         allOf?: Datapoints;
         anyOf?: Datapoints;
