@@ -110,7 +110,7 @@ export class AutoReconnectWebSocket extends EventEmitter {
         console.log("try to reconnect in 10 seconds...");
         setTimeout(
             () => {
-                console.log("try to reconnec to "+ this.websocketBaseUrl);
+                console.log("try to reconnect to "+ this.websocketBaseUrl);
                 this.connectWebsocket();
             }, 10000);
         this.emit('close', code, reason);
