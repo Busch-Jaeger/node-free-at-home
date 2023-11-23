@@ -9,6 +9,8 @@ export type Device = {
     displayName?: string;
     room?: string;
     floor?: string;
+    articleNumber?: string;
+    deviceId?: string;
     interface?: string;
     nativeId?: string;
     channels?: Record<string, Channel>;
