@@ -366,8 +366,7 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public setStartOfChargingSession(value: Date) {
-        let utcTime = (""+value.getUTCHours()).padStart(2, '0') + ":" + (""+value.getUTCMinutes()).padStart(2, '0') + ":"+ (""+value.getUTCSeconds()).padStart(2, '0') 
-        return this.setDatapoint(PairingIds.AL_INFO_START_OF_CHARGING_SESSION, utcTime);
+        return this.setDatapoint(PairingIds.AL_INFO_START_OF_CHARGING_SESSION, value.toISOString());
     }
 
     // END setting output dpt values    

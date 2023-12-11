@@ -35,7 +35,6 @@ export class RpcWebsocket {
         });
 
         this.websocket.on("message", async (message: string) => {
-            console.log(message);
             const result = await this.server.receiveJSON(message);
             this.websocket.send(JSON.stringify(result));
         });
