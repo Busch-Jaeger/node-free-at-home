@@ -495,6 +495,12 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new RGBChannel(channel);
     }
 
+    async createRGBWDevice(nativeId: string, name: string): Promise<RGBChannel> {
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"RGBW", nativeId, name);
+        const channel = device.getChannels().next().value;
+        return new RGBChannel(channel);
+    }
+
     public async markAllDevicesAsUnresponsive(): Promise<void[]> {
         const promises = [] as PromiseLike<void>[];
         this.freeAtHomeApi.virtualDevicesBySerial.forEach((device: ApiVirtualDevice) => {
