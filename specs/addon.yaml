@@ -1381,10 +1381,14 @@ components:
 
     ConfigurationEntry:
       type: object
+      required:
+        - "items"
       properties:
         items:
           type: object
           additionalProperties: true
+        deletable:
+          type: boolean
 
     Configuration:
       type: object
