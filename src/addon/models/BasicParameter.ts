@@ -16,6 +16,7 @@ export type BasicParameter = (TranslatedName & TranslatedDescription & {
     dependsOn?: string;
     rpc?: 'getParameterValue' | 'getParameterConfig';
     rpcCallOn?: 'initial' | 'everyChange';
+    rpcAdditionalParameters?: Record<string, any>;
     dependsOnValues?: Array<(string | number | boolean)>;
     dependsOnConfig?: Array<BasicDependsOnConfig>;
 });

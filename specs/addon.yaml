@@ -900,6 +900,9 @@ components:
               enum:
                 - "initial"
                 - "everyChange"
+            rpcAdditionalParameters:
+              type: object
+              additionalProperties: true
             dependsOnValues:
               type: array
               items: 
