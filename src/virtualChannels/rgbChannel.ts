@@ -9,10 +9,21 @@ import { Datapoint } from '..';
 
 import { uint32ToHSV, hsvTouint32, hsvToRgb, rgbToHsv } from './utilities/colorSpaceConversion';
 
+export type ColorMode = "hsv" | "ct" | "dim";
+
 interface ChannelEvents {
     isOnChanged(value: boolean): void;
     isForcedChanged(value: boolean): void;
     hsvChanged(h: number, s: number, v: number): void;
+    colorModeChanged(mode: ColorMode): void;
+    /**
+     * @param ct {number} color temperature in percent
+     */
+    colorTemperatureChanged(ct: number): void;
+    /**
+     * @param brightness {number} brightness in percent
+     */
+    brightnessChanged(brightness: number): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -40,6 +51,18 @@ export class RGBChannel extends Mixin(Channel, (EventEmitter as { new(): Channel
         this.setDatapoint(PairingIds.AL_INFO_RGB, ((r << 16) + (g << 8) + (b << 0)).toString());
     }
 
+    setColorMode(mode: ColorMode) {
+        this.setDatapoint(PairingIds.AL_INFO_COLOR_MODE, mode);
+    }
+
+    setColorTemperature(ct: number) {
+        this.setDatapoint(PairingIds.AL_INFO_COLOR_TEMPERATURE, ct.toFixed(0));
+    }
+
+    setBrightness(brightness: number) {
+        this.setDatapoint(PairingIds.AL_INFO_ACTUAL_DIMMING_VALUE, brightness.toFixed(0));
+    }
+
     protected dataPointChanged(id: PairingIds, value: string): void {
         switch (<PairingIds>id) {
             case PairingIds.AL_SWITCH_ON_OFF: {
@@ -60,17 +83,44 @@ export class RGBChannel extends Mixin(Channel, (EventEmitter as { new(): Channel
                 break;
             }
 
-            case PairingIds.AL_HSV:
-                {
-                    const intValue = parseInt(value);
-                    const [h, s, v] = uint32ToHSV(intValue);
-                    this.emit("hsvChanged", h, s, v);
-                    if (this.isAutoConfirm)
-                        this.setHSV(h, s, v);
-                    break;
-                }
+            case PairingIds.AL_HSV: {
+                const intValue = parseInt(value);
+                const [h, s, v] = uint32ToHSV(intValue);
+                this.emit("hsvChanged", h, s, v);
+                if (this.isAutoConfirm)
+                    this.setHSV(h, s, v);
+                break;
+            }
 
             case PairingIds.AL_NIGHT: {
+                break;
+            }
+
+            case PairingIds.AL_COLOR_MODE: {
+                const mode = value as ColorMode;
+                this.emit("colorModeChanged", mode);
+                if (this.isAutoConfirm) {
+                    this.setColorMode(mode);
+                }
+                break;
+            }
+
+            case PairingIds.AL_COLOR_TEMPERATURE: {
+                const ct = parseInt(value);
+                this.emit("colorTemperatureChanged", ct);
+                if (this.isAutoConfirm) {
+                    this.setColorTemperature(ct);
+                }
+                break;
+            }
+
+            case PairingIds.AL_ABSOLUTE_SET_VALUE_CONTROL: {
+                const brightness = parseInt(value);
+                this.emit("brightnessChanged", brightness);
+                if (this.isAutoConfirm) {
+                    this.setBrightness(brightness);
+                }
+                break;
             }
 
         }

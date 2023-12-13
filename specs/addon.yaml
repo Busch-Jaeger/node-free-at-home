@@ -900,6 +900,9 @@ components:
               enum:
                 - "initial"
                 - "everyChange"
+            rpcAdditionalParameters:
+              type: object
+              additionalProperties: true
             dependsOnValues:
               type: array
               items: 
@@ -1381,10 +1384,14 @@ components:
 
     ConfigurationEntry:
       type: object
+      required:
+        - "items"
       properties:
         items:
           type: object
           additionalProperties: true
+        deletable:
+          type: boolean
 
     Configuration:
       type: object

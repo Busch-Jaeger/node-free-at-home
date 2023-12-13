@@ -4,6 +4,7 @@
 /* eslint-disable */
 
 export type ConfigurationEntry = {
-    items?: Record<string, any>;
+    items: Record<string, any>;
+    deletable?: boolean;
 };
 

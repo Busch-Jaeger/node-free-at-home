@@ -343,6 +343,18 @@ Possible types are:
 
   Shows the value as QR-Code.
 
+- `svg`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0  
+
+  Shows the value as SVG-Image in the UI.
+
+- `uuid`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Only useful for parameter groups with `multiple: true`. The UI generates a UUID when a new entry is created. This UUID can be used to identify the entry.
+
 #### Additional parameter attributes
 
 Beside the already explained `name`, `type` and `description` attributes there are some special attributes that can be optionally added to a parameter definition:
@@ -461,6 +473,50 @@ Beside the already explained `name`, `type` and `description` attributes there a
   > **NOTE:** Requires free@home app version >= 2.4.0
 
   If this is added with a `true` value this parameter is only shown, when the app is in debug mode.
+
+- `rpc`,  `rpcCallOn`, `rpcAdditionalParameters`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Allows retrieving the value or configuration changes for this parameter from the addon via one of two RPCs: `getParameterValue`, `getParameterConfig`.
+
+  With `rpcCallOn` you can define when this rpc is send:
+  
+  `rpcCallOn: initial`: sends it only once when the UI opens the addon settings.
+
+  `rpcCallOn: everyChange`: sends it every time any of the other parameter values in the same group has been changed by the user.
+
+  `rpcAdditionalParameters`: is just an optional set of values that are added to the rpc.
+
+  Full example: If you have a parameter group that configures something that can be explained best with a graph (e.g. a dimming curve or a color temperature calculation that changes over the day) you can use the `svg` parameter type together with these rpc settings to show the user a graph based on your current parameter settings.
+
+  ```json
+    "configs": {
+      "name": "Configuration",
+      "name@de": "Konfiguration",
+      "multiple": true,
+      "display": {
+          "title": "$name"
+      },
+      "items": {
+        ...
+        "curve": {
+          "name": "Color temperature curve today",
+          "name@de": "Farbtemperaturkurve heute",
+          "type": "svg",
+          "rpc": "getParameterValue",
+          "rpcCallOn": "everyChange",
+          "rpcAdditionalParameters": {
+              "width": 600,
+              "height": 300
+          }
+      }
+    }
+  }
+  ```
+
+  The addons receives the rpc everytime any other parameter of the same groups changes. The parameters of the rpc contains all parameter values of the current group and in addition to that `"parameter": "curve"`, `"group": "configs"` and whats configured in `rpcAdditionalParameters`.
+  With all these values the addon can generate an SVG-Chart and send it as response. That chart will be shown to the user and he gets live feedback to every configuration changed by seeing an updated curve.
 
 #### Parameter groups
 
