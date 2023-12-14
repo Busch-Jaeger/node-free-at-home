@@ -6,7 +6,7 @@
 import { ApiError as SerialApiError } from "./serial";
 import { ApiError as RpcApiError } from "./rpc";
 import { ApiError as FahApiError } from "./fhapi";
-import { ApiError as ScriptingApiError } from "./scripting";
+import { ApiError as ScriptingApiError } from "./addon/";
 
 export function binaryIndexOf(list: Array<number>, item: number): number {
 	let min = 0;

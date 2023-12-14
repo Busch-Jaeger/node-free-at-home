@@ -101,7 +101,20 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
             return substring;
         });
 
-    const url = `${config.BASE}${path}`;
+    let base = config.BASE;
+    if (useUnixSocket) {
+        // for unit sockets the api path is encoded into the base url, for the request we have to remove that
+        try {
+            const url = new URL(base);
+            url.pathname = "";
+            base = url.toString();
+            if (base.endsWith("/")) {
+                base = base.substring(0, base.length-1);
+            }
+        } catch (e) {}
+    }
+
+    const url = `${base}${path}`;
     if (options.query) {
         return `${url}${getQueryString(options.query)}`;
     }
@@ -210,12 +223,13 @@ const tcpSocketAgent = new http.Agent(<object>{
 
 const socketAgents = new Map<string, http.Agent>();
 
-function getAgent(url: string) {
+function getAgent(url: string, basePath: string) {
     if (useUnixSocket) {
         try {
-            const apiPath = "/api/fhapi/v1";
+            const parsedUrl = new URL(basePath);
+            const apiPath = parsedUrl.pathname;
             if (!socketAgents.has(apiPath)) {
-                console.log('creating unix socket agent for ', apiPath);
+                console.log('creating unix socket agent for', apiPath);
                 const unixSocketAgent = new http.Agent(<object>{
                     socketPath: "/run" + apiPath,
                 });
@@ -236,7 +250,8 @@ export const sendRequest = async (
     body: any,
     formData: FormData | undefined,
     headers: Headers,
-    onCancel: OnCancel
+    onCancel: OnCancel,
+    basePath: string
 ): Promise<Response> => {
     const controller = new AbortController();
 
@@ -245,7 +260,7 @@ export const sendRequest = async (
         method: options.method,
         body: body ?? formData,
         signal: controller.signal as AbortSignal,
-        agent: getAgent(url)
+        agent: getAgent(url, basePath)
     };
 
     onCancel(() => controller.abort());
@@ -333,7 +348,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
             const headers = await getHeaders(config, options);
 
             if (!onCancel.isCancelled) {
-                const response = await sendRequest(options, url, body, formData, headers, onCancel);
+                const response = await sendRequest(options, url, body, formData, headers, onCancel, config.BASE);
                 const responseBody = await getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
 

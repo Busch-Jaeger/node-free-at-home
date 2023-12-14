@@ -76,7 +76,7 @@ export * as Utilities from './virtualChannels/utilities/colorSpaceConversion';
 export * as ScriptingHost from './addon'
 export * as AddOn from  './addon'
 
-export * as ScriptingAPI from './scripting'
+export * as ScriptingAPI from './addon/'
 
 export * as RPC from "./rpcWebsocket";
 
