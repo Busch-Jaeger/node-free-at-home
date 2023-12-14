@@ -211,17 +211,21 @@ const tcpSocketAgent = new http.Agent(<object>{
 const socketAgents = new Map<string, http.Agent>();
 
 function getAgent(url: string) {
-    if (useUnixSocket && process.env.FREEATHOME_BASE_URL && url.startsWith(process.env.FREEATHOME_BASE_URL)) {
-        const apiPath = url.substring(process.env.FREEATHOME_BASE_URL.length);
-        if (!socketAgents.has(apiPath)) {
-            console.log('creating unix socket agent for ', apiPath);
-            const unixSocketAgent = new http.Agent(<object>{
-                socketPath: "/run" + apiPath,
-            });
-            socketAgents.set(apiPath, unixSocketAgent);
-            return unixSocketAgent;
-        }
-        return socketAgents.get(apiPath);
+    if (useUnixSocket) {
+        try {
+            const apiPath = "/api/scripting/v1";
+            if (!socketAgents.has(apiPath)) {
+                console.log('creating unix socket agent for', apiPath);
+                const unixSocketAgent = new http.Agent(<object>{
+                    socketPath: "/run" + apiPath,
+                });
+                socketAgents.set(apiPath, unixSocketAgent);
+                return unixSocketAgent;
+            }
+            return socketAgents.get(apiPath);
+        } catch (e) {
+            console.error('Error parsing url', url);
+        }        
     }
     return tcpSocketAgent;
 }

@@ -213,8 +213,7 @@ const socketAgents = new Map<string, http.Agent>();
 function getAgent(url: string) {
     if (useUnixSocket) {
         try {
-            const parsedUrl = new URL(url);
-            const apiPath = parsedUrl.pathname;
+            const apiPath = "/api/fhapi/v1";
             if (!socketAgents.has(apiPath)) {
                 console.log('creating unix socket agent for ', apiPath);
                 const unixSocketAgent = new http.Agent(<object>{
