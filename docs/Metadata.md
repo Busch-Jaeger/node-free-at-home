@@ -15,10 +15,8 @@ attributes marked as `optional` can be omitted, if it provides no benefit for th
 
   A unique identifier for an Addon. The developer must chose an id such that it does not conflict
   with any other Addon that the user may want to install. The value uses a typical reversed domain
-  name, e.g. an Addon `example1` written by Busch-Jaeger would use
-  ```
-  de.busch-jaeger.freeathome.example1
-  ```
+  name, e.g. an Addon `example1` written by Busch-Jaeger would use `de.busch-jaeger.freeathome.example1`.
+
   Typically you would use your own company name here, or real-name if no company name is available.
   Note that it is preferred to use an actual domain name (in reverse notation), but not a
   requirement, i.e. the domain name does not have to actually exist.
@@ -106,7 +104,13 @@ attributes marked as `optional` can be omitted, if it provides no benefit for th
   can be used to configure the Addon for a specific user. One possible example use for this is
   address, username and password of an external device that should be controlled by the Addon.
 
-  See the dedicated parameters section below for details.
+  See the dedicated [parameters](Metadata#abb-freehome-addon-parameters) section below for details.
+
+- `wizards` (optional)
+
+  This attribute can contain a JSON object that define wizards that help the user to configure the parameters.
+
+  See the dedicated [wizards](Metadata#abb-freehome-addon-wizards) section below for details.
 
 A sample metadata JSON file looks like this:
 
@@ -182,25 +186,53 @@ With this file, the free@home next App and the System Access Point web interface
 
 ![Screenshot of parameters in the app](img/metadata/parameters.png)
 
-What type of input field is displayed to the user, depends on the `type` field and depending on the
-`type`, possibly additional data (most notably `min` and `max`, specifying the range and `value` for
-the default value to use). The `name` is what is displayed to the user for this parameter.
+All parameters can show additional information to explain what the user can configure with it by adding an optional `description`, e.g.
+
+```json
+"address": {
+    "name": "Address",
+    "description": "Enter the IP address of the server.",
+    "type": "ipv4"
+}
+```
+
+#### Translatable attributes
+
+Some attributes inside the parameter definition can be defined for multiple languages. Those are `name` and `description`. Example:
+
+```json
+"address": {
+    "name": "Address",
+    "name@de": "Adresse",
+    "description": "Enter the IP address of the server.",
+    "description@de": "Geben Sie die IP-Adresse des Servers ein.",
+    "type": "ipv4"
+}
+```
+
+#### Types
+
+What type of input field is displayed to the user, depends on the `type` attribute and depending on the `type`, possibly additional data (most notably `min` and `max`, specifying the range and `default` for the default value to use). The `name` is what is displayed to the user for this parameter.
 
 Possible types are:
 
+##### Editable types
+
 - `number`
 
-  This type has a `min` and a `max` argument, in addition to the `name` and `type`, specifying the
-  range of valid values.
+  This type has additional `min` and `max` fields, specifying the range of valid values.
 
 - `string`
 
   The user can enter a normal string here.
 
+- `multilinestring`
+
+  The user can enter a string with multiple lines here.
+
 - `password`
 
-  Similar to `string`, but will be displayed as password instead, i.e. the text is not visible in
-  clear text when displayed to the user.
+  Similar to `string`, but will be displayed as password instead, i.e. the text is not visible in clear text when displayed to the user.
 
 - `boolean`
 
@@ -210,18 +242,281 @@ Possible types are:
 
   This type allows the user to enter an IPv4 address.
 
+- `date`
+
+  The user can enter a date here.
+
+- `time`
+
+  Shows a time field where the user can enter a time value in format `HH:MM`
+
+- `weekdays`
+
+  The user can select weekdays here. The result value is a string with a concatenated list of weekday numbers (1 = Monday to 7 = Sunday), e.g. a selection
+  of Tuesday, Thursday and Saturday would result in a value of "246".
+
+- `select`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Shows a list of values to select one. The list of selections has to be added as `options`:
+
+  ```json
+  "meterType": {
+      "name": "Type",
+      "type": "select",
+      "options": [
+          {"key": "main-meter", "name": "Main meter"},
+          {"key": "sub-meter", "name": "Consumer meter"},
+          {"key": "inverter", "name": "Inverter"},
+          {"key": "battery", "name": "Battery"}
+      ]
+  }
+  ```
+
+  The `name` attribute in the options is also translatable:
+
+  ```json
+  {"key": "main-meter", "name": "Main meter", "name@de": "Hauptzähler"},
+  ```
+
+- `floor`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Shows a list of floors to select one.
+
+- `room`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Shows a list of rooms to select one.
+
+- `channel`
+
+  Shows a list of free@home channels to select one.
+
+- `scanQRCode`
+
+  Shows a text-field where you can enter a code manually or scan it from
+  an QR-Code.
+
+- `jsonSelector`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Allows the user to select a value from a complex json object. Example:
+
+  ```json
+  "power": {
+      "name": "Power",
+      "type": "jsonSelector",
+      "json": {
+        "ENERGY": {
+          "Power": 10,
+          "EnergyTotal": 678,
+          "EnergyToday": 5
+        }
+      }
+  }
+  ```
+
+  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.
+
+##### Read-only types
+
 - `text`
 
-  This is a read-only type. The specified text is simply displayed to the user.
+  The specified text is displayed to the user.
 
-- `date`
-- `time`
-- `duration`
-- `weekdays`
-- `floor`
-- `room`
-- `channel`
-- `select`
+- `error`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Like `text` but the content is displayed with red color.
+
+- `separator`
+
+  Shows a horizontal line. Can be used to separate a some parameters from others. If you add a `name` it is shown as a title for this groups, if you add a `description` it is shown as text below the title.
+
+- `displayQRCode`
+
+  Shows the value as QR-Code.
+
+- `svg`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0  
+
+  Shows the value as SVG-Image in the UI.
+
+- `uuid`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Only useful for parameter groups with `multiple: true`. The UI generates a UUID when a new entry is created. This UUID can be used to identify the entry.
+
+#### Additional parameter attributes
+
+Beside the already explained `name`, `type` and `description` attributes there are some special attributes that can be optionally added to a parameter definition:
+
+- `required`
+
+  If this is added with a `true` value this parameter value is required. The user can not save the settings unless this parameter has a value.
+
+- `default`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Specifies a default value for this parameter.
+
+- `event`
+
+  The value of this parameter is not saved in the settings but send as an event when the user clicks on the send button that is show underneath this parameter.
+
+- `visible`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Show/Hide this parameter in the UI. (default: `true`)
+
+- `dependsOn`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Allows to define that a parameter is only shown, when another parameter has a specific value. Also requires the additional `dependsOnValues` attribute. Example:
+
+  ```json
+  "connectionType": {
+      "name": "Connection",
+      "type": "select",
+      "required": true,
+      "options": [{"key": "USB"}, {"key": "MQTT"}],
+  },
+  "mqttType": {
+      "name": "MQTT type",
+      "type": "select",
+      "options": [
+        {"key": "generic", "name": "Generic"}, 
+        {"key": "tasmota", "name": "tasmota"}
+      ],
+      "dependsOn": "connectionType",
+      "dependsOnValues": ["MQTT"]
+  }
+  ```
+
+  In this example the `mqttType` parameter is only shown when the `connectionType` parameter has the value `MQTT`. `dependsOnValues` is an array of possible values to check.
+
+  - `dependsOnConfig`
+
+    Replaces other settings in this parameter configuration when one of the values matches. The former example using `dependsOnValues` in only a shortcut for:
+
+  ```json
+  "connectionType": {
+      "name": "Connection",
+      "type": "select",
+      "required": true,
+      "options": [{"key": "USB"}, {"key": "MQTT"}],
+  },
+  "mqttType": {
+      "name": "MQTT type",
+      "type": "select",
+      "options": [
+        {"key": "generic", "name": "Generic"}, 
+        {"key": "tasmota", "name": "tasmota"}
+      ],
+      "visible": false,
+      "dependsOn": "connectionType",
+      "dependsOnConfig": [
+        { "values": "MQTT", "visible": true }
+      ]
+  }
+  ```
+
+    Most of the configuration options can be overridden this way, but there are exceptions. You cannot change `type`, `dependsOn`, `dependsOnValues`
+    and `dependsOnConfig`.
+
+    Another example of a common use case for this feature is the replacement of options in a select-type parameter.
+
+  ```json
+  "meterType": {
+        "name": "Type",
+        "type": "select",
+        "required": true,
+        "options": [
+            {"key": "main-meter", "name": "Main meter"},
+            {"key": "sub-meter", "name": "Consumer meter"},
+            {"key": "inverter", "name": "Inverter"},
+            {"key": "battery", "name": "Battery"},
+            {"key": "gas-meter", "name": "Gas meter"},
+            {"key": "water-meter", "name": "Water meter"}
+        ]
+    },
+    "connectionType": {
+        "name": "Connection",
+        "type": "select",
+        "required": true,
+        "options": [{"key": "USB"}, {"key": "MQTT"}],
+        "dependsOn": "meterType",
+        "dependsOnConfig": [
+              {
+                "values": ["gas-meter", "water-meter"], 
+                "options": [{"key": "MQTT"}]
+              }
+        ]
+    }
+    ```
+
+    In this example the `connectionType` shows the options `"options": [{"key": "MQTT"}]` when `meterType` has the value `gas-meter` or `water-meter`.
+
+- `debug`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  If this is added with a `true` value this parameter is only shown, when the app is in debug mode.
+
+- `rpc`,  `rpcCallOn`, `rpcAdditionalParameters`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Allows retrieving the value or configuration changes for this parameter from the addon via one of two RPCs: `getParameterValue`, `getParameterConfig`.
+
+  With `rpcCallOn` you can define when this rpc is send:
+  
+  `rpcCallOn: initial`: sends it only once when the UI opens the addon settings.
+
+  `rpcCallOn: everyChange`: sends it every time any of the other parameter values in the same group has been changed by the user.
+
+  `rpcAdditionalParameters`: is just an optional set of values that are added to the rpc.
+
+  Full example: If you have a parameter group that configures something that can be explained best with a graph (e.g. a dimming curve or a color temperature calculation that changes over the day) you can use the `svg` parameter type together with these rpc settings to show the user a graph based on your current parameter settings.
+
+  ```json
+    "configs": {
+      "name": "Configuration",
+      "name@de": "Konfiguration",
+      "multiple": true,
+      "display": {
+          "title": "$name"
+      },
+      "items": {
+        ...
+        "curve": {
+          "name": "Color temperature curve today",
+          "name@de": "Farbtemperaturkurve heute",
+          "type": "svg",
+          "rpc": "getParameterValue",
+          "rpcCallOn": "everyChange",
+          "rpcAdditionalParameters": {
+              "width": 600,
+              "height": 300
+          }
+      }
+    }
+  }
+  ```
+
+  The addons receives the rpc everytime any other parameter of the same groups changes. The parameters of the rpc contains all parameter values of the current group and in addition to that `"parameter": "curve"`, `"group": "configs"` and whats configured in `rpcAdditionalParameters`.
+  With all these values the addon can generate an SVG-Chart and send it as response. That chart will be shown to the user and he gets live feedback to every configuration changed by seeing an updated curve.
 
 #### Parameter groups
 
@@ -266,6 +561,46 @@ settings that the user will normally not changed in an `Advanced Settings` group
 }
 ```
 
+If you need multiple configuration entries for a parameter group you can add `"multiple": true` to it.
+
+If you have many parameter groups or a group with many parameters in it the UI can be a bit confusing. To avoid that you can show a list item
+instead of the complete form of a configured parameter group entry. When the user clicks on that list item the form is opened. For the
+example above you can show the configured username in that entry with this configuration:
+
+```json
+"authentication": {
+    "name": "Authentication Settings",
+    "display": {
+      "title": "Username: $username",
+    }
+    "items": {
+        "username": {
+            "name": "Username",
+            "type": "string"
+        },
+        "password": {
+            "name": "Password",
+            "type": "password"
+        }
+    }
+},
+```
+
+You can use any parameter value from the groups `items` list in the display title by prepending its name with a `$`.
+If the `username` is not set the title is not shown. In additions to the `title` you can also add a second line with `subtitle`
+and an error line with `error`, a full example would be:
+
+```json
+"display": {
+    "title": "$meterType: $topic",
+    "subtitle": "Connection: $state",
+    "subtitle@de": "Verbindung: $state",
+    "error": "$errorMessage"
+},
+```
+
+The display feature is mostly usefull for parameter groups with the multiple flag.
+
 #### Using parameters in an ABB free@home Addon
 
 When parameters are defined in the metadata file, they can be accessed from the TypeScript code in
@@ -274,3 +609,162 @@ the Addon. The configured value will show up in the `Configuration`of the Addon,
 
 Please see the [writing Addons section](Writing-addons) for more information about using
 the configuration parameters in the Addon.
+
+### ABB free@home Addon wizards
+
+> **NOTE:** Requires free@home app version >= 2.4.0
+
+For complex parameter settings you have to option to divide the
+configuration into separate consecutive steps by using a wizard.
+A wizard can create and/or edit entries of a single parameter group.
+
+The basic structure of the wizards configuration is like this:
+
+```json
+"wizards": {
+  "wizard1": {
+    "name": "Wizard 1",
+    "create": true,
+    "edit": true,
+    "parameterGroups": ["default"],
+    "steps": [
+      {
+        "id": "step1",
+        "name": "Step 1",
+        ...
+      }, {
+        "id": "step2",
+        "name": "Step 2"
+        ...
+      }
+    ]
+  }
+}
+```
+
+This incomplete example wizard can create and edit entries of the "default" parameter group and uses 2 steps.
+
+Based on that we can step through a complete example taken from a real addon.
+It a wizard which supports the user in creating/editing an energy meter.
+The wizard contains 2 steps. In the first one the user selects the meter type and a connection type. And in the second
+step the actual meter is configured.
+
+```json
+ "wizards": {
+    "meter": {
+        "name": "Meter",
+        "name@de": "Zähler",
+        "create": true,
+        "edit": true,
+        "parameterGroups": ["serial", "electricity-mqtt", "gas-water-mqtt"],
+        "steps": [
+            {
+                "id": "select-type",
+                "name": "Select type",
+                "name@de": "Typ auswählen",
+                "conditions": [
+                  {"modes": ["create"]}
+                ],
+                "items": {
+                    "meterType": {
+                        "name": "Type",
+                        "name@de": "Typ",
+                        "type": "select",
+                        "required": true,
+                        "options": [
+                            {"key": "main-meter", "name": "Main meter", "name@de": "Hauptzähler"},
+                            {"key": "sub-meter", "name": "Consumer meter", "name@de": "Verbraucherzähler"},
+                            {"key": "inverter", "name": "Inverter", "name@de": "PV Inverter"},
+                            {"key": "battery", "name": "Battery", "name@de": "Batterie"},
+                            {"key": "gas-meter", "name": "Gas meter", "name@de": "Gaszähler"},
+                            {"key": "water-meter", "name": "Water meter", "name@de": "Wasserzähler"}
+                        ]
+                    },
+                    "connectionType": {
+                        "name": "Connection",
+                        "type": "select",
+                        "required": true,
+                        "options": [{"key": "USB"}, {"key": "MQTT"}],
+                        "dependsOn": "meterType",
+                        "dependsOnConfig": [
+                              {"values": ["gas-meter", "water-meter"], "options": [{"key": "MQTT"}]}
+                        ]
+                    },
+                    "mqttType": {
+                        "name": "MQTT type",
+                        "type": "select",
+                        "required": true,
+                        "options": [{"key": "generic", "name": "Generic"}, {"key": "tasmota", "name": "Tasmota"}],
+                        "dependsOn": "connectionType",
+                        "dependsOnValues": ["MQTT"]
+                    },
+                    "topic": {
+                        "name": "Topic",
+                        "description": "Enter the MQTT topic where your device published its energy data in.",
+                        "description@de": "Geben Sie das MQTT Topic ein in das Ihr Gerät die Energiedaten sendet.",
+                        "type": "string",
+                        "dependsOn": "mqttType",
+                        "visible": false,
+                        "dependsOnConfig": [
+                            {
+                                "values": ["tasmota"], 
+                                "visible": true,
+                                "description": "Copy the topic from your tasmota devices MQTT settings here (e.g. tasmota_XXXXXX)",
+                                "description@de": "Kopieren Sie das Topic aus den MQTT Einstellungen Ihres Tasmota Geräts (z.B. tasmota_12345B)"
+                            }, {
+                                "values": ["generic"], 
+                                "visible": true,
+                                "options": [{"key": "MQTT"}]
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "id": "configure",
+                "name": "Configure",
+                "name@de": "Konfigurieren",
+                "steps": [{
+                    "id": "configure-serial",
+                    "parameterGroup": "serial",
+                    "conditions": [
+                        {"parameter": "connectionType", "values": ["USB"]}
+                    ]
+                },
+                {
+                    "id": "configure-electricity-mqtt",
+                    "parameterGroup": "electricity-mqtt",
+                    "conditions": [
+                        {"parameter": "connectionType", "values": ["MQTT"]},
+                        {"parameter": "meterType", "values": ["main-meter", "sub-meter", "inverter", "battery"]}
+                    ]
+                },
+                {
+                    "id": "configure-gaswater-mqtt",
+                    "parameterGroup": "gas-water-mqtt",
+                    "conditions": [
+                        {"parameter": "connectionType", "values": ["MQTT"]},
+                        {"parameter": "meterType", "values": ["gas-meter", "water-meter"]}
+                    ]
+                }]
+            }
+        ]
+    }
+}
+```
+
+The wizard can create and edit entries for three different parameter groups: `"parameterGroups": ["serial", "electricity-mqtt", "gas-water-mqtt"]`.
+
+The first step with the id `select-type` contains `items` which are used to prepare the next step. The `items` section in a step uses the same syntax
+as in the parameter groups, which already have been explained. Because the first step does not contain an `parameterGroup` property the configuration
+is not stored anywhere by copied into the next step. So based on the users entries the values for `meterType`, `connectionType`, `mqttType` and `topic` are
+copied into step 2 when it is entered. This step is only needed for creating new entries and not for editing existing ones. The setting
+`"conditions": [{"modes": ["create"]}]` makes sure that this step is only shown when the user adds an entry.
+
+The second step contains another level of `steps` which all have `conditions` specified. The first of the sub-steps which fullfills its condition will
+be executed as second step. If the use has selected in the first step, e.g. `meterType: "main-meter"` and `connectionType: "mqtt"` the sub-step `configure-electricity-mqtt` will be the used one for the second step.
+
+This step has the `parameterGroup` property, which means it will create / edit and entry of the `electricity-mqtt` parameter group.
+This step will use the `items` from that group to generate the form elements in the UI. Some of those are prefilled by values from the first step.
+
+The wizards itself do not store anything when closed, so you can create / edit multiple settings with wizards and have to save your changes at the end.

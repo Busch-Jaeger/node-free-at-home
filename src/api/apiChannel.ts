@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
-import * as api from "../api";
+import * as api from "../fhapi";
 import { PairingIds } from "../pairingIds";
 import { ParameterIds } from '../parameterIds';
 import { FreeAtHomeApi, IndexedDatapoint } from '../freeAtHomeApi';
@@ -21,6 +21,7 @@ type OutputDatapointCallback = (value: string) => void;
 export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }) {
     device: ApiDevice;
     channelNumber: number;
+    serialNumber: string;
 
     inputPairingToPosition: Map<PairingIds, number> = new Map();
     inputPositionToPairing: Map<number, PairingIds> = new Map();
@@ -40,6 +41,7 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
         super();
         this.device = device;
         this.channelNumber = channelNumber;
+        this.serialNumber = `${device.serialNumber}/ch${channelNumber.toString().padStart(4, '0')}`;
 
         if (apiChannel.floor !== undefined)
             this.floor = parseInt(apiChannel.floor, 16);

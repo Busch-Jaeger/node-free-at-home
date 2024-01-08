@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
-import * as api from "../api";
+import * as api from "../fhapi";
 import { PairingIds } from "../pairingIds";
 import { ParameterIds } from '../parameterIds';
 import { FreeAtHomeApi, IndexedDatapoint, Datapoint } from '../freeAtHomeApi';
@@ -9,7 +9,8 @@ import { Capabilities } from '../capabilities';
 import { channel } from 'diagnostics_channel';
 
 interface DeviceEvents {
-    parameterChanged(id: ParameterIds, value: string): void
+    parameterChanged(id: ParameterIds, value: string): void,
+    destroyed(): void
 }
 
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
@@ -56,6 +57,11 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
             for(const [key, value] of this.parameters)
                 this.emit("parameterChanged", key, value);
         });
+    }
+
+    async destroy() {
+        this.emit("destroyed");
+        this.removeAllListeners();
     }
 
     onInputDatapointChange(channelIndex: number, data: IndexedDatapoint) {
@@ -106,5 +112,9 @@ export class ApiVirtualDevice extends (EventEmitter as { new(): DeviceEventEmitt
 
     public async setAuxiliaryData(channel: number, index: number, auxiliaryData: string[]): Promise<void> {
         return this.freeAtHomeApi.setAuxiliaryData(this.serialNumber, channel, index, auxiliaryData);
+    }
+
+    public async patchDevice(patch: api.ApiRestDevice_sysap__serial_PatchRequest): Promise<void> {
+        return this.freeAtHomeApi.patch(this.serialNumber, patch);
     }
 }

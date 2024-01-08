@@ -1,0 +1,63 @@
+openapi: 3.0.1
+info:
+  title: free@home RPC API
+  description: free@home RPC API
+  version: v1
+servers:
+  - url: https://{hostname}/api/rpc/v1
+    variables:
+      hostname:
+        default: 192.168.2.1
+        description: Hostname of the System Access Point or IP Address
+paths:
+  "/{reference}/pushData":
+    post:
+      tags:
+        - rpc
+      summary: upload auxiliary device data
+      description: Push 
+      operationId: UploadAuxiliaryDeviceData
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.example"
+      responses:
+        "200":
+          description: Success
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "413":
+          description: Payload Too Large error
+      requestBody:
+        description: New value
+        content:
+          text/plain:
+            example: "data"
+            schema:
+              type: string
+components:
+  schemas:
+    Reference:
+      type: string
+      pattern: "^[a-zA-Z0-9\\-/\\\\_.]{4,64}$"
+      maxLength: 128
+          
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+security:
+  - basicAuth: []
+tags:
+  - name: rpc
+    description: RPC

@@ -64,10 +64,51 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     private isShuffel: boolean = false;
     private isCrossfade: boolean = false;
 
-    private inputs: string[] = [];
-    private playlists: string[] = [];
+    private favoriteCount: number = 0;
+    private lastSelectedFavorit: number | undefined = undefined;
 
     private parameterMaxVolume: number = 100;
+
+    private lastVolume: number = 0;
+    static readonly volumeChangeInterval = 4;
+    static readonly volumeIntervalTime = 500;
+    private volumeIntervalTimer: ReturnType<typeof setInterval> | undefined = undefined
+
+    private stopIntervalTimer() {
+        if (undefined !== this.volumeIntervalTimer) {
+            clearInterval(this.volumeIntervalTimer);
+            this.volumeIntervalTimer = undefined;
+        }
+    }
+
+    private startIntervalTimer(callback: () => void) {
+        this.stopIntervalTimer();
+        this.volumeIntervalTimer = setInterval(callback, MediaPlayerChannel.volumeIntervalTime);
+    }
+
+    private incrementVolume() {
+        let volume = this.lastVolume;
+        volume += MediaPlayerChannel.volumeChangeInterval;
+        if (volume > this.parameterMaxVolume)
+            volume = this.parameterMaxVolume;
+        this.emit("playVolumeChanged", volume);
+        this.emit("volume", volume);
+        if (this.isAutoConfirm)
+            this.setVolume(volume);
+    }
+
+    private decrementVolume() {
+        let volume = this.lastVolume;
+        volume -= MediaPlayerChannel.volumeChangeInterval;
+        if (volume < 0)
+            volume = 0;
+        if (volume > this.parameterMaxVolume)
+            volume = this.parameterMaxVolume;
+        this.emit("playVolumeChanged", volume);
+        this.emit("volume", volume);
+        if (this.isAutoConfirm)
+            this.setVolume(volume);
+    }
 
     protected dataPointChanged(id: PairingIds, value: string): void {
         switch (id) {
@@ -83,7 +124,10 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 this.emit("playModeChanged", MediaPlayerChannel.PlayMode.paused);
                 this.emit("pause");
                 if (this.isAutoConfirm) {
-                    this.playMode = MediaPlayerChannel.PlayMode.paused;
+                    if (this.playMode !== MediaPlayerChannel.PlayMode.paused)
+                        this.playMode = MediaPlayerChannel.PlayMode.paused;
+                    else
+                        this.playMode = MediaPlayerChannel.PlayMode.playing;
                     this.updatePlayMode();
                 }
                 break;
@@ -98,6 +142,35 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
             case PairingIds.AL_RELATIVE_VOLUME_CONTROL:
                 if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeDec) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeDec);
                 else if (parseInt(value) === MediaPlayerChannel.PlayCommand.VolumeInc) this.emit("playCommandChanged", MediaPlayerChannel.PlayCommand.VolumeInc);
+                console.log(value);
+                switch (value) {
+                    case '12': //volume inc
+                        this.stopIntervalTimer();
+                        this.incrementVolume();
+                        break;
+                    case '4': //volume dec
+                        this.stopIntervalTimer();
+                        this.decrementVolume();
+                        break;
+                    case '9': //volume inc long presed
+                        this.incrementVolume();
+                        this.startIntervalTimer(() => {
+                            this.incrementVolume();
+                        });
+                        break;
+                    case '8': //volume inc long released
+                        this.stopIntervalTimer();
+                        break;
+                    case '1': //volume dec long presed 
+                        this.decrementVolume();
+                        this.startIntervalTimer(() => {
+                            this.decrementVolume();
+                        });
+                        break;
+                    case '0': //volume dec long released
+                        this.stopIntervalTimer();
+                        break;
+                }
                 break;
             case PairingIds.AL_ABSOLUTE_VOLUME_CONTROL:
                 let volume = parseInt(value);
@@ -106,17 +179,21 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 this.emit("playVolumeChanged", volume);
                 this.emit("volume", volume);
                 if (this.isAutoConfirm)
-                    this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, volume.toString());
+                    this.setVolume(volume);
                 break;
             case PairingIds.AL_MEDIA_MUTE:
                 switch (parseInt(value)) {
                     case MediaPlayerChannel.SetMute.Mute:
                         this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
                         this.emit("mute");
+                        if (this.isAutoConfirm)
+                            this.setMute();
                         break;
                     case MediaPlayerChannel.SetMute.Unmute:
                         this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
                         this.emit("unMute");
+                        if (this.isAutoConfirm)
+                            this.setUnMute();
                         break;
                 }
                 break;
@@ -161,6 +238,17 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     this.updatePlayMode();
 
                 break;
+            case PairingIds.AL_PLAY_NEXT_FAVORITE:
+                if (0 === this.favoriteCount)
+                    return;
+                let index = (undefined !== this.lastSelectedFavorit) ? this.lastSelectedFavorit + 1 : 0;
+                if (index >= this.favoriteCount)
+                    index = 0;
+                this.emit("playlist", index);
+                if (this.isAutoConfirm) {
+                    this.setPlaylistIndex(index);
+                }
+                break;
             case PairingIds.AL_SELECT_PROFILE:
                 {
                     const intValue = parseInt(value);
@@ -169,6 +257,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     switch (topicIndex) {
                         case Topics.TOP_MEDIA_PLAYER_PLAYLIST:
                             this.emit("playlist", index);
+                            this.lastSelectedFavorit = index;
                             if (this.isAutoConfirm)
                                 this.setPlaylistIndex(index);
                             break;
@@ -245,12 +334,17 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                         case MediaPlayerChannel.SetMute.Mute:
                             this.emit("muteChanged", MediaPlayerChannel.SetMute.Mute);
                             this.emit("mute");
+                            if (this.isAutoConfirm)
+                                this.setMute();
                             break;
                         case MediaPlayerChannel.SetMute.Unmute:
                             this.emit("muteChanged", MediaPlayerChannel.SetMute.Unmute);
                             this.emit("unMute");
+                            if (this.isAutoConfirm)
+                                this.setUnMute();
                             break;
                     }
+                    break;
                 case PairingIds.AL_INFO_ACTUAL_VOLUME:
                     let volume = parseInt(value);
                     if(volume > this.parameterMaxVolume)
@@ -269,6 +363,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     {
                         const intValue = parseInt(value) - 1;
                         this.emit("playlist", intValue);
+                        this.lastSelectedFavorit = intValue;
                         if (this.isAutoConfirm)
                             this.setPlaylistIndex(intValue);
                         break;
@@ -321,6 +416,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     setVolume(value: number): Promise<void> {
+        this.lastVolume = value;
         return this.setDatapoint(PairingIds.AL_INFO_ACTUAL_VOLUME, value.toString());
     }
 
@@ -360,22 +456,22 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
      * @deprecated The method should not be used, use setPlazlists instead
      */
     setFavorites(favorites: string[]): Promise<void> {
-        this.playlists = favorites;
+        this.favoriteCount = favorites.length;
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_PLAYLIST, favorites);
     }
 
     setPlaylists(playlists: string[]): Promise<void> {
-        this.playlists = playlists;
+        this.favoriteCount = playlists.length;
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_PLAYLIST, playlists);
     }
 
     async setPlaylistIndex(value?: number): Promise<void> {
+        this.lastSelectedFavorit = value;
         value = (undefined === value) ? 0 : value + 1;
         return this.setDatapoint(PairingIds.AL_INFO_PLAYLIST, value.toString());
     }
 
     setInputs(inputs: string[]): Promise<void> {
-        this.inputs = inputs;
         return this.setAuxiliaryData(Topics.TOP_MEDIA_PLAYER_AUDIO_INPUT, inputs);
     }
 

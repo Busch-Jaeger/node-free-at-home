@@ -1,30 +1,29 @@
 import EventSource from 'eventsource';
-import net from 'net';
-import http from 'http';
-import fs from 'fs';
-import * as API from './scriptingApi';
+import { Metadata, Configuration, ApplicationState, Event, AddonClient, OpenAPIConfig } from './addon/';
+import * as fs from 'fs';
+import * as http from 'http';
+import * as net from 'net';
 
 import { EventEmitter } from 'events';
+import { handleRequestError } from './utilities';
 
-import fetch from 'cross-fetch';
+export {Configuration, ApplicationState};
 
-export {Configuration, ApplicationState} from './scriptingApi';
+const REST_PATH = "/api/scripting/v1";
 
 export function readMetaData() {
     const data = fs.readFileSync('free-at-home-metadata.json', 'utf8');
     const metaData = JSON.parse(data);
-    return metaData as API.Metadata;
+    return metaData as Metadata
 }
 
-interface ConnectionOptions {
-    headers: {
-        Authorization: string;
-        Range: string;
-    };
-    baseUrl: string;
-    fetch: any;
-    createConnection: ((options: http.ClientRequestArgs, connectionListener?: (() => void) | undefined) => net.Socket) | undefined;
-    agent: http.Agent;
+interface EventSourceOptions {
+    withCredentials?: boolean | undefined;
+    headers?: object | undefined;
+    proxy?: string | undefined;
+    https?: object | undefined;
+    rejectUnauthorized?: boolean | undefined;
+    createConnection: ((options: http.ClientRequestArgs, connectionListener?: (() => void) | undefined) => net.Socket) | undefined
 }
 
 export type ConnectionState = "init" | "connected" | "error";
@@ -39,9 +38,9 @@ interface Events<ConfigurationType, EventType> {
 }
 
 export declare interface AddOn<
-    ConfigurationType  extends API.Configuration = API.Configuration,
-    StateType  extends API.ApplicationState = API.ApplicationState,
-    EventType extends API.Event = API.Event> {
+    ConfigurationType  extends Configuration = Configuration,
+    StateType  extends ApplicationState = ApplicationState,
+    EventType extends Event = Event> {
     on<U extends keyof Events<ConfigurationType, EventType>>(
         event: U, listener: Events<ConfigurationType, EventType>[U]
     ): this;
@@ -52,11 +51,14 @@ export declare interface AddOn<
 }
 
 export class AddOn<
-    ConfigurationType = API.Configuration,
-    StateType = API.ApplicationState,
-    EventType = API.Event> extends EventEmitter {
+    ConfigurationType = Configuration,
+    StateType = ApplicationState,
+    EventType = Event> extends EventEmitter {
     private id: string;
-    private connectionOptions: ConnectionOptions;
+    private eventSourceOptions: EventSourceOptions;
+    private eventSourceBaseUrl: string = "";
+    private connectionConfig: Partial<OpenAPIConfig>;
+    private api: AddonClient;
     private configurationEventSource?: EventSource;
     private applicationStateEventSource?: EventSource;
     private eventEventSource?: EventSource;
@@ -65,7 +67,7 @@ export class AddOn<
         super();
         this.id = id;
         const baseUrl = baseUrl_ ?? process.env.FREEATHOME_SCRIPTING_API_BASE_URL
-            ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/scripting/v1" : "http://localhost/api/scripting/v1");
+            ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + REST_PATH : "http://localhost" + REST_PATH);
         const username = username_ ?? process.env.FREEATHOME_API_USERNAME ?? "installer";
         const password = password_ ?? process.env.FREEATHOME_API_PASSWORD ?? "12345";
         const useUnixSocket: boolean = process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined;
@@ -74,22 +76,24 @@ export class AddOn<
         };
 
         function connectToUnixSocket(options: http.ClientRequestArgs, connectionListener?: () => void) {
-            return net.createConnection("/run/api/scripting/v1", connectionListener);
+            return net.createConnection("/run" + REST_PATH, connectionListener);
         }
 
-        const unixSocketAgent = new http.Agent(<object>{
-            socketPath: "/run/api/scripting/v1",
-        })
+        this.connectionConfig = {
+            BASE: (useUnixSocket) ? "http://localhost" + REST_PATH : baseUrl,
+            USERNAME: username,
+            PASSWORD: password
+        }
+        this.eventSourceBaseUrl = (useUnixSocket) ? "http://localhost" : baseUrl;
 
-        this.connectionOptions = {
+        this.api = new AddonClient(this.connectionConfig);
+
+        this.eventSourceOptions = {
             headers: {
                 "Range": "0",
                 ...authenticationHeader
             },
-            baseUrl:  (useUnixSocket) ? "http://localhost" : baseUrl,
-            fetch: fetch,
-            createConnection: (useUnixSocket) ? connectToUnixSocket : undefined, // used in EventSource
-            agent: (useUnixSocket) ? unixSocketAgent : http.globalAgent          // used in fetch
+            createConnection: (useUnixSocket) ? connectToUnixSocket : undefined
         }
     }
 
@@ -97,18 +101,19 @@ export class AddOn<
         if (undefined !== this.configurationEventSource)
             return;
 
-        const url = this.connectionOptions.baseUrl + "/rest/container/" + this.id + "/configuration";
+        const url = this.eventSourceBaseUrl + "/rest/container/" + this.id + "/configuration";
 
         this.configurationEventSource = new EventSource(
-            url, this.connectionOptions);
+            url, this.eventSourceOptions);
         this.configurationEventSource.onopen = (event: MessageEvent) => {
             console.log("open configuration");
             this.emit("configurationConnectionChanged", "connected");
         };
         this.configurationEventSource.onerror = (event: MessageEvent) => {
-            console.log("error in  event source");
+            console.log("error in event source");
             this.emit("configurationConnectionChanged", "error");
             console.log(event);
+            console.log(url);
         };
         this.configurationEventSource.onmessage = (event: MessageEvent) => {
             try {
@@ -125,18 +130,19 @@ export class AddOn<
         if (undefined !== this.applicationStateEventSource)
             return;
 
-        const url = this.connectionOptions.baseUrl + "/rest/container/" + this.id + "/applicationstate";
+        const url = this.eventSourceBaseUrl + "/rest/container/" + this.id + "/applicationstate";
 
         this.applicationStateEventSource = new EventSource(
-            url, this.connectionOptions);
+            url, this.eventSourceOptions);
         this.applicationStateEventSource.onopen = (event: MessageEvent) => {
             console.log("open application state");
             this.emit("applicationStateConnectionChanged", "connected");
         };
         this.applicationStateEventSource.onerror = (event: MessageEvent) => {
-            console.log("error in  event source");
+            console.log("error in event source");
             this.emit("applicationStateConnectionChanged", "error");
             console.log(event);
+            console.log(url);
         };
         this.applicationStateEventSource.onmessage = (event: MessageEvent) => {
             try {
@@ -153,10 +159,10 @@ export class AddOn<
         if (undefined !== this.eventEventSource)
             return;
 
-        const url = this.connectionOptions.baseUrl + "/rest/container/" + this.id + "/events";
+        const url = this.eventSourceBaseUrl + "/rest/container/" + this.id + "/events";
 
         this.eventEventSource = new EventSource(
-            url, this.connectionOptions);
+            url, this.eventSourceOptions);
             this.eventEventSource.onopen = (event: MessageEvent) => {
             console.log("open events");
             this.emit("eventConnectionChanged", "connected");
@@ -165,6 +171,7 @@ export class AddOn<
             console.log("error in  event source");
             this.emit("eventConnectionChanged", "error");
             console.log(event);
+            console.log(url);
         };
         this.eventEventSource.onmessage = async (event: MessageEvent) => {
             try {
@@ -178,15 +185,27 @@ export class AddOn<
     }
 
     async setApplicationState(state: StateType) {
-        return API.setContainerApplicationState(this.id, state, this.connectionOptions);
+        try {
+            return this.api.container.setContainerApplicationState(this.id, state);
+        } catch (e) {
+            handleRequestError(e);
+        }
     }
 
     async setConfiguration(configuration: ConfigurationType) {
-        return API.setContainerConfiguration(this.id, configuration, this.connectionOptions);
+        try {
+            return this.api.container.setContainerConfiguration(this.id, configuration);
+        } catch (e) {
+            handleRequestError(e);
+        }
     }
 
     async triggerEvent(event: EventType) {
-        return API.putContainerEvents(this.id, event, this.connectionOptions);
+        try {
+            return this.api.container.putContainerEvents(this.id, event);
+        } catch (e) {
+            handleRequestError(e);
+        }
     }
 
     dispose() {

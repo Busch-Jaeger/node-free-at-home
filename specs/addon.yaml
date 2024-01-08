@@ -1,0 +1,1550 @@
+openapi: 3.0.1
+info:
+  title: free@home add-on API
+  description: free@home is the leading Smart Home System from ABB.
+  version: v1
+servers:
+  - url: https://{hostname}/api/addon/v1
+    variables:
+      hostname:
+        default: 192.168.2.1
+        description: Hostname of the System Access Point or IP Address
+paths:
+  "/rest/downloadqueue":
+    post:
+      tags:
+        - experimental
+      summary: queue an add-on url for download
+      description: queue an add-on url for download
+      operationId: queueDownload
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+              pattern: "^(?:(http[s]?):\\/)?\\/?([^:\\/\\s]+)(?::(\\d+))?((?:(?:\\/\\w+)*\\/)(?:[\\w\\-\\.]+[^#?\\s]+)(?:.*)?(#[\\w\\-]+)?)$"
+            example: "https://update.mybuildings.abb.com/freeathomescripts/scripts/de.busch-jaeger.freeathome.i-net-radio-10.0.0-release-465c0c593ba45d26accca0b37f7d61dc72cda0cf/content.tar"
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/rest/ref":
+    post:
+      tags:
+        - repository
+      summary: Upload an add-on inside of a tar file
+      description: Upload an add-on inside of a tar file
+      operationId: upload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: string
+                  format: binary
+          application/x-tar:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      tags:
+        - repository
+      summary: Get all add-on references
+      description: Get all an add-on references
+      operationId: getAddOn
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/References"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/rest/ref/{reference}":
+    get:
+      tags:
+        - repository
+      summary: Get Metadata by references
+      description: Get Metadata by references
+      operationId: getMetadata
+      parameters:
+        - name: reference
+          in: path
+          description: Add-on reference
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: de.busch-jaeger.freeathome.velux
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/x-tar:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+          content:
+            text/plain:
+              schema:
+                type: string
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      tags:
+        - repository
+      summary: Delete an add-on by references
+      description: Delete an add-on by references
+      operationId: deleteScript
+      parameters:
+        - name: reference
+          in: path
+          description: add-on reference
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: de.busch-jaeger.freeathome.velux
+      responses:
+        "200":
+          description: Success
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  "/rest/container":
+    post:
+      tags:
+        - container
+      summary: Create a container instance from a previous uploaded add-on
+      description: Create a container instance from a previous uploaded add-on
+      operationId: postContainer
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/Reference"
+            example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/x-tar:
+              schema:
+                type: string
+                format: binary
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      tags:
+        - container
+      summary: List all created container instances
+      description: List all created container instances
+      operationId: getContainers
+      responses:
+        "200":
+          description: Success
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/x-tar:
+              schema:
+                type: string
+                format: binary
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/rest/container/{reference}":
+    get:
+      tags:
+        - container
+      summary: Get the run time state of a container instance
+      description: List all created container instances
+      operationId: getContainerById
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/x-tar:
+              schema:
+                type: string
+                format: binary
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      tags:
+        - container
+      summary: Delete a container instance by references
+      description: Delete a container by references
+      operationId: deleteContainer
+      parameters:
+        - name: reference
+          in: path
+          description: Container reference
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  "/rest/container/{reference}/configuration":
+    get:
+      tags:
+        - container
+      summary: Get the configuration of a container
+      description: Get the configuration of a container
+      operationId: getContainerConfiguration
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Configuration"
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/Configuration"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      tags:
+        - container
+      summary: Set the configuration of a container
+      description: Set the configuration of a container
+      operationId: setContainerConfiguration
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Configuration"
+            example: { group: {items: {param1: "test1"}} }
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  "/rest/container/{reference}/applicationstate":
+    get:
+      tags:
+        - container
+      summary: Get the application state of a container
+      description: Get the application state of a container
+      operationId: getContainerApplicationState
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationState"
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/ApplicationState"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      tags:
+        - container
+      summary: Set the application state of a container
+      description: Set the application state of a container
+      operationId: setContainerApplicationState
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationState"
+            example: { state: { id: "ok", text: "State description"} }
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  "/rest/container/{reference}/events":
+    get:
+      tags:
+        - container
+      summary: Get the events of a container
+      description: Get the events of a container
+      operationId: getContainerEvents
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.example"
+      responses:
+        "200":
+          description: Success
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      tags:
+        - container
+      summary: Set the events of a container
+      description: Set the events of a container
+      operationId: putContainerEvents
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.scriptingHost-configStateEvents"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Event"
+            example: {
+              "eventType": "buttonPressed",
+              "group": "hue",
+              "index": "820237408283894720347023",
+              "parameter": "connectToHue"
+                      }
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  "/rest/container/{reference}/start":
+    post:
+      tags:
+        - container
+      summary: Start a container
+      description: Start a container
+      operationId: startContainer
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/x-tar:
+              schema:
+                type: string
+                format: binary
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/rest/container/{reference}/stop":
+    post:
+      tags:
+        - container
+      summary: Stop a running container
+      description: Stop a running container
+      operationId: stopContainer
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Metadata"
+            application/x-tar:
+              schema:
+                type: string
+                format: binary
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+components:
+  schemas:
+    References:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/Reference"
+    Reference:
+      type: string
+      pattern: "^[a-zA-Z0-9\\-/\\\\_.]{4,64}$"
+      maxLength: 128
+    Metadata:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - description
+        - version
+        - id
+        - license
+        - author
+        - url
+        - entryPoint
+        - type
+      properties:
+        version:
+          type: string
+        id:
+          type: string   
+        name: 
+          $ref: "#/components/schemas/TranslatedString"
+        description:
+          $ref: "#/components/schemas/TranslatedString"
+        license:
+          type: string
+        author:
+          type: string
+        url:
+          $ref: "#/components/schemas/TranslatedUri"
+        supportUrl:
+          type: string
+        howtoUrl:
+          type: string
+        minSysapVersion:
+          type: string
+          pattern: '^\d+\.\d+\.\d+$'
+        accessControl:
+          type: object
+          additionalProperties: false
+          properties:
+            allowedAPIs:
+              type: array
+              maxItems: 20
+              items:
+                type: string
+                maxLength: 256
+                enum: ["webinterface", "serialport"]
+            networkAccess:
+              type: boolean
+            networkPorts:
+              type: array
+              maxItems: 20
+              items:
+                type: number
+                maximum: 0xffff
+                minimum: 0x1
+        entryPoint:
+          type: string
+          maxLength: 1024
+          pattern: "^(/?[a-zA-Z0-9_\\-\\.]+)+$"
+        type:
+          type: string
+          enum: ["app", "runtime", "standalone"]
+        beta:
+          type: boolean
+        parameters:
+          $ref: "#/components/schemas/Parameters"
+        wizards:
+          $ref: "#/components/schemas/Wizards"
+        minAuxFileUploadIntervalMinutes: 
+          type: integer
+          minimum: 15
+        organizationId:
+          type: string
+          maxLength: 1024
+        rpc:
+          type: array
+          items:
+            type: string
+            maxLength: 256
+      example:
+        {
+          name: "test add-on",
+          version: "1.0.0",
+          id: "de.busch-jaeger.freeathome.testscript",
+          license: "MIT",
+          description: "Test add-on description",
+          url: "http://busch-jaeger.de",
+          author: "Busch Jaeger",
+          type: "app",
+          entryPoint: "index.js"
+        }
+
+    Parameters:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/ParameterGroup"
+
+    Wizards:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/Wizard"
+
+    ParameterGroup:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+            - "name"
+            - "items"
+          properties:
+            name:
+              type: string
+            multiple:
+              type: boolean
+            display: 
+              allOf: 
+                - $ref: "#/components/schemas/TranslatedTitle"
+                - $ref: "#/components/schemas/TranslatedSubtitle"
+                - $ref: "#/components/schemas/TranslatedError"
+            items:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Parameter"
+
+    Wizard: 
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+            - "name"
+            - "parameterGroups"
+            - "steps"
+            - "create"
+            - "edit"
+          properties:
+            name:
+              type: string
+            create:
+              type: boolean
+            edit:
+              type: boolean
+            parameterGroups:
+              type: array
+              items:
+                type: string
+            steps:
+              type: array
+              items:
+                $ref: "#/components/schemas/WizardStep"
+
+    BaseWizardStep: 
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+            - "id"
+          properties:
+            id:
+              type: string                        
+            parameterGroup: 
+              type: string
+            steps:
+              type: array
+              items: 
+                $ref: "#/components/schemas/WizardSubStep"        
+            items:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Parameter"
+
+    WizardStep:
+      allOf: 
+        - $ref: "#/components/schemas/BaseWizardStep"
+        - type: object
+          required:
+            - "name"
+          properties:
+            name:
+              type: string
+            conditions:
+              type: array
+              items: 
+                oneOf:
+                  - $ref: "#/components/schemas/WizardModeCondition"
+                  - $ref: "#/components/schemas/WizardParameterCondition"
+
+    WizardSubStep:
+      allOf: 
+        - $ref: "#/components/schemas/BaseWizardStep"
+        - type: object
+          required:
+            - "conditions"
+          properties:
+            name:
+              type: string
+            conditions:
+              type: array
+              items: 
+                oneOf:
+                  - $ref: "#/components/schemas/WizardModeCondition"
+                  - $ref: "#/components/schemas/WizardParameterCondition"
+
+
+    Parameter:
+      oneOf:
+        - $ref: "#/components/schemas/StringParameter"
+        - $ref: "#/components/schemas/NumberParameter"
+        - $ref: "#/components/schemas/ChannelParameter"
+        - $ref: "#/components/schemas/SelectParameter"
+        - $ref: "#/components/schemas/BasicParameter"
+        - $ref: "#/components/schemas/JsonParameter"
+        - $ref: "#/components/schemas/SeparatorParameter"
+        - $ref: "#/components/schemas/DescriptionParameter"
+        - $ref: "#/components/schemas/ArrayParameter"
+        - $ref: "#/components/schemas/EmptyParameter"
+      discriminator:
+        propertyName: type
+        mapping:
+          string: "#/components/schemas/StringParameter"
+          multilinestring: "#/components/schemas/StringParameter"
+          password: "#/components/schemas/StringParameter"
+          number: "#/components/schemas/NumberParameter"
+          boolean: "#/components/schemas/BasicParameter"
+          date: "#/components/schemas/BasicParameter"
+          time: "#/components/schemas/BasicParameter"
+          weekdays: "#/components/schemas/StringParameter"
+          ipv4: "#/components/schemas/BasicParameter"
+          floor: "#/components/schemas/BasicParameter"
+          room: "#/components/schemas/BasicParameter"
+          channel: "#/components/schemas/ChannelParameter"
+          select: "#/components/schemas/SelectParameter"
+          button: "#/components/schemas/BasicParameter"
+          text: "#/components/schemas/BasicParameter"
+          description: "#/components/schemas/DescriptionParameter"
+          error: "#/components/schemas/BasicParameter"
+          displayQRCode: "#/components/schemas/BasicParameter"
+          scanQRCode: "#/components/schemas/BasicParameter"
+          hidden: "#/components/schemas/BasicParameter"
+          jsonSelector: "#/components/schemas/JsonParameter"
+          separator: "#/components/schemas/SeparatorParameter"
+          array: "#/components/schemas/ArrayParameter"
+          svg: "#/components/schemas/BasicParameter"
+          uuid: "#/components/schemas/EmptyParameter"
+
+    EmptyParameter:
+      type: object
+
+    SeparatorParameter:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "type"
+          properties:              
+            type:
+              type: string
+              enum:
+                - "separator"
+            dependsOn:
+              type: string
+            dependsOnValues:
+              type: array
+              items: 
+                type: string
+
+    DescriptionParameter:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "description"
+          properties:              
+            type:
+              type: string
+              enum:
+                - "description"            
+            description:
+              type: string
+            dependsOn:
+              type: string
+            dependsOnValues:
+              type: array
+              items: 
+                type: string
+
+    BasicDependsOnConfig:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object   
+          required:
+            - "values"
+          minProperties: 2
+          properties:
+            values:
+                type: array
+                items:
+                  anyOf:
+                  - type: string
+                  - type: number
+                  - type: boolean 
+            name:
+              type: string
+            required:
+              type: boolean
+            default:
+              anyOf:
+                - type: string
+                - type: number
+                - type: boolean            
+            visible:
+              type: boolean    
+
+    BasicParameter:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "name"
+            - "type"
+          properties:              
+            type:
+              type: string
+              enum:
+                - "string"
+                - "multilinestring"
+                - "password"
+                - "number"
+                - "boolean"
+                - "date"
+                - "time"
+                - "weekdays"
+                - "ipv4"
+                - "floor"
+                - "room"
+                - "channel"
+                - "select"
+                - "button"
+                - "text"
+                - "error"
+                - "description"
+                - "displayQRCode"
+                - "scanQRCode"
+                - "hidden"
+                - "jsonSelector"
+                - "array"
+                - "svg"
+                - "uuid"
+            name:
+              type: string
+            required:
+              type: boolean
+            default:
+              anyOf:
+                - type: string
+                - type: number
+                - type: boolean            
+            visible:
+              type: boolean         
+            dependsOn:
+              type: string
+            rpc:
+              type: string
+              enum:
+              - "getParameterValue"
+              - "getParameterConfig"
+            rpcCallOn:
+              type: string
+              default: "initial"
+              enum:
+                - "initial"
+                - "everyChange"
+            rpcAdditionalParameters:
+              type: object
+              additionalProperties: true
+            dependsOnValues:
+              type: array
+              items: 
+                anyOf:
+                - type: string
+                - type: number
+                - type: boolean
+            dependsOnConfig:
+              type: array
+              items:
+                $ref: "#/components/schemas/BasicDependsOnConfig"
+                  
+
+    StringParameter:
+      allOf:
+        - $ref: "#/components/schemas/BasicParameter"
+        - type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            regex:
+              type: string
+            dependsOnConfig:
+              type: array
+              items:
+                allOf: 
+                  - $ref: "#/components/schemas/BasicDependsOnConfig"
+                  - type: object
+                    properties:
+                      min:
+                        type: number
+                      max:
+                        type: number
+
+    NumberParameter:
+      allOf:
+        - $ref: "#/components/schemas/BasicParameter"
+        - type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+            dependsOnConfig:
+              type: array
+              items:
+                allOf: 
+                  - $ref: "#/components/schemas/BasicDependsOnConfig"
+                  - type: object                      
+                    properties:
+                      min:
+                        type: number
+                      max:
+                        type: number
+
+    ChannelParameter:
+      allOf:
+        - $ref: "#/components/schemas/BasicParameter"
+        - type: object
+          properties:
+            multiSelect:
+              type: boolean
+            filters:
+              type: array
+              items: 
+                anyOf:
+                  - $ref: "#/components/schemas/ChannelFunctionGroup"
+                  - $ref: "#/components/schemas/ChannelDatapoints"
+
+    JsonParameter:
+      allOf:
+        - $ref: "#/components/schemas/BasicParameter"
+        - type: object
+          properties:
+            json:
+              anyOf:
+                - type: string
+                - type: object
+
+    SelectParameter:
+      allOf:
+        - $ref: "#/components/schemas/BasicParameter"
+        - type: object
+          properties:
+            options:
+              type: array
+              items:
+                $ref: "#/components/schemas/SelectOption"
+            dependsOnConfig:
+              type: array
+              items:
+                type: object
+                allOf: 
+                  - $ref: "#/components/schemas/BasicDependsOnConfig"
+                  - type: object   
+                    properties:
+                      options:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SelectOption" 
+    ArrayParameter:
+      allOf:
+        - $ref: "#/components/schemas/BasicParameter"
+        - type: object
+          properties:
+            items:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Parameter"
+
+    ChannelFunctionGroup:
+      type: object
+      properties:
+        context:
+          type: string
+          enum: [logics, identification, category, devicelist, meter]
+        type:
+          type: string
+
+    ChannelDatapoints:
+      type: object 
+      properties:
+        groups:
+          type: boolean
+          description: Allow groups in the filtered list (input/output are inversed for filtering)
+        scenes:
+          type: boolean
+          description: Allow scenes in the filtered list (input/output are inversed for filtering)
+        outputs: 
+          type: object
+          properties:            
+            allOf: 
+              $ref: "#/components/schemas/Datapoints"
+            anyOf:
+              $ref: "#/components/schemas/Datapoints"
+
+        inputs:
+          type: object
+          properties:            
+            allOf: 
+              $ref: "#/components/schemas/Datapoints"
+            anyOf:
+              $ref: "#/components/schemas/Datapoints"
+
+    Datapoints: 
+      type: array
+      items:
+        anyOf:
+          - type: number
+          - type: string
+            
+    WizardModeCondition:
+      type: object
+      required:
+        - "modes"
+      properties:
+        modes:
+          type: array
+          items:
+            type: string
+            enum:
+              - "create"
+              - "edit"
+
+    WizardParameterCondition:
+      type: object
+      required:
+        - "parameter"
+        - "values"
+      properties:
+        parameter:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+
+    SelectOption:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+          - "key"
+          properties:
+            key: 
+              oneOf:
+               - type: string
+               - type: number
+               - type: boolean
+
+    TranslatedString:
+      oneOf:
+        - type: string
+        - type: object
+          required:
+            - "en"
+          properties:
+            en:
+              type: string
+            es:
+              type: string
+            fr:
+              type: string
+            it:
+              type: string
+            nl:
+              type: string
+            de:
+              type: string
+            zh:
+              type: string
+            da:
+              type: string
+            fi:
+              type: string
+            nb:
+              type: string
+            pl:
+              type: string
+            pt:
+              type: string
+            ru:
+              type: string
+            sv:
+              type: string
+            el:
+              type: string
+            cs:
+              type: string
+            tr:
+              type: string              
+
+    TranslatedName:
+      type: object
+      properties:
+        name@en:
+          type: string
+        name@es:
+          type: string
+        name@fr:
+          type: string
+        name@it:
+          type: string
+        name@nl:
+          type: string
+        name@de:
+          type: string
+        name@zh:
+          type: string
+        name@da:
+          type: string
+        name@fi:
+          type: string
+        name@nb:
+          type: string
+        name@pl:
+          type: string
+        name@pt:
+          type: string
+        name@ru:
+          type: string
+        name@sv:
+          type: string
+        name@el:
+          type: string
+        name@cs:
+          type: string
+        name@tr:
+          type: string
+
+    TranslatedDescription:
+      type: object
+      properties:
+        description:
+          type: string
+        description@en:
+          type: string
+        description@es:
+          type: string
+        description@fr:
+          type: string
+        description@it:
+          type: string
+        description@nl:
+          type: string
+        description@de:
+          type: string
+        description@zh:
+          type: string
+        description@da:
+          type: string
+        description@fi:
+          type: string
+        description@nb:
+          type: string
+        description@pl:
+          type: string
+        description@pt:
+          type: string
+        description@ru:
+          type: string
+        description@sv:
+          type: string
+        description@el:
+          type: string
+        description@cs:
+          type: string
+        description@tr:
+          type: string
+
+    TranslatedTitle:
+      type: object
+      properties:
+        title:
+          type: string
+        title@en:
+          type: string
+        title@es:
+          type: string
+        title@fr:
+          type: string
+        title@it:
+          type: string
+        title@nl:
+          type: string
+        title@de:
+          type: string
+        title@zh:
+          type: string
+        title@da:
+          type: string
+        title@fi:
+          type: string
+        title@nb:
+          type: string
+        title@pl:
+          type: string
+        title@pt:
+          type: string
+        title@ru:
+          type: string
+        title@sv:
+          type: string
+        title@el:
+          type: string
+        title@cs:
+          type: string
+        title@tr:
+          type: string
+
+    TranslatedSubtitle:
+      type: object
+      properties:
+        subtitle:
+          type: string
+        subtitle@en:
+          type: string
+        subtitle@es:
+          type: string
+        subtitle@fr:
+          type: string
+        subtitle@it:
+          type: string
+        subtitle@nl:
+          type: string
+        subtitle@de:
+          type: string
+        subtitle@zh:
+          type: string
+        subtitle@da:
+          type: string
+        subtitle@fi:
+          type: string
+        subtitle@nb:
+          type: string
+        subtitle@pl:
+          type: string
+        subtitle@pt:
+          type: string
+        subtitle@ru:
+          type: string
+        subtitle@sv:
+          type: string
+        subtitle@el:
+          type: string
+        subtitle@cs:
+          type: string
+        subtitle@tr:
+          type: string
+
+    TranslatedError:
+      type: object
+      properties:
+        error:
+          type: string
+        error@en:
+          type: string
+        error@es:
+          type: string
+        error@fr:
+          type: string
+        error@it:
+          type: string
+        error@nl:
+          type: string
+        error@de:
+          type: string
+        error@zh:
+          type: string
+        error@da:
+          type: string
+        error@fi:
+          type: string
+        error@nb:
+          type: string
+        error@pl:
+          type: string
+        error@pt:
+          type: string
+        error@ru:
+          type: string
+        error@sv:
+          type: string
+        error@el:
+          type: string
+        error@cs:
+          type: string
+        error@tr:
+          type: string
+
+    Uri:
+      type: string
+      format: uri
+      maxLength: 1024
+
+    TranslatedUri:
+      oneOf:
+        - $ref: "#/components/schemas/Uri"
+        - type: object
+          required:
+            - "en"
+          properties:
+            en:
+              $ref: "#/components/schemas/Uri"
+            es:
+              $ref: "#/components/schemas/Uri"
+            fr:
+              $ref: "#/components/schemas/Uri"
+            it:
+              $ref: "#/components/schemas/Uri"
+            nl:
+              $ref: "#/components/schemas/Uri"
+            de:
+              $ref: "#/components/schemas/Uri"
+            zh:
+              $ref: "#/components/schemas/Uri"
+            da:
+              $ref: "#/components/schemas/Uri"
+            fi:
+              $ref: "#/components/schemas/Uri"
+            nb:
+              $ref: "#/components/schemas/Uri"
+            pl:
+              $ref: "#/components/schemas/Uri"
+            pt:
+              $ref: "#/components/schemas/Uri"
+            ru:
+              $ref: "#/components/schemas/Uri"
+            sv:
+              $ref: "#/components/schemas/Uri"
+            el:
+              $ref: "#/components/schemas/Uri"
+            cs:
+              $ref: "#/components/schemas/Uri"
+            tr:
+              $ref: "#/components/schemas/Uri"
+
+    ConfigurationEntry:
+      type: object
+      properties:
+        items:
+          type: object
+          additionalProperties: true
+        deletable:
+          type: boolean
+
+    Configuration:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/ConfigurationEntry"
+
+    State:
+      type: object
+      properties:
+        id:
+          type: string
+          enum:
+            - "ok"
+            - "configurationNeeded"
+            - "error"
+        text:
+          type: string
+
+    ApplicationStateEntry:
+      type: object
+      properties:
+        items:
+          type: object
+          additionalProperties: true
+
+    ApplicationState:
+      type: object
+      properties:
+        state:
+          $ref: "#/components/schemas/State"
+      additionalProperties:
+        $ref: "#/components/schemas/ApplicationStateEntry"
+
+    ButtonEvent:
+      type: object
+      required:
+        - "eventType"
+        - "parameter"
+        - "group"
+      properties:
+        eventType:
+          type: string
+          enum:
+            - buttonPressed
+        parameter:
+          type: string
+        group:
+          type: string
+        index:
+          type: string
+
+    ParameterEvent:
+      type: object
+      required:
+        - "eventType"
+        - "parameter"
+        - "group"
+        - "value"
+      properties:
+        eventType:
+          type: string
+          enum:
+            - parameterChanged
+        parameter:
+          type: string
+        group:
+          type: string
+        index:
+          type: string
+        value: 
+          oneOf: 
+            - type: string
+            - type: number
+            - type: boolean
+
+    WizardEvent:
+      type: object
+      required:
+        - "eventType"
+        - "wizard"
+        - "state"
+        - "mode"
+        - "active"
+      properties:
+        eventType:
+          type: string
+          enum:
+            - wizard
+        wizard:
+          type: string
+        state:
+          type: string
+          enum:
+            - started
+            - canceled
+            - finished
+        mode:
+          type: string
+          enum:
+            - create
+            - edit
+        active:
+          type: boolean
+        index:
+          type: string
+
+    WizardStepEvent:
+      type: object
+      required:
+        - "eventType"
+        - "wizard"
+        - "state"
+        - "mode"
+        - "key"
+      properties:
+        eventType:
+          type: string
+          enum:
+            - wizardStep
+        wizard:
+          type: string
+        state:
+          type: string
+          enum:
+            - entered
+            - exited
+        mode:
+          type: string
+          enum:
+            - create
+            - edit
+        key:
+          type: string
+        data:
+          type: object
+
+    Event:
+      oneOf:
+        - $ref: "#/components/schemas/ButtonEvent"
+        - $ref: "#/components/schemas/ParameterEvent"
+        - $ref: "#/components/schemas/WizardEvent"
+        - $ref: "#/components/schemas/WizardStepEvent"
+  
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+security:
+  - basicAuth: []
+tags:
+  - name: repository
+    description: Add-on repository management
+  - name: container
+    description: Add-on container management

@@ -13,6 +13,7 @@ interface ChannelEvents {
     setModeAuto(): void;
     setModeCooling(): void;
     setModeHeating(): void;
+    setFanSpeed(value: number): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -72,8 +73,9 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 if (this.isAutoConfirm) {
                     this.setDatapoint(PairingIds.AL_FAN_COIL_LEVEL, value);
                 }
+                this.emit("setFanSpeed", parseInt(value));
                 break;
-            case PairingIds.AL_INFO_OPERATION_MODE:
+            case PairingIds.AL_OPERATION_MODE:
                 {
                     const intValue = Number.parseInt(value);
                     if (this.isAutoConfirm)
@@ -130,6 +132,12 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public setModeCooling() {
         this.setMode(3);
+    }
+
+    public async setFanSpeed(value: number) {
+        if(value > 3)
+            value = 3;
+        await this.setDatapoint(PairingIds.AL_FAN_COIL_LEVEL, value.toString());
     }
 
     protected setMode(mode: number) {
