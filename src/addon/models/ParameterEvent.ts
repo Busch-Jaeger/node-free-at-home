@@ -8,6 +8,7 @@ export type ParameterEvent = {
     parameter: string;
     group: string;
     index?: string;
-    value: (string | number | boolean);
+    value?: (string | number | boolean);
+    data?: Record<string, any>;
 };
 
