@@ -4,6 +4,7 @@
 /* eslint-disable */
 
 import type { Parameters } from './Parameters';
+import type { ParameterType } from './ParameterType';
 import type { TranslatedString } from './TranslatedString';
 import type { TranslatedUri } from './TranslatedUri';
 import type { Wizards } from './Wizards';
@@ -29,6 +30,7 @@ export type Metadata = {
     beta?: boolean;
     parameters?: Parameters;
     wizards?: Wizards;
+    types?: Record<string, ParameterType>;
     minAuxFileUploadIntervalMinutes?: number;
     organizationId?: string;
     rpc?: Array<string>;

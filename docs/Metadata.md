@@ -321,13 +321,17 @@ Possible types are:
   }
   ```
 
-  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.
+  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.  
 
 ##### Read-only types
 
 - `text`
 
   The specified text is displayed to the user.
+
+- `button`
+
+  Shows a button that sends an event of type `buttonPressed` event to the Addon.
 
 - `error`
 
@@ -355,6 +359,50 @@ Possible types are:
 
   Only useful for parameter groups with `multiple: true`. The UI generates a UUID when a new entry is created. This UUID can be used to identify the entry.
 
+##### Custom types
+
+For more complex parameter values you can define custom types. Those types are defined in an extra `types`-section of your metadata and have the same
+syntax as a parameter group with just two differences:
+
+1. The `display` attribute is required
+2. The `multiple` attribute is not allowed
+
+Basic exampe:
+
+  ```json
+  "parameters": {
+    "example": {
+      "name": "Custom example",
+      "items": {
+        "register": {
+            "name": "Register",
+            "type": "custom",
+            "customTypeName": "modbusRegister"      
+        }
+      }
+    }
+  }
+  "types": {
+     "modbusRegister": {
+        "name": "Modbus register",
+        "name@de": "Modbus-Register",
+        "display": {
+            "title": "$address",
+            "error": "$errorMessage"
+        },
+        "items": {
+            "function": {
+                ...
+            },
+            "address": {
+              ...
+            }
+            ...
+        }
+     }
+  }
+  ```
+
 #### Additional parameter attributes
 
 Beside the already explained `name`, `type` and `description` attributes there are some special attributes that can be optionally added to a parameter definition:
@@ -373,11 +421,31 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   The value of this parameter is not saved in the settings but send as an event when the user clicks on the send button that is show underneath this parameter.
 
+- `eventScope`
+
+  Defines the amount of information that is sent in the `event`.
+
+  `eventScope: parameter`: [default] sends only the current value of this parameters.
+  `eventScope: group`: sends the current values of all parameters of the same group.
+  
+
 - `visible`
 
   > **NOTE:** Requires free@home app version >= 2.4.0
 
   Show/Hide this parameter in the UI. (default: `true`)
+
+- `preFill`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Prefill this value with the last edited one (or one from another config entry of this group). (default: `false`).
+
+- `saveOnChange`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  When this is true the every change of the parameters value will be saved immediately (default: false)
 
 - `dependsOn`
 
@@ -472,7 +540,7 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   > **NOTE:** Requires free@home app version >= 2.4.0
 
-  If this is added with a `true` value this parameter is only shown, when the app is in debug mode.
+  If this is added with a `true` value this parameter is only shown, when the app is in debug mode and the 'Enable Addon debug settings' checkbox is checked in the debug menu.
 
 - `rpc`,  `rpcCallOn`, `rpcAdditionalParameters`
 
@@ -485,6 +553,8 @@ Beside the already explained `name`, `type` and `description` attributes there a
   `rpcCallOn: initial`: sends it only once when the UI opens the addon settings.
 
   `rpcCallOn: everyChange`: sends it every time any of the other parameter values in the same group has been changed by the user.
+
+  `rpcCallOn: buttonPressed`: Only for parameters that have `sendAsEvent: true`. Executes the rpc when the send button has been pressed.
 
   `rpcAdditionalParameters`: is just an optional set of values that are added to the rpc.
 
@@ -599,7 +669,23 @@ and an error line with `error`, a full example would be:
 },
 ```
 
-The display feature is mostly usefull for parameter groups with the multiple flag.
+The display feature is mostly useful for parameter groups with the multiple flag. You are also able to modify the values of `title`, `subtitle` and
+`error` depending on values of other parameters in this group. This is familiar with the `dependsOnConfig` feature of a parameter but uses a slightly
+different syntax. Example:
+
+```json
+"display": {
+    "title": "$meterType: $topic",
+    "subtitle": "Connection: $state",
+    "subtitle@de": "Verbindung: $state",
+    "error": "$errorMessage",
+    "dependsOn": {
+      "topic": [{"values": [""], "title": "Unconfigured", "title@de": "Unkonfiguriert"}]
+    }
+},
+```
+
+In this case the display title will show "Unconfigured" when the topic is empty.
 
 #### Using parameters in an ABB free@home Addon
 

@@ -415,6 +415,10 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     public async getPairings(): Promise<API.Pairings> {
         return this.apiClient.api.getpairings();
     }
+
+    public async getSysapSection(): Promise<API.SysapSection> {
+        return this.apiClient.api.getsysap();
+    }
 }
 
 
