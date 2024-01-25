@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Error } from './Error';
 import type { Parameters } from './Parameters';
 import type { ParameterType } from './ParameterType';
 import type { TranslatedString } from './TranslatedString';
@@ -34,5 +35,6 @@ export type Metadata = {
     minAuxFileUploadIntervalMinutes?: number;
     organizationId?: string;
     rpc?: Array<string>;
+    errors?: Record<string, Error>;
 };
 

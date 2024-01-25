@@ -609,6 +609,10 @@ components:
           items:
             type: string
             maxLength: 256
+        errors:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Error"
       example:
         {
           name: "test add-on",
@@ -989,6 +993,9 @@ components:
             debug:
               type: boolean
               description: Show this parameter only when debugging is enabled
+            fixed:
+              type: boolean
+              description: A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed.
 
     StringParameter:
       allOf:
@@ -1652,6 +1659,19 @@ components:
         - $ref: "#/components/schemas/ParameterEvent"
         - $ref: "#/components/schemas/WizardEvent"
         - $ref: "#/components/schemas/WizardStepEvent"
+
+    Error:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "name"
+          properties:
+            name:
+              type: string
+            description:
+              type: string
   
   responses:
     UnauthorizedError:
