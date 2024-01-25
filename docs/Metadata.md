@@ -321,13 +321,17 @@ Possible types are:
   }
   ```
 
-  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.
+  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.  
 
 ##### Read-only types
 
 - `text`
 
   The specified text is displayed to the user.
+
+- `button`
+
+  Shows a button that sends an event of type `buttonPressed` event to the Addon.
 
 - `error`
 
@@ -342,6 +346,64 @@ Possible types are:
 - `displayQRCode`
 
   Shows the value as QR-Code.
+
+- `svg`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0  
+
+  Shows the value as SVG-Image in the UI.
+
+- `uuid`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Only useful for parameter groups with `multiple: true`. The UI generates a UUID when a new entry is created. This UUID can be used to identify the entry.
+
+##### Custom types
+
+  > **NOTE:** Requires free@home app version >= 2.4.0  
+
+For more complex parameter values you can define custom types. Those types are defined in an extra `types`-section of your metadata and have the same
+syntax as a parameter group with just two differences:
+
+1. The `display` attribute is required
+2. The `multiple` attribute is not allowed
+
+Basic exampe:
+
+  ```json
+  "parameters": {
+    "example": {
+      "name": "Custom example",
+      "items": {
+        "register": {
+            "name": "Register",
+            "type": "custom",
+            "customTypeName": "modbusRegister"      
+        }
+      }
+    }
+  }
+  "types": {
+     "modbusRegister": {
+        "name": "Modbus register",
+        "name@de": "Modbus-Register",
+        "display": {
+            "title": "$address",
+            "error": "$errorMessage"
+        },
+        "items": {
+            "function": {
+                ...
+            },
+            "address": {
+              ...
+            }
+            ...
+        }
+     }
+  }
+  ```
 
 #### Additional parameter attributes
 
@@ -361,17 +423,43 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   The value of this parameter is not saved in the settings but send as an event when the user clicks on the send button that is show underneath this parameter.
 
+- `eventScope`
+
+  Defines the amount of information that is sent in the `event`.
+
+  `eventScope: parameter`: [default] sends only the current value of this parameters.
+  `eventScope: group`: sends the current values of all parameters of the same group.
+  
+
 - `visible`
 
   > **NOTE:** Requires free@home app version >= 2.4.0
 
   Show/Hide this parameter in the UI. (default: `true`)
 
+- `preFill`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Prefill this value with the last edited one (or one from another config entry of this group). (default: `false`).
+
+- `saveOnChange`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  When this is true the every change of the parameters value will be saved immediately (default: false)
+
 - `dependsOn`
 
   > **NOTE:** Requires free@home app version >= 2.4.0
 
   Allows to define that a parameter is only shown, when another parameter has a specific value. Also requires the additional `dependsOnValues` attribute. Example:
+
+- `fixed`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed. You have to delete the entry and create a new one, if you want to change this value.
 
   ```json
   "connectionType": {
@@ -460,7 +548,53 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   > **NOTE:** Requires free@home app version >= 2.4.0
 
-  If this is added with a `true` value this parameter is only shown, when the app is in debug mode.
+  If this is added with a `true` value this parameter is only shown, when the app is in debug mode and the 'Enable Addon debug settings' checkbox is checked in the debug menu.
+
+- `rpc`,  `rpcCallOn`, `rpcAdditionalParameters`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Allows retrieving the value or configuration changes for this parameter from the addon via one of two RPCs: `getParameterValue`, `getParameterConfig`.
+
+  With `rpcCallOn` you can define when this rpc is send:
+  
+  `rpcCallOn: initial`: sends it only once when the UI opens the addon settings.
+
+  `rpcCallOn: everyChange`: sends it every time any of the other parameter values in the same group has been changed by the user.
+
+  `rpcCallOn: buttonPressed`: Only for parameters that have `sendAsEvent: true`. Executes the rpc when the send button has been pressed.
+
+  `rpcAdditionalParameters`: is just an optional set of values that are added to the rpc.
+
+  Full example: If you have a parameter group that configures something that can be explained best with a graph (e.g. a dimming curve or a color temperature calculation that changes over the day) you can use the `svg` parameter type together with these rpc settings to show the user a graph based on your current parameter settings.
+
+  ```json
+    "configs": {
+      "name": "Configuration",
+      "name@de": "Konfiguration",
+      "multiple": true,
+      "display": {
+          "title": "$name"
+      },
+      "items": {
+        ...
+        "curve": {
+          "name": "Color temperature curve today",
+          "name@de": "Farbtemperaturkurve heute",
+          "type": "svg",
+          "rpc": "getParameterValue",
+          "rpcCallOn": "everyChange",
+          "rpcAdditionalParameters": {
+              "width": 600,
+              "height": 300
+          }
+      }
+    }
+  }
+  ```
+
+  The addons receives the rpc everytime any other parameter of the same groups changes. The parameters of the rpc contains all parameter values of the current group and in addition to that `"parameter": "curve"`, `"group": "configs"` and whats configured in `rpcAdditionalParameters`.
+  With all these values the addon can generate an SVG-Chart and send it as response. That chart will be shown to the user and he gets live feedback to every configuration changed by seeing an updated curve.
 
 #### Parameter groups
 
@@ -543,7 +677,23 @@ and an error line with `error`, a full example would be:
 },
 ```
 
-The display feature is mostly usefull for parameter groups with the multiple flag.
+The display feature is mostly useful for parameter groups with the multiple flag. You are also able to modify the values of `title`, `subtitle` and
+`error` depending on values of other parameters in this group. This is familiar with the `dependsOnConfig` feature of a parameter but uses a slightly
+different syntax. Example:
+
+```json
+"display": {
+    "title": "$meterType: $topic",
+    "subtitle": "Connection: $state",
+    "subtitle@de": "Verbindung: $state",
+    "error": "$errorMessage",
+    "dependsOn": {
+      "topic": [{"values": [""], "title": "Unconfigured", "title@de": "Unkonfiguriert"}]
+    }
+},
+```
+
+In this case the display title will show "Unconfigured" when the topic is empty.
 
 #### Using parameters in an ABB free@home Addon
 
@@ -553,6 +703,33 @@ the Addon. The configured value will show up in the `Configuration`of the Addon,
 
 Please see the [writing Addons section](Writing-addons) for more information about using
 the configuration parameters in the Addon.
+
+### Errors
+
+  > **NOTE:** Requires free@home app version >= 2.4.0  
+
+Define custom error messages that the UI can show e.g. when the Addon responds to a RPC with an error.
+
+Basic exampe:
+
+```json
+"errors": {
+  "CODE_4": {
+      "name": "Internal error",
+      "name@de": "Fehler im Gerät",
+      "description": "Device reports internal error. Please check all settings especially `Modbus ID`, 'Function' and 'Datatype'",
+      "description@de": "Gerät meldet internen Fehler. Bitte überrüfen sie alle Einstellungen, insb. `Modbus ID`, 'Funktion' und 'Datentyp'"
+  }
+```
+
+The addon can respond to a RPC with one of the defined error codes and the UI shows the translated error & description.
+Currently this is implemented only for the parameter RPC `getParameterValue`. In order to show the error from the example, the addon
+has to respond with ```{"error": "ADDON_ERROR:CODE_1"}```.
+
+The Addon can also respond with a custom error message, that will be shown as is in the UI.
+```{"error": "This is a custom error"}```. In that case a translation is not possible, also there will be no possibility to show additional information below the error as its done with the `description` from a predefined error. The box with the red background will not be visible when you send a custom error message.
+
+![Screenshot of error in the app](img/metadata/internal_error.png)
 
 ### ABB free@home Addon wizards
 

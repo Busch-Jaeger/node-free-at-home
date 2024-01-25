@@ -411,6 +411,14 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     public async postNotification(notification: API.Notification) {
         return this.apiClient.api.postnotification(notification);
     }
+
+    public async getPairings(): Promise<API.Pairings> {
+        return this.apiClient.api.getpairings();
+    }
+
+    public async getSysapSection(): Promise<API.SysapSection> {
+        return this.apiClient.api.getsysap();
+    }
 }
 
 

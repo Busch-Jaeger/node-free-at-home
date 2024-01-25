@@ -3,7 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ApplicationStateEntry = {
-    items?: Record<string, any>;
+export type Pairing = {
+    sensor: string;
+    actuator: string;
+    sceneSlot?: number;
 };
 

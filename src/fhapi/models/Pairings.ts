@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type WizardModeCondition = {
-    modes: Array<'create' | 'edit'>;
-};
+import type { Pairing } from './Pairing';
 
+export type Pairings = Array<Pairing>;

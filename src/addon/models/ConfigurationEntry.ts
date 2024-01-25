@@ -5,5 +5,6 @@
 
 export type ConfigurationEntry = {
     items?: Record<string, any>;
+    deletable?: boolean;
 };
 
