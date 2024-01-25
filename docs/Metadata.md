@@ -449,17 +449,17 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   When this is true the every change of the parameters value will be saved immediately (default: false)
 
-- `dependsOn`
-
-  > **NOTE:** Requires free@home app version >= 2.4.0
-
-  Allows to define that a parameter is only shown, when another parameter has a specific value. Also requires the additional `dependsOnValues` attribute. Example:
-
 - `fixed`
 
   > **NOTE:** Requires free@home app version >= 2.4.0
 
   A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed. You have to delete the entry and create a new one, if you want to change this value.
+
+- `dependsOn`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Allows to define that a parameter is only shown, when another parameter has a specific value. Also requires the additional `dependsOnValues` attribute. Example:
 
   ```json
   "connectionType": {
