@@ -361,6 +361,8 @@ Possible types are:
 
 ##### Custom types
 
+  > **NOTE:** Requires free@home app version >= 2.4.0  
+
 For more complex parameter values you can define custom types. Those types are defined in an extra `types`-section of your metadata and have the same
 syntax as a parameter group with just two differences:
 
@@ -452,6 +454,12 @@ Beside the already explained `name`, `type` and `description` attributes there a
   > **NOTE:** Requires free@home app version >= 2.4.0
 
   Allows to define that a parameter is only shown, when another parameter has a specific value. Also requires the additional `dependsOnValues` attribute. Example:
+
+- `fixed`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed. You have to delete the entry and create a new one, if you want to change this value.
 
   ```json
   "connectionType": {
@@ -695,6 +703,33 @@ the Addon. The configured value will show up in the `Configuration`of the Addon,
 
 Please see the [writing Addons section](Writing-addons) for more information about using
 the configuration parameters in the Addon.
+
+### Errors
+
+  > **NOTE:** Requires free@home app version >= 2.4.0  
+
+Define custom error messages that the UI can show e.g. when the Addon responds to a RPC with an error.
+
+Basic exampe:
+
+```json
+"errors": {
+  "CODE_4": {
+      "name": "Internal error",
+      "name@de": "Fehler im Gerät",
+      "description": "Device reports internal error. Please check all settings especially `Modbus ID`, 'Function' and 'Datatype'",
+      "description@de": "Gerät meldet internen Fehler. Bitte überrüfen sie alle Einstellungen, insb. `Modbus ID`, 'Funktion' und 'Datentyp'"
+  }
+```
+
+The addon can respond to a RPC with one of the defined error codes and the UI shows the translated error & description.
+Currently this is implemented only for the parameter RPC `getParameterValue`. In order to show the error from the example, the addon
+has to respond with ```{"error": "ADDON_ERROR:CODE_1"}```.
+
+The Addon can also respond with a custom error message, that will be shown as is in the UI.
+```{"error": "This is a custom error"}```. In that case a translation is not possible, also there will be no possibility to show additional information below the error as its done with the `description` from a predefined error. The box with the red background will not be visible when you send a custom error message.
+
+![Screenshot of error in the app](img/metadata/internal_error.png)
 
 ### ABB free@home Addon wizards
 

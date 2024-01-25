@@ -44,5 +44,9 @@ export type BasicParameter = (TranslatedName & TranslatedDescription & Translate
      * Show this parameter only when debugging is enabled
      */
     debug?: boolean;
+    /**
+     * A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed.
+     */
+    fixed?: boolean;
 });
 
