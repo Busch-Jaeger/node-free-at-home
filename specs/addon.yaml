@@ -1672,7 +1672,32 @@ components:
               type: string
             description:
               type: string
+
+    RPC:
+      oneOf:
+      - $ref: "#/components/schemas/RPCGetParameterValue"
   
+
+    RPCGetParameterValue:
+      allOf:
+      - type: object
+        required:
+          - $parameter
+          - $group
+        properties:
+          $parameter: 
+            type: string
+            description: name of the parameter
+          $group: 
+            type: string
+            description: name of the parameter group the requested parameter is defined in      
+      - type: object
+        additionalProperties: true
+
+    RPCGetParameterConfig:
+      allOf:
+      - $ref: "#/components/schemas/RPCGetParameterValue"
+
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid
