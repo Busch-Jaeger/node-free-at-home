@@ -230,8 +230,8 @@ function getAgent(url: string, basePath: string) {
             const apiPath = parsedUrl.pathname;
             if (!socketAgents.has(apiPath)) {
                 console.log('creating unix socket agent for', apiPath);
-                const unixSocketAgent = new http.Agent(<object>{
-                    socketPath: "/run" + apiPath,
+                const unixSocketAgent = new http.Agent({
+                    host: "ws+unix:///run" + apiPath + ":" + apiPath
                 });
                 socketAgents.set(apiPath, unixSocketAgent);
                 return unixSocketAgent;
