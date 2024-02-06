@@ -7,8 +7,10 @@ import type { ErrorCallback } from '@serialport/stream'
 import rewiremock from 'rewiremock';
 import { handleRequestError } from "./utilities";
 
+const REST_PATH = "/api/serial/v1";
+
 const baseUrl = process.env.FREEATHOME_SERIAL_API_BASE_URL
-    ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/serial/v1" : "http://localhost/api/serial/v1");
+    ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + REST_PATH : "http://localhost" + REST_PATH);
 const username = process.env.FREEATHOME_API_USERNAME ?? "installer";
 const password = process.env.FREEATHOME_API_PASSWORD ?? "12345";
 const authenticationHeader = {
@@ -16,7 +18,7 @@ const authenticationHeader = {
 };
 
 const apiClient = new API.SerialClient({
-    BASE: baseUrl + "/api/serial/v1",
+    BASE: baseUrl,
     USERNAME: username,
     PASSWORD: password
 });
@@ -110,7 +112,8 @@ export class SerialPortBinding implements BindingPortInterface {
         throw new Error("Method not implemented.");
     }
     flush(): Promise<void> {
-        throw new Error("Method not implemented.");
+        console.error("SerialPortBinding.flush method not implemented.");
+        return Promise.resolve();
     }
     drain(): Promise<void> {
         throw new Error("Method not implemented.");
