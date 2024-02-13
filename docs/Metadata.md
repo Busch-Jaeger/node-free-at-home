@@ -321,7 +321,13 @@ Possible types are:
   }
   ```
 
-  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.  
+  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`. 
+
+- `serialPort`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Shows a list of serial ports available on the sysap to select one.
 
 ##### Read-only types
 

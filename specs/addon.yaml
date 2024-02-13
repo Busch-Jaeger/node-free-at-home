@@ -824,6 +824,7 @@ components:
           svg: "#/components/schemas/BasicParameter"
           uuid: "#/components/schemas/EmptyParameter"
           custom: "#/components/schemas/BasicParameter"
+          serialPort: "#/components/schemas/BasicParameter"
 
     EmptyParameter:
       type: object
@@ -933,6 +934,7 @@ components:
                 - "svg"
                 - "uuid"
                 - "custom"
+                - "serialPort"
             name:
               type: string
             required:
