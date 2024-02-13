@@ -2,8 +2,9 @@ import { FreeAtHomeWebsocket } from "./freeAtHomeWebsocket";
 import { createWebSocketStream } from 'ws';
 import * as stream from "stream";
 import * as API from './serial';
-import { SerialPortStream } from '@serialport/stream'
-import type { ErrorCallback } from '@serialport/stream'
+import { SerialPortStream } from '@serialport/stream';
+import type { ErrorCallback, OpenOptions } from '@serialport/stream';
+import { BindingInterface, BindingPortInterface, UpdateOptions, SetOptions, PortStatus, PortInfo } from '@serialport/bindings-interface';
 import rewiremock from 'rewiremock';
 import { handleRequestError } from "./utilities";
 
@@ -37,7 +38,6 @@ export function CreateSerialWebSocket(options: OpenOptions) {
     return websocket;
 }
 
-import { BindingInterface, BindingPortInterface, OpenOptions, UpdateOptions, SetOptions, PortStatus, PortInfo } from '@serialport/bindings-interface';
 export class SerialPortBinding implements BindingPortInterface {
     openOptions: Required<OpenOptions>;
     isOpen: boolean = true;
@@ -128,7 +128,7 @@ export class SerialBinding implements BindingInterface {
             return result.map((device): PortInfo => {
                 return {
                     path: device.sysName,
-                    manufacturer: undefined,
+                    manufacturer: device.manufacturer,
                     serialNumber: device.serialNumber,
                     pnpId: undefined,
                     locationId: undefined,
@@ -143,7 +143,11 @@ export class SerialBinding implements BindingInterface {
     }
     async open(options: OpenOptions): Promise<BindingPortInterface> {
         const binding = new SerialPortBinding(options);
-        return binding.waitForOpen();
+        const p = binding.waitForOpen();
+        p.catch(e => {
+            handleRequestError(e);
+        });
+        return p;
     }
 }
 

@@ -43,6 +43,10 @@ components:
           type: string
         serialNumber:
           type: string
+        manufacturer:
+          type: string
+        usbPath:
+          type: string
 
   responses:
     UnauthorizedError:

@@ -8,5 +8,7 @@ export type Device = {
     vID?: string;
     pID?: string;
     serialNumber?: string;
+    manufacturer?: string;
+    usbPath?: string;
 };
 
