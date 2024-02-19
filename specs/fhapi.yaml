@@ -732,6 +732,12 @@ components:
           type: string
         nativeId:
           type: string
+        unresponsive:
+          type: boolean
+        unresponsiveCounter:
+          type: integer
+        defect:
+          type: boolean
         channels:
           type: object
           additionalProperties:
