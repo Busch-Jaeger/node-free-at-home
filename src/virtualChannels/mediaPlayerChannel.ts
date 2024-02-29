@@ -60,7 +60,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     private playMode: MediaPlayerChannel.PlayMode = MediaPlayerChannel.PlayMode.paused;
-    private repeadMode: MediaPlayerChannel.RepeadMode = MediaPlayerChannel.RepeadMode.off;
+    private repeatMode: MediaPlayerChannel.RepeatMode = MediaPlayerChannel.RepeatMode.off;
     private isShuffel: boolean = false;
     private isCrossfade: boolean = false;
 
@@ -214,24 +214,24 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 }
 
                 if ((intValue & (1 << 2)) !== 0) {
-                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeat)
+                    if (this.repeatMode !== MediaPlayerChannel.RepeatMode.repeat)
                         this.emit("repeat");
                     if (this.isAutoConfirm)
-                        this.repeadMode = MediaPlayerChannel.RepeadMode.repeat;
+                        this.repeatMode = MediaPlayerChannel.RepeatMode.repeat;
                 }
 
                 if ((intValue & (1 << 3)) !== 0) {
-                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.repeatOne)
+                    if (this.repeatMode !== MediaPlayerChannel.RepeatMode.repeatOne)
                         this.emit("repeatOne");
                     if (this.isAutoConfirm)
-                        this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
+                        this.repeatMode = MediaPlayerChannel.RepeatMode.repeatOne;
                 }
 
                 if ((intValue & ((1 << 2) | 1 << 3)) === 0) {
-                    if (this.repeadMode !== MediaPlayerChannel.RepeadMode.off)
+                    if (this.repeatMode !== MediaPlayerChannel.RepeatMode.off)
                         this.emit("repeatOff");
                     if (this.isAutoConfirm)
-                        this.repeadMode = MediaPlayerChannel.RepeadMode.off;
+                        this.repeatMode = MediaPlayerChannel.RepeatMode.off;
                 }
 
                 if (this.isAutoConfirm)
@@ -276,13 +276,13 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
 
     public updatePlayMode() {
         let value: number = 0;
-        switch (this.repeadMode) {
-            case MediaPlayerChannel.RepeadMode.off:
+        switch (this.repeatMode) {
+            case MediaPlayerChannel.RepeatMode.off:
                 break;
-            case MediaPlayerChannel.RepeadMode.repeat:
+            case MediaPlayerChannel.RepeatMode.repeat:
                 value |= (1 << 2);
                 break;
-            case MediaPlayerChannel.RepeadMode.repeatOne:
+            case MediaPlayerChannel.RepeatMode.repeatOne:
                 value |= (1 << 3);
                 break;
         }
@@ -491,17 +491,17 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     async setRepeatOff(): Promise<void> {
-        this.repeadMode = MediaPlayerChannel.RepeadMode.off;
+        this.repeatMode = MediaPlayerChannel.RepeatMode.off;
         return this.updatePlayMode();
     }
 
     async setRepeat(): Promise<void> {
-        this.repeadMode = MediaPlayerChannel.RepeadMode.repeat;
+        this.repeatMode = MediaPlayerChannel.RepeatMode.repeat;
         return this.updatePlayMode();
     }
-    
+
     async setRepeatOne(): Promise<void> {
-        this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
+        this.repeatMode = MediaPlayerChannel.RepeatMode.repeatOne;
         return this.updatePlayMode();
     }
 }
@@ -526,11 +526,14 @@ export namespace MediaPlayerChannel {
         buffering = 3,
     }
 
-    export enum RepeadMode {
+    export enum RepeatMode {
         off,
         repeat,
         repeatOne
     }
+
+    /** @deprecated Use RepeatMode instead */
+    export import RepeadMode = RepeatMode;
 
     export enum PlayCommand {
         Next = 2,
