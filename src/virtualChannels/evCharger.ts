@@ -109,6 +109,8 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
     protected _supportsSwitchOff: boolean = false;
     protected _supportsDisableCharging: boolean = false;
     protected _supportsCurrentLimit: boolean = false;
+    protected _supportsEnergyTotal: boolean = false;
+    protected _supportsEnergyToday: boolean = false;
 
     constructor(channel: ApiVirtualChannel){
         super(channel);
@@ -134,6 +136,15 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
         // CAP_CURRENT_LIMIT = 0x001E, supports limitation of current
         this._supportsCurrentLimit = channel.inputPairingToPosition.has(PairingIds.AL_LIMIT_FOR_CHARGER);
+
+        // CAP_CURRENT_LIMIT = 0x001E, supports limitation of current
+        this._supportsCurrentLimit = channel.inputPairingToPosition.has(PairingIds.AL_LIMIT_FOR_CHARGER);
+
+        // CAP_ENERGY_TOTAL = 0x0012, supports total energy counter
+        this._supportsEnergyTotal = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_TOTAL_ENERGY_EXPORTED);
+
+        // CAP_ENERGY_TODAY = 0x0011, supports total energy counter
+        this._supportsEnergyToday = channel.outputPairingToPosition.has(PairingIds.AL_MEASURED_EXPORTED_ENERGY_TODAY);
     }
     
 
@@ -336,6 +347,18 @@ export class EvChargerChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public setInstalledPower(value: number) {
         return this.setDatapoint(PairingIds.AL_INFO_INSTALLED_POWER, value.toString());
+    }
+
+    public setEnergyTotal(value: number) {
+        if (this._supportsEnergyTotal) {
+            return this.setDatapoint(PairingIds.AL_MEASURED_TOTAL_ENERGY_EXPORTED, value.toString());
+        }
+    }
+
+    public setEnergyToday(value: number) {
+        if (this._supportsEnergyToday) {
+            return this.setDatapoint(PairingIds.AL_MEASURED_EXPORTED_ENERGY_TODAY, value.toString());
+        }
     }
 
     public setLimitForCharger(value: number) {

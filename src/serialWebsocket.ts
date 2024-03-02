@@ -2,13 +2,16 @@ import { FreeAtHomeWebsocket } from "./freeAtHomeWebsocket";
 import { createWebSocketStream } from 'ws';
 import * as stream from "stream";
 import * as API from './serial';
-import { SerialPortStream } from '@serialport/stream'
-import type { ErrorCallback } from '@serialport/stream'
+import { SerialPortStream } from '@serialport/stream';
+import type { ErrorCallback, OpenOptions } from '@serialport/stream';
+import { BindingInterface, BindingPortInterface, UpdateOptions, SetOptions, PortStatus, PortInfo } from '@serialport/bindings-interface';
 import rewiremock from 'rewiremock';
 import { handleRequestError } from "./utilities";
 
+const REST_PATH = "/api/serial/v1";
+
 const baseUrl = process.env.FREEATHOME_SERIAL_API_BASE_URL
-    ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + "/api/serial/v1" : "http://localhost/api/serial/v1");
+    ?? ((process.env.FREEATHOME_BASE_URL) ? process.env.FREEATHOME_BASE_URL + REST_PATH : "http://localhost" + REST_PATH);
 const username = process.env.FREEATHOME_API_USERNAME ?? "installer";
 const password = process.env.FREEATHOME_API_PASSWORD ?? "12345";
 const authenticationHeader = {
@@ -16,7 +19,7 @@ const authenticationHeader = {
 };
 
 const apiClient = new API.SerialClient({
-    BASE: baseUrl + "/api/serial/v1",
+    BASE: baseUrl,
     USERNAME: username,
     PASSWORD: password
 });
@@ -35,7 +38,6 @@ export function CreateSerialWebSocket(options: OpenOptions) {
     return websocket;
 }
 
-import { BindingInterface, BindingPortInterface, OpenOptions, UpdateOptions, SetOptions, PortStatus, PortInfo } from '@serialport/bindings-interface';
 export class SerialPortBinding implements BindingPortInterface {
     openOptions: Required<OpenOptions>;
     isOpen: boolean = true;
@@ -110,7 +112,8 @@ export class SerialPortBinding implements BindingPortInterface {
         throw new Error("Method not implemented.");
     }
     flush(): Promise<void> {
-        throw new Error("Method not implemented.");
+        console.error("SerialPortBinding.flush method not implemented.");
+        return Promise.resolve();
     }
     drain(): Promise<void> {
         throw new Error("Method not implemented.");
@@ -125,7 +128,7 @@ export class SerialBinding implements BindingInterface {
             return result.map((device): PortInfo => {
                 return {
                     path: device.sysName,
-                    manufacturer: undefined,
+                    manufacturer: device.manufacturer,
                     serialNumber: device.serialNumber,
                     pnpId: undefined,
                     locationId: undefined,
@@ -140,7 +143,11 @@ export class SerialBinding implements BindingInterface {
     }
     async open(options: OpenOptions): Promise<BindingPortInterface> {
         const binding = new SerialPortBinding(options);
-        return binding.waitForOpen();
+        const p = binding.waitForOpen();
+        p.catch(e => {
+            handleRequestError(e);
+        });
+        return p;
     }
 }
 

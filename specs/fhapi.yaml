@@ -575,6 +575,50 @@ paths:
           $ref: "#/components/responses/BadGatewayError"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  /api/rest/sysap:
+    get:
+      tags:
+        - api
+      summary: Get sysap related information
+      description: Get sysap related information
+      operationId: getsysap
+      responses:
+        "200":
+          description: Sysap
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SysapSection"
+        "502":
+          description: free@home error
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiRestConfigurationGet502TextPlainResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /api/rest/pairings:
+    get:
+      tags:
+        - api
+      summary: Get pairings between sensor and actuator
+      description: Get pairings between sensor and actuator
+      operationId: getpairings
+      responses:
+        "200":
+          description: Sysap
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pairings"
+        "502":
+          description: free@home error
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiRestConfigurationGet502TextPlainResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 components:
   schemas:
     Error:
@@ -680,10 +724,20 @@ components:
           type: string
         floor:
           type: string
+        articleNumber:
+          type: string
+        deviceId:
+          type: string
         interface:
           type: string
         nativeId:
           type: string
+        unresponsive:
+          type: boolean
+        unresponsiveCounter:
+          type: integer
+        defect:
+          type: boolean
         channels:
           type: object
           additionalProperties:
@@ -737,9 +791,63 @@ components:
           role: switch
           name: foobar-fhapi
           jid: foobar-fhapi@busch-jaeger.de
+    SysapSection:
+      type: object
+      properties:
+        sysapName: 
+          type: string
+        uartSerialNumber:
+          type: string
+        testMode:
+          type: boolean
+        version:
+          type: string
+        sunRiseTimes:
+          type: array
+          items:
+            type: integer
+        sunSetTimes:
+          type: array
+          items:
+            type: integer
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+          required:
+            - "latitude"
+            - "longitude"
+      required:
+        - "sysapName"
+        - "uartSerialNumber"
+        - "testMode"
+        - "version"
+        - "sunRiseTimes"
+        - "sunSetTimes"
+    Pairing:
+      type: object
+      properties:
+        sensor:
+          type: string
+        actuator:
+          type: string
+        sceneSlot:
+          type: integer
+      required:
+        - "sensor"
+        - "actuator"
+    Pairings:
+      type: array
+      items:
+        $ref: "#/components/schemas/Pairing"
     SysAP:
       type: object
       properties:
+        sysap:
+          $ref: "#/components/schemas/SysapSection"
         devices:
           $ref: "#/components/schemas/Devices"
         floorplan:
@@ -1033,6 +1141,7 @@ components:
           devices:
             $ref: "#/components/schemas/Devices"
       example:
+        {
           "00000000-0000-0000-0000-000000000000":
             {
               "devices":
@@ -1070,10 +1179,12 @@ components:
                             },
                         },
                       "displayName": "Test",
-                      "nativeId": "47110815AA"
+                      "nativeId": "47110815AA",
+                      "unresponsive": false,
                     },
                 },
-            }
+            },
+        }
     ApiRestDevice_sysap__device_Get502TextPlainResponse:
       type: string
       example: FreeAtHome Connection Timeout
@@ -1086,8 +1197,7 @@ components:
             type: array
             items:
               type: string
-      example: 
-        "00000000-0000-0000-0000-000000000000": { "values": ["1"] }
+      example: { "00000000-0000-0000-0000-000000000000": { "values": ["1"] } }
     ApiRestDatapoint_sysap__serial_PutRequest:
       type: string
       example: "1"
@@ -1113,8 +1223,7 @@ components:
         properties:
           result:
             type: string
-      example: 
-        "00000000-0000-0000-0000-000000000000": { "result": "OK" }
+      example: { "00000000-0000-0000-0000-000000000000": { "result": "OK" } }
     ApiRestDatapoint_sysap__serial_Put502TextPlainResponse:
       type: string
       example: FreeAtHome Connection Timeout
@@ -1132,8 +1241,10 @@ components:
                 serial:
                   type: string
       example:
-        "00000000-0000-0000-0000-000000000000":
-          { "devices": { "abcd12345": { "serial": "6000D2CB27B2" } } }
+        {
+          "00000000-0000-0000-0000-000000000000":
+            { "devices": { "abcd12345": { "serial": "6000D2CB27B2" } } },
+        }
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid

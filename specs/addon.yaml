@@ -594,6 +594,10 @@ components:
           $ref: "#/components/schemas/Parameters"
         wizards:
           $ref: "#/components/schemas/Wizards"
+        types:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/ParameterType"
         minAuxFileUploadIntervalMinutes: 
           type: integer
           minimum: 15
@@ -605,6 +609,10 @@ components:
           items:
             type: string
             maxLength: 256
+        errors:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Error"
       example:
         {
           name: "test add-on",
@@ -640,6 +648,52 @@ components:
               type: string
             multiple:
               type: boolean
+            debug:
+              type: boolean
+              description: Show this parameter group only when debugging is enabled
+            display: 
+              allOf: 
+                - $ref: "#/components/schemas/TranslatedTitle"
+                - $ref: "#/components/schemas/TranslatedSubtitle"
+                - $ref: "#/components/schemas/TranslatedError"
+                - type: object
+                  properties:
+                    dependsOn:
+                      type: object
+                      additionalProperties:
+                        $ref: "#/components/schemas/DisplayDependsOn"
+
+            items:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Parameter"
+
+    DisplayDependsOn:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedTitle"
+        - $ref: "#/components/schemas/TranslatedSubtitle"
+        - $ref: "#/components/schemas/TranslatedError"
+        - type: object
+          required:
+            - "values"
+          properties: 
+            values:
+              type: array
+              items:
+                type: string
+
+
+    ParameterType:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - type: object
+          required:
+            - "name"
+            - "display"
+            - "items"
+          properties:
+            name:
+              type: string
             display: 
               allOf: 
                 - $ref: "#/components/schemas/TranslatedTitle"
@@ -648,7 +702,7 @@ components:
             items:
               type: object
               additionalProperties:
-                $ref: "#/components/schemas/Parameter"
+                $ref: "#/components/schemas/Parameter"                
 
     Wizard: 
       allOf: 
@@ -769,6 +823,8 @@ components:
           array: "#/components/schemas/ArrayParameter"
           svg: "#/components/schemas/BasicParameter"
           uuid: "#/components/schemas/EmptyParameter"
+          custom: "#/components/schemas/BasicParameter"
+          serialPort: "#/components/schemas/BasicParameter"
 
     EmptyParameter:
       type: object
@@ -844,6 +900,7 @@ components:
       allOf: 
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
+        - $ref: "#/components/schemas/TranslatedButton"
         - type: object
           required:
             - "name"
@@ -876,6 +933,8 @@ components:
                 - "array"
                 - "svg"
                 - "uuid"
+                - "custom"
+                - "serialPort"
             name:
               type: string
             required:
@@ -884,7 +943,10 @@ components:
               anyOf:
                 - type: string
                 - type: number
-                - type: boolean            
+                - type: boolean
+            preFill:
+              type: boolean
+              description: Prefill this value with the last edited one              
             visible:
               type: boolean         
             dependsOn:
@@ -900,6 +962,7 @@ components:
               enum:
                 - "initial"
                 - "everyChange"
+                - "buttonPressed"
             rpcAdditionalParameters:
               type: object
               additionalProperties: true
@@ -914,7 +977,27 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/BasicDependsOnConfig"
-                  
+            customTypeName:
+              type: string
+              description: Only relevant when type == custom
+            event:
+              type: boolean
+              description: Do not store this value but send it as an event when the button is pressed
+            eventScope:
+              type: string
+              description: parameter-scope (default) -> send only this parameter value, group-scope -> send all parameter values from the same group
+              enum:
+                - "parameter"
+                - "group"
+            saveOnChange:
+              type: boolean
+              description: "When this is true the every change of the parameters value will be saved immediately (default: false)"
+            debug:
+              type: boolean
+              description: Show this parameter only when debugging is enabled
+            fixed:
+              type: boolean
+              description: A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed.
 
     StringParameter:
       allOf:
@@ -1094,6 +1177,11 @@ components:
                - type: string
                - type: number
                - type: boolean
+            name:
+              type: string
+            debug:
+              type: boolean
+              description: Show this option only when debugging is enabled
 
     TranslatedString:
       oneOf:
@@ -1335,6 +1423,46 @@ components:
         error@tr:
           type: string
 
+    TranslatedButton:
+      type: object
+      properties:
+        buttonLabel:
+          type: string
+        buttonLabel@en:
+          type: string
+        buttonLabel@es:
+          type: string
+        buttonLabel@fr:
+          type: string
+        buttonLabel@it:
+          type: string
+        buttonLabel@nl:
+          type: string
+        buttonLabel@de:
+          type: string
+        buttonLabel@zh:
+          type: string
+        buttonLabel@da:
+          type: string
+        buttonLabel@fi:
+          type: string
+        buttonLabel@nb:
+          type: string
+        buttonLabel@pl:
+          type: string
+        buttonLabel@pt:
+          type: string
+        buttonLabel@ru:
+          type: string
+        buttonLabel@sv:
+          type: string
+        buttonLabel@el:
+          type: string
+        buttonLabel@cs:
+          type: string
+        buttonLabel@tr:
+          type: string
+
     Uri:
       type: string
       format: uri
@@ -1447,7 +1575,6 @@ components:
         - "eventType"
         - "parameter"
         - "group"
-        - "value"
       properties:
         eventType:
           type: string
@@ -1464,6 +1591,8 @@ components:
             - type: string
             - type: number
             - type: boolean
+        data:
+          type: object
 
     WizardEvent:
       type: object
@@ -1532,7 +1661,45 @@ components:
         - $ref: "#/components/schemas/ParameterEvent"
         - $ref: "#/components/schemas/WizardEvent"
         - $ref: "#/components/schemas/WizardStepEvent"
+
+    Error:
+      allOf: 
+        - $ref: "#/components/schemas/TranslatedName"
+        - $ref: "#/components/schemas/TranslatedDescription"
+        - type: object
+          required:
+            - "name"
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+
+    RPC:
+      oneOf:
+      - $ref: "#/components/schemas/RPCGetParameterValue"
   
+
+    RPCGetParameterValue:
+      allOf:
+      - type: object
+        required:
+          - $parameter
+          - $group
+        properties:
+          $parameter: 
+            type: string
+            description: name of the parameter
+          $group: 
+            type: string
+            description: name of the parameter group the requested parameter is defined in      
+      - type: object
+        additionalProperties: true
+
+    RPCGetParameterConfig:
+      allOf:
+      - $ref: "#/components/schemas/RPCGetParameterValue"
+
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid

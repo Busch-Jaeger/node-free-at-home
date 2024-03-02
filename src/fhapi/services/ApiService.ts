@@ -16,6 +16,8 @@ import type { Devicelist } from '../models/Devicelist';
 import type { DeviceSerial } from '../models/DeviceSerial';
 import type { NativeSerial } from '../models/NativeSerial';
 import type { Notification } from '../models/Notification';
+import type { Pairings } from '../models/Pairings';
+import type { SysapSection } from '../models/SysapSection';
 import type { SysapUuid } from '../models/SysapUuid';
 import type { VirtualDevice } from '../models/VirtualDevice';
 import type { VirtualDevicesSuccess } from '../models/VirtualDevicesSuccess';
@@ -285,6 +287,40 @@ export class ApiService {
             url: '/api/rest/notification',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                401: `Authentication information is missing or invalid`,
+                502: `free@home error`,
+            },
+        });
+    }
+
+    /**
+     * Get sysap related information
+     * Get sysap related information
+     * @returns SysapSection Sysap
+     * @throws ApiError
+     */
+    public getsysap(): CancelablePromise<SysapSection> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/rest/sysap',
+            errors: {
+                401: `Authentication information is missing or invalid`,
+                502: `free@home error`,
+            },
+        });
+    }
+
+    /**
+     * Get pairings between sensor and actuator
+     * Get pairings between sensor and actuator
+     * @returns Pairings Sysap
+     * @throws ApiError
+     */
+    public getpairings(): CancelablePromise<Pairings> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/rest/pairings',
             errors: {
                 401: `Authentication information is missing or invalid`,
                 502: `free@home error`,
