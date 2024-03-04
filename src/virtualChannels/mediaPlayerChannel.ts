@@ -61,7 +61,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
 
     private playMode: MediaPlayerChannel.PlayMode = MediaPlayerChannel.PlayMode.paused;
     private repeadMode: MediaPlayerChannel.RepeadMode = MediaPlayerChannel.RepeadMode.off;
-    private isShuffel: boolean = false;
+    private isShuffle: boolean = false;
     private isCrossfade: boolean = false;
 
     private favoriteCount: number = 0;
@@ -201,16 +201,16 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 const intValue = parseInt(value);
 
                 if ((intValue & (1 << 4)) !== 0) {
-                    if (this.isShuffel === false)
+                    if (this.isShuffle === false)
                         this.emit("shuffle");
                     if (this.isAutoConfirm)
-                        this.isShuffel = true;
+                        this.isShuffle = true;
                 }
                 else {
-                    if (this.isShuffel === true)
+                    if (this.isShuffle === true)
                         this.emit("shuffleOff");
                     if (this.isAutoConfirm)
-                        this.isShuffel = false;
+                        this.isShuffle = false;
                 }
 
                 if ((intValue & (1 << 2)) !== 0) {
@@ -286,7 +286,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                 value |= (1 << 3);
                 break;
         }
-        if (this.isShuffel)
+        if (this.isShuffle)
             value |= (1 << 4);
         if (this.isCrossfade)
             value |= (1 << 5);
@@ -481,12 +481,12 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
     }
 
     async setShuffle(): Promise<void> {
-        this.isShuffel = true;
+        this.isShuffle = true;
         return this.updatePlayMode();
     }
 
     async setShuffleOff(): Promise<void> {
-        this.isShuffel = false;
+        this.isShuffle = false;
         return this.updatePlayMode();
     }
 
