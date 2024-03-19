@@ -55,6 +55,7 @@ import { WaterMeterChannel } from './virtualChannels/waterMeterChannel';
 import { GasMeterChannel } from './virtualChannels/gasMeterChannel';
 import { Capabilities } from './capabilities';
 import { HVAC2Channel } from './virtualChannels/hvac2Channel';
+import { MeterSensorChannel } from './virtualChannels/meterSensorChannel';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -172,6 +173,16 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("SwitchingActuator", nativeId, name);
         const channel = device.getChannels().next().value;
         return new SwitchingActuatorChannel(channel);
+    }
+
+    async createSmartPlugDevice(nativeId: string, name: string) {
+        const device = await this.freeAtHomeApi.createDevice("SmartPlug" as VirtualDeviceType, nativeId, name, "02");
+        const channelIterator = device.getChannels();
+        const channels = {
+            actuator: new SwitchingActuatorChannel(channelIterator.next().value),
+            sensor: new MeterSensorChannel(channelIterator.next().value),
+        }
+        return channels;
     }
 
     async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): Promise<RawChannel> {
