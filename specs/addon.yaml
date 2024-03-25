@@ -1519,10 +1519,17 @@ components:
         deletable:
           type: boolean
 
-    Configuration:
+    ConfigurationEntryExtended:
       type: object
       additionalProperties:
         $ref: "#/components/schemas/ConfigurationEntry"
+
+    Configuration:
+      type: object
+      additionalProperties:
+        oneOf:
+          - $ref: "#/components/schemas/ConfigurationEntryExtended"
+          - $ref: "#/components/schemas/ConfigurationEntry"
 
     State:
       type: object
@@ -1543,13 +1550,20 @@ components:
           type: object
           additionalProperties: true
 
+    ApplicationStateExtended:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/ApplicationStateEntry"
+
     ApplicationState:
       type: object
       properties:
         state:
           $ref: "#/components/schemas/State"
       additionalProperties:
-        $ref: "#/components/schemas/ApplicationStateEntry"
+        oneOf:
+          - $ref: "#/components/schemas/ApplicationStateExtended"
+          - $ref: "#/components/schemas/ApplicationStateEntry"
 
     ButtonEvent:
       type: object

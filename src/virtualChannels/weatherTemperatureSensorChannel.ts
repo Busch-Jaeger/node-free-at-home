@@ -26,10 +26,10 @@ export class WeatherTemperatureSensorChannel extends Mixin(Channel, (EventEmitte
         console.log("new temperature %s", temperature);
 
         if (this.alertActivationLevel !== undefined) {
-            if (this.alertActivationLevel <= temperature)
-                this.setDatapoint(PairingIds.AL_FROST_ALARM, "1");
-            else
+            if (this.alertActivationLevel < temperature)
                 this.setDatapoint(PairingIds.AL_FROST_ALARM, "0");
+            else
+                this.setDatapoint(PairingIds.AL_FROST_ALARM, "1");
         }
     }
 

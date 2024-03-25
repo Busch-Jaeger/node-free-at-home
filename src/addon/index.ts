@@ -12,6 +12,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { ApplicationState } from './models/ApplicationState';
 export type { ApplicationStateEntry } from './models/ApplicationStateEntry';
+export type { ApplicationStateExtended } from './models/ApplicationStateExtended';
 export type { ArrayParameter } from './models/ArrayParameter';
 export type { BaseWizardStep } from './models/BaseWizardStep';
 export type { BasicDependsOnConfig } from './models/BasicDependsOnConfig';
@@ -22,6 +23,7 @@ export type { ChannelFunctionGroup } from './models/ChannelFunctionGroup';
 export type { ChannelParameter } from './models/ChannelParameter';
 export type { Configuration } from './models/Configuration';
 export type { ConfigurationEntry } from './models/ConfigurationEntry';
+export type { ConfigurationEntryExtended } from './models/ConfigurationEntryExtended';
 export type { Datapoints } from './models/Datapoints';
 export type { DescriptionParameter } from './models/DescriptionParameter';
 export type { DisplayDependsOn } from './models/DisplayDependsOn';
