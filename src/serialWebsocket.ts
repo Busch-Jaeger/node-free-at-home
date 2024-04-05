@@ -71,7 +71,7 @@ export class SerialPortBinding implements BindingPortInterface {
         return new Promise<{ buffer: Buffer; bytesRead: number; }>(
             (resolve, reject) => {
                 this.stream.once("readable", () => {
-                    let chunk: Buffer = this.stream.read(1);
+                    const chunk: Buffer = this.stream.read(Math.min(length, this.stream.readableLength));
                     if (null === chunk) {
                         reject(new Error("broken pipe"));
                         return;
