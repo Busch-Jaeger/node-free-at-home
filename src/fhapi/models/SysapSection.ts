@@ -10,6 +10,7 @@ export type SysapSection = {
     version: string;
     sunRiseTimes: Array<number>;
     sunSetTimes: Array<number>;
+    locale?: string;
     location?: {
         latitude: number;
         longitude: number;
