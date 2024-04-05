@@ -258,7 +258,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
     }
 
-    async createDevice(deviceType: API.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
+    async createDevice(deviceType: API.VirtualDeviceType, nativeId: string, displayName?: string, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
         if(false === nativeIdRegExp.test(nativeId))
             throw new Error("nativeId contains not supported characters");
         try {
