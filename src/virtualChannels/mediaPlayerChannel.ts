@@ -120,7 +120,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     this.updatePlayMode();
                 }
                 break;
-            case PairingIds.AL_MEDIA_PAUSE: // stop
+            case PairingIds.AL_MEDIA_PAUSE: // pause
                 this.emit("playModeChanged", MediaPlayerChannel.PlayMode.paused);
                 this.emit("pause");
                 if (this.isAutoConfirm) {
@@ -152,7 +152,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                         this.stopIntervalTimer();
                         this.decrementVolume();
                         break;
-                    case '9': //volume inc long presed
+                    case '9': //volume inc long pressed
                         this.incrementVolume();
                         this.startIntervalTimer(() => {
                             this.incrementVolume();
@@ -161,7 +161,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     case '8': //volume inc long released
                         this.stopIntervalTimer();
                         break;
-                    case '1': //volume dec long presed 
+                    case '1': //volume dec long pressed
                         this.decrementVolume();
                         this.startIntervalTimer(() => {
                             this.decrementVolume();
@@ -443,8 +443,6 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
             value |= 1 << 5;
         if (actions?.canPause)
             value |= 1 << 6;
-        if (actions?.canStop)
-            value |= 1 << 7;
         return this.setDatapoint(PairingIds.AL_ALLOWED_PLAYBACK_ACTIONS, value.toString());
     }
 
@@ -499,7 +497,7 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
         this.repeadMode = MediaPlayerChannel.RepeadMode.repeat;
         return this.updatePlayMode();
     }
-    
+
     async setRepeatOne(): Promise<void> {
         this.repeadMode = MediaPlayerChannel.RepeadMode.repeatOne;
         return this.updatePlayMode();
@@ -516,7 +514,6 @@ export namespace MediaPlayerChannel {
         canRepeatOne?: boolean;
         canShuffle?: boolean;
         canPause?: boolean;
-        canStop?: boolean;
     }
 
     export enum PlayMode {
@@ -544,8 +541,11 @@ export namespace MediaPlayerChannel {
         Mute = 1
     }
 
+    /**
+     * @deprecated The enum should not be used
+     */
     export enum PlayControls {
         PlayStop = 3,
         PlayStopNextPrev = 127
     }
-} 
+}
