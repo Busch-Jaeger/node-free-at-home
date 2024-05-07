@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://busy-buildsystem.abb.com/schemas/configuration.xsd"
+  version="2">
+
+  <property name="resources_repository" type="string" value="resources" />
+
+  <stage name="update.resources">
+    <if inverted="true" exist="$(resources_repository)">
+      <git.execute_command
+        arguments="clone --depth 1 git@ssh.dev.azure.com:v3/ABB-BHC-BHAS/Resources/resources $(resources_repository)" />
+    </if>
+    <if exist="$(resources_repository)">
+      <git.pull fast_forward_only="true" repository_directory="$(resources_repository)" />
+    </if>
+  </stage>
+
+  <stage name="update.node_lib_headers">
+    <property name="resource_regions" type="string">
+      <value value="Common" />
+      <value value="MRHA" />
+    </property>
+    <epos.resources.parse directory="$(resources_repository)" />
+    <debje.sysap.write_node_lib_headers
+      pairing_ids_file="src/pairingIds.ts"
+      function_ids_file="src/functionIds.ts"
+      topic_file="src/topics.ts"
+      capability_file="src/capabilities.ts"
+    />
+  </stage>
+
+  <stage name="update:all">
+    <run_stage name="update.resources" />
+    <run_stage name="update.node_lib_headers" />
+  </stage>
+
+</workspace>

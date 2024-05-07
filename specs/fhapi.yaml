@@ -810,6 +810,26 @@ components:
           type: array
           items:
             type: integer
+        locale:
+          type: string
+          enum:
+            - "en"
+            - "es"
+            - "fr"
+            - "it"
+            - "nl"
+            - "de"
+            - "zh"
+            - "da"
+            - "fi"
+            - "nb"
+            - "pl"
+            - "pt"
+            - "ru"
+            - "sv"
+            - "el"
+            - "cs"
+            - "tr"
         location:
           type: object
           properties:

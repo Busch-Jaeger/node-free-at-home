@@ -104,6 +104,7 @@ export class ApiChannel extends (EventEmitter as { new(): ChannelEventEmitter; }
         const pairingId = this.outputPositionToPairing.get(data.index);
         if (undefined === pairingId)
             return;
+        this.outputDataPoints.set(pairingId, data.value);
         this.emit("outputDatapointChanged", pairingId, data.value);
         const subscribers = this.outputSubscribers.get(pairingId);
         if(subscribers !== undefined)

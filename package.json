@@ -1,6 +1,6 @@
 {
   "name": "@busch-jaeger/free-at-home",
-  "version": "0.34.9",
+  "version": "0.34.11",
   "description": "Library for free@home local device api",
   "repository": {
     "type": "git",
@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc -p .",
     "buildProd": "tsc  -p . --sourceMap false --declarationMap false",
+    "busy": "npm_config_registry=https://pkgs.dev.azure.com/ABB-BHC-BHAS/_packaging/ABB-BHC-BHAS/npm/registry/ npm_config_always_auth=true npx --yes busy \"run_stage\" \"update:all\"",
     "spellcheck": "cspell 'src/**/*.ts'",
     "generate": "./generate.js",
     "validate": "./validate -e ./specs"
