@@ -30,6 +30,10 @@ export function CreateSerialWebSocket(options: OpenOptions) {
         params += "baudrate=" + options.baudRate + "&";
     if (undefined !== options.parity)
         params += "parity=" + options.parity + "&";
+    if (undefined !== options.dataBits)
+        params += "databits=" + options.dataBits + "&";
+    if (undefined !== options.stopBits)
+        params += "stopbits=" + options.stopBits + "&";
 
     const websocket = new FreeAtHomeWebsocket(baseUrl, "/" + options.path + "/websocket" + params, {
         ...authenticationHeader
@@ -116,7 +120,7 @@ export class SerialPortBinding implements BindingPortInterface {
         return Promise.resolve();
     }
     drain(): Promise<void> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve();
     }
 
 }
