@@ -131,11 +131,11 @@ export class SerialBinding implements BindingInterface {
             const result = await apiClient.serial.getSettings();
             return result.map((device): PortInfo => {
                 return {
-                    path: device.sysName,
+                    path: device.id ?? device.sysName,
                     manufacturer: device.manufacturer,
                     serialNumber: device.serialNumber,
                     pnpId: undefined,
-                    locationId: undefined,
+                    locationId: device.usbPath,
                     productId: device.pID,
                     vendorId: device.vID,
                 }
