@@ -322,6 +322,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 throw new Error("device not found in response");
             }
         } catch (e) {
+            handleRequestError(e, this.enableLogging);
             return await devicePromiseWithTimeout.promise;
             // throw new Error("Could not read device from ata model error code: " + res.status);
         }
