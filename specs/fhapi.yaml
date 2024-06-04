@@ -1130,9 +1130,7 @@ components:
             additionalProperties:
               type: string
           devices:
-            type: object
-            additionalProperties:
-              $ref: "#/components/schemas/Devices"
+            $ref: "#/components/schemas/Devices"
           devicesAdded:
             type: array
             items:
