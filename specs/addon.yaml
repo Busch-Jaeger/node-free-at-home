@@ -612,7 +612,11 @@ components:
         errors:
           type: object
           additionalProperties:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/Message"
+        messages:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Message"
       example:
         {
           name: "test add-on",
@@ -901,6 +905,7 @@ components:
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
         - $ref: "#/components/schemas/TranslatedButton"
+        - $ref: "#/components/schemas/TranslatedConfirm"
         - type: object
           required:
             - "name"
@@ -998,6 +1003,9 @@ components:
             fixed:
               type: boolean
               description: A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed.
+            confirm: 
+              type: string
+              description: "[Only for type=button] Show a confirm dialog with this text before sending the button event"
 
     StringParameter:
       allOf:
@@ -1463,6 +1471,44 @@ components:
         buttonLabel@tr:
           type: string
 
+    TranslatedConfirm:
+      type: object
+      properties:
+        confirm@en:
+          type: string
+        confirm@es:
+          type: string
+        confirm@fr:
+          type: string
+        confirm@it:
+          type: string
+        confirm@nl:
+          type: string
+        confirm@de:
+          type: string
+        confirm@zh:
+          type: string
+        confirm@da:
+          type: string
+        confirm@fi:
+          type: string
+        confirm@nb:
+          type: string
+        confirm@pl:
+          type: string
+        confirm@pt:
+          type: string
+        confirm@ru:
+          type: string
+        confirm@sv:
+          type: string
+        confirm@el:
+          type: string
+        nconfirmame@cs:
+          type: string
+        confirm@tr:
+          type: string
+
     Uri:
       type: string
       format: uri
@@ -1676,7 +1722,7 @@ components:
         - $ref: "#/components/schemas/WizardEvent"
         - $ref: "#/components/schemas/WizardStepEvent"
 
-    Error:
+    Message:
       allOf: 
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
