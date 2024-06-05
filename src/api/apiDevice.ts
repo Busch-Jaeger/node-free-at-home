@@ -21,7 +21,7 @@ export class ApiDevice extends (EventEmitter as { new(): DeviceEventEmitter; }) 
     serialNumber: string;
     displayName: string | undefined;
 
-    private channels: Array<ApiChannel> = new Array();
+    private channels: Map<number, ApiChannel> = new Map();
 
     constructor(freeAtHomeApi: FreeAtHomeApi, apiDevice: api.Device, serialNumber: string) {
         super();
@@ -29,25 +29,26 @@ export class ApiDevice extends (EventEmitter as { new(): DeviceEventEmitter; }) 
         this.serialNumber = serialNumber;
         this.displayName = apiDevice.displayName;
 
-        let i = 0;
         for (const channelName in apiDevice?.channels) {
             const apiChannel = apiDevice.channels?.[channelName];
+            const i = parseInt(channelName.substring(2), 16);
             const channel = new ApiChannel(this, apiChannel, i);
-            this.channels.push(channel);
-            i++
+            this.channels.set(i, channel);
         }
     }
 
-    onOutputDatapointChange(channelIndex: number, data: IndexedDatapoint) {
-        if(channelIndex >= this.channels.length) {
-            return;
-        }
-        const channel = this.channels[channelIndex];
-        channel.onOutputDatapointChange(data);
+    onOutputDatapointChange(channelId: number, data: IndexedDatapoint) {
+        const channel = this.channels.get(channelId);
+        channel?.onOutputDatapointChange(data);
     }
 
     public getChannels(): IterableIterator<ApiChannel> {
-        return this.channels[Symbol.iterator]();
+        return this.channels.values();
+    }
+
+    public getChannel(channelId: number)
+    {
+        return this.channels.get(channelId);
     }
 
     public setInputDatapoint(channelNumber: number, index: number, value: string): Promise<void> {

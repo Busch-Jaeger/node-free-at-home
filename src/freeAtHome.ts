@@ -55,6 +55,7 @@ import { WaterMeterChannel } from './virtualChannels/waterMeterChannel';
 import { GasMeterChannel } from './virtualChannels/gasMeterChannel';
 import { Capabilities } from './capabilities';
 import { HVAC2Channel } from './virtualChannels/hvac2Channel';
+import { MeterSensorChannel } from './virtualChannels/meterSensorChannel';
 
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
@@ -150,61 +151,71 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         this.emit("open");
     }
 
-    async createBlindDevice(nativeId: string, name: string): Promise<BlindActuatorChannel> {
+    async createBlindDevice(nativeId: string, name?: string): Promise<BlindActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("BlindActuator", nativeId, name);
         const channel = device.getChannels().next().value;
         return new BlindActuatorChannel(channel);
     }
 
-    async createDimActuatorDevice(nativeId: string, name: string): Promise<DimActuatorChannel> {
+    async createDimActuatorDevice(nativeId: string, name?: string): Promise<DimActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("DimActuator", nativeId, name);
         const channel = device.getChannels().next().value;
         return new DimActuatorChannel(channel);
     }
 
-    async createWindowDevice(nativeId: string, name: string): Promise<WindowActuatorChannel> {
+    async createWindowDevice(nativeId: string, name?: string): Promise<WindowActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("WindowActuator", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WindowActuatorChannel(channel);
     }
 
-    async createSwitchingActuatorDevice(nativeId: string, name: string): Promise<SwitchingActuatorChannel> {
+    async createSwitchingActuatorDevice(nativeId: string, name?: string): Promise<SwitchingActuatorChannel> {
         const device = await this.freeAtHomeApi.createDevice("SwitchingActuator", nativeId, name);
         const channel = device.getChannels().next().value;
         return new SwitchingActuatorChannel(channel);
     }
 
-    async createRawDevice(nativeId: string, name: string, deviceType: VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): Promise<RawChannel> {
+    async createSmartPlugDevice(nativeId: string, name?: string) {
+        const device = await this.freeAtHomeApi.createDevice("SmartPlug" as VirtualDeviceType, nativeId, name, "02");
+        const channelIterator = device.getChannels();
+        const channels = {
+            actuator: new SwitchingActuatorChannel(channelIterator.next().value),
+            sensor: new MeterSensorChannel(channelIterator.next().value),
+        }
+        return channels;
+    }
+
+    async createRawDevice(nativeId: string, name: string | undefined, deviceType: VirtualDeviceType, flavor?: string, capabilities?: Capabilities[]): Promise<RawChannel> {
         const device = await this.freeAtHomeApi.createDevice(deviceType, nativeId, name, flavor, capabilities);
         const channel = device.getChannels().next().value;
         return new RawChannel(channel);
     }
 
-    async createWeatherBrightnessSensorDevice(nativeId: string, name: string): Promise<WeatherBrightnessSensorChannel> {
+    async createWeatherBrightnessSensorDevice(nativeId: string, name?: string): Promise<WeatherBrightnessSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-BrightnessSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WeatherBrightnessSensorChannel(channel);
     }
 
-    async createWeatherTemperatureSensorDevice(nativeId: string, name: string): Promise<WeatherTemperatureSensorChannel> {
+    async createWeatherTemperatureSensorDevice(nativeId: string, name?: string): Promise<WeatherTemperatureSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-TemperatureSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WeatherTemperatureSensorChannel(channel);
     }
 
-    async createWeatherRainSensorDevice(nativeId: string, name: string): Promise<WeatherRainSensorChannel> {
+    async createWeatherRainSensorDevice(nativeId: string, name?: string): Promise<WeatherRainSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-RainSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WeatherRainSensorChannel(channel);
     }
 
-    async createWeatherWindSensorDevice(nativeId: string, name: string): Promise<WeatherWindSensorChannel> {
+    async createWeatherWindSensorDevice(nativeId: string, name?: string): Promise<WeatherWindSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("Weather-WindSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WeatherWindSensorChannel(channel);
     }
 
-    async createWeatherStationDevice(nativeId: string, name: string): Promise<WeatherStationChannels> {
+    async createWeatherStationDevice(nativeId: string, name?: string): Promise<WeatherStationChannels> {
         const device = await this.freeAtHomeApi.createDevice("WeatherStation", nativeId, name);
         const channelIterator = device.getChannels();
         const channels = {
@@ -216,25 +227,25 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createWindowSensorDevice(nativeId: string, name: string): Promise<WindowSensorChannel> {
+    async createWindowSensorDevice(nativeId: string, name?: string): Promise<WindowSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("WindowSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WindowSensorChannel(channel);
     }
 
-    async createSwitchSensorDevice(nativeId: string, name: string): Promise<SwitchSensorChannel> {
+    async createSwitchSensorDevice(nativeId: string, name?: string): Promise<SwitchSensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("KNX-SwitchSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new SwitchSensorChannel(channel);
     }
 
-    async createMediaPlayerDevice(nativeId: string, name: string): Promise<MediaPlayerChannel> {
+    async createMediaPlayerDevice(nativeId: string, name?: string): Promise<MediaPlayerChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"MediaPlayer_Type1", nativeId, name);
         const channel = device.getChannels().next().value;
         return new MediaPlayerChannel(channel);
     }
 
-    async createRoomTemperatureControllerDevice(nativeId: string, name: string): Promise<RoomTemperatureControllerChannel> {
+    async createRoomTemperatureControllerDevice(nativeId: string, name?: string): Promise<RoomTemperatureControllerChannel> {
         const device = await this.freeAtHomeApi.createDevice("RTC", nativeId, name);
         const channel = device.getChannels().next().value;
         return new RoomTemperatureControllerChannel(channel);
@@ -248,19 +259,19 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return this.freeAtHomeApi.getDevice(deviceId);
     }
 
-    async createEnergyBatteryDevice(nativeId: string, name: string): Promise<EnergyBatteryChannel> {
+    async createEnergyBatteryDevice(nativeId: string, name?: string): Promise<EnergyBatteryChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyBattery", nativeId, name);
         const channel = device.getChannels().next().value;
         return new EnergyBatteryChannel(channel);
     }
 
-    async createEnergyInverterDevice(nativeId: string, name: string): Promise<EnergyInverterChannel> {
+    async createEnergyInverterDevice(nativeId: string, name?: string): Promise<EnergyInverterChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverter", nativeId, name);
         const channel = device.getChannels().next().value;
         return new EnergyInverterChannel(channel);
     }
 
-    async createEnergyMeterDevice(nativeId: string, name: string): Promise<EnergyMeterChannel> {
+    async createEnergyMeterDevice(nativeId: string, name?: string): Promise<EnergyMeterChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeter", nativeId, name);
         const channel = device.getChannels().next().value;
         return new EnergyMeterChannel(channel);
@@ -272,31 +283,31 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
     // 0100 -> battery
     // 1000 -> inverter
     // 1100 -> inverter with battery
-    async createEnergyBatteryV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyBatteryV2Channel> {
+    async createEnergyBatteryV2Device(nativeId: string, name?: string, capabilities?: Capabilities[]): Promise<EnergyBatteryV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "04", capabilities);
         const channel = device.getChannels().next().value;
         return new EnergyBatteryV2Channel(channel);
     }
 
-    async createEnergyInverterV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyInverterV2Channel> {
+    async createEnergyInverterV2Device(nativeId: string, name?: string, capabilities?: Capabilities[]): Promise<EnergyInverterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "08", capabilities);
         const channel = device.getChannels().next().value;
         return new EnergyInverterV2Channel(channel);
     }
 
-    async createEnergyTwoWayMeterV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyTwoWayMeterV2Channel> {
+    async createEnergyTwoWayMeterV2Device(nativeId: string, name?: string, capabilities?: Capabilities[]): Promise<EnergyTwoWayMeterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "02", capabilities);
         const channel = device.getChannels().next().value;
         return new EnergyTwoWayMeterV2Channel(channel);
     }
 
-    async createEnergyOneWayMeterV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyOneWayMeterV2Channel> {
+    async createEnergyOneWayMeterV2Device(nativeId: string, name?: string, capabilities?: Capabilities[]): Promise<EnergyOneWayMeterV2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "01", capabilities);
         const channel = device.getChannels().next().value;
         return new EnergyOneWayMeterV2Channel(channel);
     }
 
-    async createEnergyInverterBatteryV2Device(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EnergyV2Channels> {
+    async createEnergyInverterBatteryV2Device(nativeId: string, name?: string, capabilities?: Capabilities[]): Promise<EnergyV2Channels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterv2", nativeId, name, "0C", capabilities);
         const channelIterator = device.getChannels();
         const channels = {
@@ -306,7 +317,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createEnergyInverterMeterDevice(nativeId: string, name: string): Promise<EnergyInverterMeterChannels> {
+    async createEnergyInverterMeterDevice(nativeId: string, name?: string): Promise<EnergyInverterMeterChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeter", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
@@ -317,19 +328,19 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createWaterMeterDevice(nativeId: string, name: string): Promise<WaterMeterChannel> {
+    async createWaterMeterDevice(nativeId: string, name?: string): Promise<WaterMeterChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"WaterMeter", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WaterMeterChannel(channel);
     }
 
-    async createGasMeterDevice(nativeId: string, name: string): Promise<GasMeterChannel> {
+    async createGasMeterDevice(nativeId: string, name?: string): Promise<GasMeterChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"GasMeter", nativeId, name);
         const channel = device.getChannels().next().value;
         return new GasMeterChannel(channel);
     }
 
-    async createEnergyMeterBatteryDevice(nativeId: string, name: string): Promise<EnergyMeterBatteryChannels> {
+    async createEnergyMeterBatteryDevice(nativeId: string, name?: string): Promise<EnergyMeterBatteryChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyMeterBattery", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
@@ -340,7 +351,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createEnergyInverterMeterBatteryDevice(nativeId: string, name: string): Promise<EnergyInverterMeterBatteryChannels> {
+    async createEnergyInverterMeterBatteryDevice(nativeId: string, name?: string): Promise<EnergyInverterMeterBatteryChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"EnergyInverterMeterBattery", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
@@ -352,67 +363,67 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createAirQualityCO2Device(nativeId: string, name: string): Promise<AirCO2Channel> {
+    async createAirQualityCO2Device(nativeId: string, name?: string): Promise<AirCO2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityCO2", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirCO2Channel(channel);
     }
 
-    async createAirQualityCODevice(nativeId: string, name: string): Promise<AirCOChannel> {
+    async createAirQualityCODevice(nativeId: string, name?: string): Promise<AirCOChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityCO", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirCOChannel(channel);
     }
 
-    async createAirQualityHumidityDevice(nativeId: string, name: string): Promise<AirHumidityChannel> {
+    async createAirQualityHumidityDevice(nativeId: string, name?: string): Promise<AirHumidityChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityHumidity", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirHumidityChannel(channel);
     }
 
-    async createAirQualityNO2Device(nativeId: string, name: string): Promise<AirNO2Channel> {
+    async createAirQualityNO2Device(nativeId: string, name?: string): Promise<AirNO2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityNO2", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirNO2Channel(channel);
     }
 
-    async createAirQualityO3Device(nativeId: string, name: string): Promise<AirO3Channel> {
+    async createAirQualityO3Device(nativeId: string, name?: string): Promise<AirO3Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityO3", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirO3Channel(channel);
     }
 
-    async createAirQualityPM10Device(nativeId: string, name: string): Promise<AirPM10Channel> {
+    async createAirQualityPM10Device(nativeId: string, name?: string): Promise<AirPM10Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityPM10", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirPM10Channel(channel);
     }
 
-    async createAirQualityPM25Device(nativeId: string, name: string): Promise<AirPM25Channel> {
+    async createAirQualityPM25Device(nativeId: string, name?: string): Promise<AirPM25Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityPM25", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirPM25Channel(channel);
     }
 
-    async createAirQualityPressureDevice(nativeId: string, name: string): Promise<AirPressureChannel> {
+    async createAirQualityPressureDevice(nativeId: string, name?: string): Promise<AirPressureChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityPressure", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirPressureChannel(channel);
     }
 
-    async createAirQualityTemperatureDevice(nativeId: string, name: string): Promise<AirTemperatureChannel> {
+    async createAirQualityTemperatureDevice(nativeId: string, name?: string): Promise<AirTemperatureChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityTemperature", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirTemperatureChannel(channel);
     }
 
-    async createAirQualityVOCDevice(nativeId: string, name: string): Promise<AirVOCChannel> {
+    async createAirQualityVOCDevice(nativeId: string, name?: string): Promise<AirVOCChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityVOC", nativeId, name);
         const channel = device.getChannels().next().value;
         return new AirVOCChannel(channel);
     }
 
-    async createAirQualityFullDevice(nativeId: string, name: string): Promise<AirQualityFullChannels> {
+    async createAirQualityFullDevice(nativeId: string, name?: string): Promise<AirQualityFullChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityFull", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
@@ -430,7 +441,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         }
         return channels;
     }
-    async createAirQualityKaiterra(nativeId: string, name: string): Promise<AirQualityKaiterraChannels> {
+    async createAirQualityKaiterra(nativeId: string, name?: string): Promise<AirQualityKaiterraChannels> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"AirQualityKaiterra", nativeId, name);
         const channelIterator = device.getChannels();
         const Iterator = channelIterator.next().value;
@@ -447,55 +458,55 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    async createCeilingFan(nativeId: string, name: string): Promise<CeilingFanChannel> {
+    async createCeilingFan(nativeId: string, name?: string): Promise<CeilingFanChannel> {
         const device = await this.freeAtHomeApi.createDevice("CeilingFanActuator", nativeId, name);
         const channel = device.getChannels().next().value;
         return new CeilingFanChannel(channel);
     }
 
-    async createEvCharger(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<EvChargerChannel> {
+    async createEvCharger(nativeId: string, name?: string, capabilities?: Capabilities[]): Promise<EvChargerChannel> {
         const device = await this.freeAtHomeApi.createDevice("evcharging", nativeId, name, undefined, capabilities);
         const channel = device.getChannels().next().value;
         return new EvChargerChannel(channel);
     }
 
-    async createHomeApplianceLaundry(nativeId: string, name: string): Promise<HomeApplianceChannel> {
+    async createHomeApplianceLaundry(nativeId: string, name?: string): Promise<HomeApplianceChannel> {
         const device = await this.freeAtHomeApi.createDevice("HomeAppliance-Laundry", nativeId, name);
         const channel = device.getChannels().next().value;
         return new HomeApplianceChannel(channel);
     }
 
-    async createBinarySensor(nativeId: string, name: string): Promise<BinarySensorChannel> {
+    async createBinarySensor(nativeId: string, name?: string): Promise<BinarySensorChannel> {
         const device = await this.freeAtHomeApi.createDevice("BinarySensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new BinarySensorChannel(channel);
     }
 
-    async createHVACWithEnergyDevice(nativeId: string, name: string, capabilities?: Capabilities[]): Promise<HVAC2Channel> {
+    async createHVACWithEnergyDevice(nativeId: string, name?: string, capabilities?: Capabilities[]): Promise<HVAC2Channel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"HVACWithEnergy", nativeId, name, undefined, capabilities);
         const channel = device.getChannels().next().value;
         return new HVAC2Channel(channel);
     }
 
-    async createHVACDevice(nativeId: string, name: string): Promise<HVACChannel> {
+    async createHVACDevice(nativeId: string, name?: string): Promise<HVACChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"HVAC", nativeId, name);
         const channel = device.getChannels().next().value;
         return new HVACChannel(channel);
     }
 
-    async createSplitUnitDevice(nativeId: string, name: string): Promise<SplitUnitChannel> {
+    async createSplitUnitDevice(nativeId: string, name?: string): Promise<SplitUnitChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"SplitUnit", nativeId, name);
         const channel = device.getChannels().next().value;
         return new SplitUnitChannel(channel);
     }
 
-    async createRGBDevice(nativeId: string, name: string): Promise<RGBChannel> {
+    async createRGBDevice(nativeId: string, name?: string): Promise<RGBChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"ledvance-rgb", nativeId, name);
         const channel = device.getChannels().next().value;
         return new RGBChannel(channel);
     }
 
-    async createRGBWDevice(nativeId: string, name: string): Promise<RGBChannel> {
+    async createRGBWDevice(nativeId: string, name?: string): Promise<RGBChannel> {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"RGBW", nativeId, name);
         const channel = device.getChannels().next().value;
         return new RGBChannel(channel);

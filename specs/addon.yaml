@@ -612,7 +612,11 @@ components:
         errors:
           type: object
           additionalProperties:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/Message"
+        messages:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Message"
       example:
         {
           name: "test add-on",
@@ -824,6 +828,7 @@ components:
           svg: "#/components/schemas/BasicParameter"
           uuid: "#/components/schemas/EmptyParameter"
           custom: "#/components/schemas/BasicParameter"
+          serialPort: "#/components/schemas/BasicParameter"
 
     EmptyParameter:
       type: object
@@ -900,6 +905,7 @@ components:
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
         - $ref: "#/components/schemas/TranslatedButton"
+        - $ref: "#/components/schemas/TranslatedConfirm"
         - type: object
           required:
             - "name"
@@ -933,6 +939,7 @@ components:
                 - "svg"
                 - "uuid"
                 - "custom"
+                - "serialPort"
             name:
               type: string
             required:
@@ -996,6 +1003,9 @@ components:
             fixed:
               type: boolean
               description: A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed.
+            confirm: 
+              type: string
+              description: "[Only for type=button] Show a confirm dialog with this text before sending the button event"
 
     StringParameter:
       allOf:
@@ -1461,6 +1471,44 @@ components:
         buttonLabel@tr:
           type: string
 
+    TranslatedConfirm:
+      type: object
+      properties:
+        confirm@en:
+          type: string
+        confirm@es:
+          type: string
+        confirm@fr:
+          type: string
+        confirm@it:
+          type: string
+        confirm@nl:
+          type: string
+        confirm@de:
+          type: string
+        confirm@zh:
+          type: string
+        confirm@da:
+          type: string
+        confirm@fi:
+          type: string
+        confirm@nb:
+          type: string
+        confirm@pl:
+          type: string
+        confirm@pt:
+          type: string
+        confirm@ru:
+          type: string
+        confirm@sv:
+          type: string
+        confirm@el:
+          type: string
+        nconfirmame@cs:
+          type: string
+        confirm@tr:
+          type: string
+
     Uri:
       type: string
       format: uri
@@ -1517,10 +1565,17 @@ components:
         deletable:
           type: boolean
 
-    Configuration:
+    ConfigurationEntryExtended:
       type: object
       additionalProperties:
         $ref: "#/components/schemas/ConfigurationEntry"
+
+    Configuration:
+      type: object
+      additionalProperties:
+        oneOf:
+          - $ref: "#/components/schemas/ConfigurationEntryExtended"
+          - $ref: "#/components/schemas/ConfigurationEntry"
 
     State:
       type: object
@@ -1541,13 +1596,20 @@ components:
           type: object
           additionalProperties: true
 
+    ApplicationStateExtended:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/ApplicationStateEntry"
+
     ApplicationState:
       type: object
       properties:
         state:
           $ref: "#/components/schemas/State"
       additionalProperties:
-        $ref: "#/components/schemas/ApplicationStateEntry"
+        oneOf:
+          - $ref: "#/components/schemas/ApplicationStateExtended"
+          - $ref: "#/components/schemas/ApplicationStateEntry"
 
     ButtonEvent:
       type: object
@@ -1660,7 +1722,7 @@ components:
         - $ref: "#/components/schemas/WizardEvent"
         - $ref: "#/components/schemas/WizardStepEvent"
 
-    Error:
+    Message:
       allOf: 
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
@@ -1672,7 +1734,32 @@ components:
               type: string
             description:
               type: string
+
+    RPC:
+      oneOf:
+      - $ref: "#/components/schemas/RPCGetParameterValue"
   
+
+    RPCGetParameterValue:
+      allOf:
+      - type: object
+        required:
+          - $parameter
+          - $group
+        properties:
+          $parameter: 
+            type: string
+            description: name of the parameter
+          $group: 
+            type: string
+            description: name of the parameter group the requested parameter is defined in      
+      - type: object
+        additionalProperties: true
+
+    RPCGetParameterConfig:
+      allOf:
+      - $ref: "#/components/schemas/RPCGetParameterValue"
+
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid

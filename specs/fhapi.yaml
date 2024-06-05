@@ -732,6 +732,12 @@ components:
           type: string
         nativeId:
           type: string
+        unresponsive:
+          type: boolean
+        unresponsiveCounter:
+          type: integer
+        defect:
+          type: boolean
         channels:
           type: object
           additionalProperties:
@@ -804,6 +810,26 @@ components:
           type: array
           items:
             type: integer
+        locale:
+          type: string
+          enum:
+            - "en"
+            - "es"
+            - "fr"
+            - "it"
+            - "nl"
+            - "de"
+            - "zh"
+            - "da"
+            - "fi"
+            - "nb"
+            - "pl"
+            - "pt"
+            - "ru"
+            - "sv"
+            - "el"
+            - "cs"
+            - "tr"
         location:
           type: object
           properties:
@@ -1104,9 +1130,7 @@ components:
             additionalProperties:
               type: string
           devices:
-            type: object
-            additionalProperties:
-              $ref: "#/components/schemas/Devices"
+            $ref: "#/components/schemas/Devices"
           devicesAdded:
             type: array
             items:

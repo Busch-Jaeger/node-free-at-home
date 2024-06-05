@@ -60,6 +60,9 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     virtualDevicesBySerial: Map<string, ApiVirtualDevice> = new Map();
     devicesBySerial: Map<string, ApiDevice> = new Map();
 
+    cachedPairings = new Map<string, Array<string>>();
+    lastUpdateOnCachedPairings = 0;
+
     deviceAddedEmitter: EventEmitter = new EventEmitter();
 
     enableLogging: boolean = false;
@@ -255,7 +258,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
     }
 
-    async createDevice(deviceType: API.VirtualDeviceType, nativeId: string, displayName: string, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
+    async createDevice(deviceType: API.VirtualDeviceType, nativeId: string, displayName?: string, flavor?: string, capabilities?: Capabilities[]): Promise<ApiVirtualDevice> {
         if(false === nativeIdRegExp.test(nativeId))
             throw new Error("nativeId contains not supported characters");
         try {
@@ -319,6 +322,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 throw new Error("device not found in response");
             }
         } catch (e) {
+            handleRequestError(e, this.enableLogging);
             return await devicePromiseWithTimeout.promise;
             // throw new Error("Could not read device from ata model error code: " + res.status);
         }
@@ -401,6 +405,62 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         }
         
         return this.devicesBySerial.values();
+    }
+
+    public async updateCachedPairings() {
+        const pairings = new Map<string, Array<string>>();
+        for( const {actuator, sensor } of await this.apiClient.api.getpairings())
+        {
+            const actuatorPairings = pairings.get(sensor) ?? new Array<string>();
+            actuatorPairings.push(actuator)
+            pairings.set(sensor, actuatorPairings);
+            
+            const sensorPairings = pairings.get(actuator) ?? new Array<string>();
+            sensorPairings.push(sensor)
+            pairings.set(actuator, sensorPairings);
+        }
+        this.cachedPairings = pairings;
+    }
+
+    public async getChannel(id: string) {
+        const deviceSerial = id.substring(0,12);
+        const device = await this.getAPIDevice(deviceSerial)
+
+        const channel = device.getChannel(parseInt(id.substring(15)));
+        if(undefined === channel)
+            return Promise.reject("channel with serial number " + id + "not found");
+        return channel;
+    }
+
+    public async getChannelsFromList(list: Array<string>)
+    {
+        const channels = new Array<ApiChannel>;
+        for(const value of list)
+            channels.push(await this.getChannel(value));
+        return channels;
+    }
+
+    public async getPairedChannels(path: string)
+    {
+        const cacheAge =  Math.abs(this.lastUpdateOnCachedPairings - Date.now())/1000;
+        if(cacheAge > 10) {
+            await this.updateCachedPairings();
+            this.lastUpdateOnCachedPairings = Date.now();
+        }
+        const pairings = this.cachedPairings.get(path) ?? [];
+        return this.getChannelsFromList(pairings);
+    }
+
+    public async getAPIDevice(deviceId: string)
+    {
+        const exsistingDevice = this.devicesBySerial.get(deviceId);
+        if (undefined !== exsistingDevice)
+            return exsistingDevice;
+
+        const device = await this.getDevice(deviceId);
+        const deviceObject = new ApiDevice(this, device, deviceId);
+        this.devicesBySerial.set(deviceId, deviceObject);
+        return deviceObject;
     }
 
     public async getAllChannels(): Promise<IterableIterator<ApiChannel>> {

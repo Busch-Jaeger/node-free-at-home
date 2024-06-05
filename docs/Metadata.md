@@ -321,7 +321,13 @@ Possible types are:
   }
   ```
 
-  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`.  
+  If the user selects the `Power` entry, the stored value would be the path to that value: `Energy.Power`. 
+
+- `serialPort`
+
+  > **NOTE:** Requires free@home app version >= 2.4.0
+
+  Shows a list of serial ports available on the sysap to select one.
 
 ##### Read-only types
 
@@ -331,7 +337,25 @@ Possible types are:
 
 - `button`
 
-  Shows a button that sends an event of type `buttonPressed` event to the Addon.
+  Shows a button that sends an event of type `buttonPressed` event to the Addon. To override the default button text "send" you can
+  define an additional translatable attribute `buttonLabel`. You can also define a translatable `confirm` message that the UI should
+  show before sending the event. The user has to confirm that he wants to proceed.
+
+  Full example:
+  
+   e.g.
+
+    ```json
+    "clearDB": {
+        "name": "Clear all data",
+        "name@de": "Alle Daten löschen",
+        "type": "button",
+        "buttonLabel": "Delete",
+        "buttonLabel@de": "Löschen",
+        "confirm": "Are you sure you want to delete all data? This cannot be undone.",
+        "confirm@de": "Sind Sie sicher, dass Sie alle Daten löschen möchten? Dies kann nicht rückgängig gemacht werden."
+    }
+    ```
 
 - `error`
 
@@ -704,11 +728,11 @@ the Addon. The configured value will show up in the `Configuration`of the Addon,
 Please see the [writing Addons section](Writing-addons) for more information about using
 the configuration parameters in the Addon.
 
-### Errors
+### Errors & Messages
 
   > **NOTE:** Requires free@home app version >= 2.4.0  
 
-Define custom error messages that the UI can show e.g. when the Addon responds to a RPC with an error.
+Define custom (error-) messages that the UI can show e.g. when the Addon responds to a RPC with a result message
 
 Basic exampe:
 
@@ -720,13 +744,19 @@ Basic exampe:
       "description": "Device reports internal error. Please check all settings especially `Modbus ID`, 'Function' and 'Datatype'",
       "description@de": "Gerät meldet internen Fehler. Bitte überrüfen sie alle Einstellungen, insb. `Modbus ID`, 'Funktion' und 'Datentyp'"
   }
+
+"messages": {
+  "OK": {
+      "name": "Successful",
+      "name@de": "Erfolgreich"
+  }
 ```
 
-The addon can respond to a RPC with one of the defined error codes and the UI shows the translated error & description.
-Currently this is implemented only for the parameter RPC `getParameterValue`. In order to show the error from the example, the addon
-has to respond with ```{"error": "ADDON_ERROR:CODE_1"}```.
+The addon can respond to a RPC with one of the defined error/message codes and the UI shows the translated name & description.
+Currently this is implemented only for the parameter RPC `getParameterValue`. In order to show the message from the example, the addon
+has to respond with ```{"error": "ADDON_ERROR:CODE_1"}``` or ```{"message": "ADDON_MSG:OK"}```.
 
-The Addon can also respond with a custom error message, that will be shown as is in the UI.
+The Addon can also respond with a custom 7message, that will be shown as is in the UI.
 ```{"error": "This is a custom error"}```. In that case a translation is not possible, also there will be no possibility to show additional information below the error as its done with the `description` from a predefined error. The box with the red background will not be visible when you send a custom error message.
 
 ![Screenshot of error in the app](img/metadata/internal_error.png)

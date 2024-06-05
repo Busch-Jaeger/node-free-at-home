@@ -4,6 +4,5 @@
 /* eslint-disable */
 
 import type { ApplicationStateEntry } from './ApplicationStateEntry';
-import type { ApplicationStateExtended } from './ApplicationStateExtended';
 
-export type ApplicationState = Record<string, (ApplicationStateExtended | ApplicationStateEntry)>;
+export type ApplicationStateExtended = Record<string, ApplicationStateEntry>;

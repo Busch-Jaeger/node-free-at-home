@@ -35,6 +35,8 @@ components:
       required:
         - sysName
       properties:
+        id:
+          type: string
         sysName:
           type: string
         vID:
@@ -42,6 +44,10 @@ components:
         pID:
           type: string
         serialNumber:
+          type: string
+        manufacturer:
+          type: string
+        usbPath:
           type: string
 
   responses:

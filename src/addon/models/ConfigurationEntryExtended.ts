@@ -4,6 +4,5 @@
 /* eslint-disable */
 
 import type { ConfigurationEntry } from './ConfigurationEntry';
-import type { ConfigurationEntryExtended } from './ConfigurationEntryExtended';
 
-export type Configuration = Record<string, (ConfigurationEntryExtended | ConfigurationEntry)>;
+export type ConfigurationEntryExtended = Record<string, ConfigurationEntry>;

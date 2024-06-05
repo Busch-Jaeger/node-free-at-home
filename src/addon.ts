@@ -28,10 +28,10 @@ interface EventSourceOptions {
 
 export type ConnectionState = "init" | "connected" | "error";
 
-interface Events<ConfigurationType, EventType> {
+interface Events<ConfigurationType, StateType, EventType> {
     configurationChanged(configuration: ConfigurationType): void,
     event(event: EventType): void,
-    applicationStateChanged(configuration: ConfigurationType): void,
+    applicationStateChanged(state: StateType): void,
     configurationConnectionChanged(state: ConnectionState): void,
     eventConnectionChanged(state: ConnectionState): void,
     applicationStateConnectionChanged(state: ConnectionState): void,
@@ -41,12 +41,12 @@ export declare interface AddOn<
     ConfigurationType  extends Configuration = Configuration,
     StateType  extends ApplicationState = ApplicationState,
     EventType extends Event = Event> {
-    on<U extends keyof Events<ConfigurationType, EventType>>(
-        event: U, listener: Events<ConfigurationType, EventType>[U]
+    on<U extends keyof Events<ConfigurationType, StateType, EventType>>(
+        event: U, listener: Events<ConfigurationType, StateType, EventType>[U]
     ): this;
 
-    emit<U extends keyof Events<ConfigurationType, EventType>>(
-        event: U, ...args: Parameters<Events<ConfigurationType, EventType>[U]>
+    emit<U extends keyof Events<ConfigurationType, StateType, EventType>>(
+        event: U, ...args: Parameters<Events<ConfigurationType, StateType, EventType>[U]>
     ): boolean;
 }
 
