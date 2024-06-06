@@ -1558,6 +1558,8 @@ components:
 
     ConfigurationEntry:
       type: object
+      required:
+        - "items"
       properties:
         items:
           type: object
