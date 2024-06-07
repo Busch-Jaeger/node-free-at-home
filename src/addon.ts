@@ -117,11 +117,11 @@ export class AddOn<
         };
         this.configurationEventSource.onmessage = (event: MessageEvent) => {
             try {
-                const data = JSON.parse(event.data);
+                const data = event.data ? JSON.parse(event.data) : "";
                 this.emit('configurationChanged', data);
             }
             catch (error) {
-                console.log(event.data);
+                console.error(`error parsing configuration data: '${event.data}'`, error);
             }
         };
     }
@@ -146,11 +146,11 @@ export class AddOn<
         };
         this.applicationStateEventSource.onmessage = (event: MessageEvent) => {
             try {
-                const data = JSON.parse(event.data);
+                const data = event.data ? JSON.parse(event.data) : "";
                 this.emit('applicationStateChanged', data);
             }
             catch (error) {
-                console.log(event.data);
+                console.error(`error parsing application state: '${event.data}'`, error);
             }
         };
     }
@@ -179,7 +179,7 @@ export class AddOn<
                 this.emit("event", data)
             }
             catch (error) {
-                console.log(event.data);
+                console.error(`error parsing event data: '${event.data}'`, error);
             }
         };
     }
