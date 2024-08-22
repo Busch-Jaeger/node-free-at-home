@@ -479,6 +479,12 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed. You have to delete the entry and create a new one, if you want to change this value.
 
+- `copyable`
+
+  > **NOTE:** Requires free@home app version > 2.4.0
+
+  Adds the possibility to copy the current value into the clipboard, e.g. the addon sends some kind of ID via state to the UI and the user needs to copy that value to be able to use it elsewhere.
+
 - `dependsOn`
 
   > **NOTE:** Requires free@home app version >= 2.4.0
@@ -619,6 +625,30 @@ Beside the already explained `name`, `type` and `description` attributes there a
 
   The addons receives the rpc everytime any other parameter of the same groups changes. The parameters of the rpc contains all parameter values of the current group and in addition to that `"parameter": "curve"`, `"group": "configs"` and whats configured in `rpcAdditionalParameters`.
   With all these values the addon can generate an SVG-Chart and send it as response. That chart will be shown to the user and he gets live feedback to every configuration changed by seeing an updated curve.
+
+- `multiple`
+
+  > **NOTE:** Requires free@home app version >= 3.5.0
+  
+  > **NOTE:** Currently only implemented for parameters of type ``channel``
+
+  If this is added with a `true` value this parameter allows more that one value.
+
+- `minValues`
+
+  > **NOTE:** Requires free@home app version >= 3.5.0
+
+  > **NOTE:** only for parameters with ``multiple: true``!
+
+  Defines a minimum number of values (default: 0)
+
+- `minValues`
+
+  > **NOTE:** Requires free@home app version >= 3.5.0
+  
+  > **NOTE:** only for parameters with ``multiple: true``!
+
+  Defines a maximum number of values (default: unlimited)
 
 #### Parameter groups
 
@@ -919,3 +949,41 @@ This step has the `parameterGroup` property, which means it will create / edit a
 This step will use the `items` from that group to generate the form elements in the UI. Some of those are prefilled by values from the first step.
 
 The wizards itself do not store anything when closed, so you can create / edit multiple settings with wizards and have to save your changes at the end.
+
+### Limits
+
+> **NOTE:** Requires free@home app version >= 3.5.0
+
+You can define global limits for configurable values, e.g. if you have a parameter of type "channel" that allows the selection of multiple values and that parameter is maybe part of a group that also
+allows to create multiple entries you can defined a limit of the total sum of selected channels either
+for that parameter group of globally for the whole addon configuration.
+
+```json
+"limits": {
+    "maxChannels": {
+        "max": 64,
+        "type": "channel",
+        "group": "connections",
+        "message": ["You can select %1 more channel", "You can select %1 more channels"],
+        "message@de": ["Sie können %1 weiteren Kanal hinzufügen", "Sie können %1 weitere Kanäle hinzufügen"],
+        "fullMessage": [
+            "You cannot add more channels, limit of %1 channel has been reached",
+            "You cannot add more channels, limit of %1 channels has been reached"
+        ],
+        "fullMessage@de": [
+            "Sie können keinen weiteren Kanal mehr hinzufügen, das Limit von %1 Kanal wurde erreicht.",
+            "Sie können keinen weiteren Kanal mehr hinzufügen, das Limit von %1 Kanälen wurde erreicht."
+        ]
+    }
+}
+```
+
+In this example all selected values of type "channel" in the parameter group "connections" are counted.
+If the counter is under the defined limit of 64 the "message" will shown and informs the user how many
+channels he can still add. If the limit is reached the "fullMessage" is shown instead as a warning and the user cannot select more channels.
+
+The translated string are a little bit different from the translations in other parts of the settings because they allow a numeric placeholder and therefore support plurals.
+In the "message" the ``%1`` will be replaced with the remaining number of channels that can be selected until the limit is reached. In "fullMessage" the placeholder ``%1`` will be replaced with the value of ``max``.
+
+For plural support the translated string are an array of up to 3 values. Depending of the number that replaces the placeholder one of the values in the array is chosen as the currently translated string.
+The rules that decide which value of the array is chosen can be seen here: https://doc.qt.io/qt-6/i18n-plural-rules.html

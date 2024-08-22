@@ -609,6 +609,24 @@ components:
           items:
             type: string
             maxLength: 256
+        limits:
+          allOf: 
+          - $ref: "#/components/schemas/TranslatedMessage"
+          - $ref: "#/components/schemas/TranslatedFullMessage"
+            type: object
+            additionalProperties:
+              type: object
+              required:
+                - max
+                - type
+              properties:
+                max:
+                  type: integer
+                  minimum: 1
+                type: 
+                  type: string         
+                group:
+                  type: string              
         errors:
           type: object
           additionalProperties:
@@ -652,6 +670,10 @@ components:
               type: string
             multiple:
               type: boolean
+            canBeDisabled:
+              type: boolean
+              description: adds a checkbox to the displayed item (display configuration is needed for this) where the user can disable that entry.
+                            The addon will receive an additional boolean property named "$disabled" for this entry and has to handle it accordingly.
             debug:
               type: boolean
               description: Show this parameter group only when debugging is enabled
@@ -1003,6 +1025,9 @@ components:
             fixed:
               type: boolean
               description: A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed.
+            copyable:
+              type: boolean
+              description: Adds the possibility to copy the current value into the clipboard, e.g. the addon sends some kind of ID via state to the UI and the user needs to copy that value to be able to use it elsewhere.
             confirm: 
               type: string
               description: "[Only for type=button] Show a confirm dialog with this text before sending the button event"
@@ -1056,8 +1081,15 @@ components:
         - $ref: "#/components/schemas/BasicParameter"
         - type: object
           properties:
-            multiSelect:
+            multiple:
               type: boolean
+              description: "allow more than one channel"
+            minValues:
+              type: number
+              description: "Minimum values that must be selected (default: 0)"
+            maxValues:
+              type: number
+              description: "Maximum values that can be selected (default: unlimited)"
             filters:
               type: array
               items: 
@@ -1509,6 +1541,230 @@ components:
         confirm@tr:
           type: string
 
+    TranslatedMessage:
+      type: object
+      properties:
+        message:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@en:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@es:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@fr:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@it:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@nl:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@de:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@zh:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@da:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@fi:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@nb:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@pl:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@pt:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@ru:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@sv:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@el:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@cs:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        message@tr:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+
+    TranslatedFullMessage:
+      type: object
+      properties:
+        fullMessage:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@en:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@es:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@fr:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@it:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@nl:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@de:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@zh:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@da:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@fi:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@nb:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@pl:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@pt:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@ru:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@sv:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@el:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@cs:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+        fullMessage@tr:
+          oneOf: 
+            - type: string
+            - type: array
+              items:
+                type: string
+
     Uri:
       type: string
       format: uri
@@ -1558,6 +1814,8 @@ components:
 
     ConfigurationEntry:
       type: object
+      required:
+        - "items"
       properties:
         items:
           type: object
