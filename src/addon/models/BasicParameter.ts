@@ -50,6 +50,10 @@ export type BasicParameter = (TranslatedName & TranslatedDescription & Translate
      */
     fixed?: boolean;
     /**
+     * Adds the possibility to copy the current value into the clipboard, e.g. the addon sends some kind of ID via state to the UI and the user needs to copy that value to be able to use it elsewhere.
+     */
+    copyable?: boolean;
+    /**
      * [Only for type=button] Show a confirm dialog with this text before sending the button event
      */
     confirm?: string;

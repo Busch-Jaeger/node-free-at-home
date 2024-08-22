@@ -52,6 +52,8 @@ export type { TranslatedButton } from './models/TranslatedButton';
 export type { TranslatedConfirm } from './models/TranslatedConfirm';
 export type { TranslatedDescription } from './models/TranslatedDescription';
 export type { TranslatedError } from './models/TranslatedError';
+export type { TranslatedFullMessage } from './models/TranslatedFullMessage';
+export type { TranslatedMessage } from './models/TranslatedMessage';
 export type { TranslatedName } from './models/TranslatedName';
 export type { TranslatedString } from './models/TranslatedString';
 export type { TranslatedSubtitle } from './models/TranslatedSubtitle';
