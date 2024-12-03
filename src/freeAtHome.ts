@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { FreeAtHomeApi } from './freeAtHomeApi';
+import { FreeAtHomeApi, createFreeAtHomeApi } from './freeAtHomeApi';
 import { VirtualDeviceType } from './fhapi';
 
 import { BlindActuatorChannel } from './virtualChannels/blindActuatorChannel';
@@ -132,7 +132,7 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
             Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64')
         };
 
-        this.freeAtHomeApi = new FreeAtHomeApi(baseUrl, authenticationHeader);
+        this.freeAtHomeApi = createFreeAtHomeApi(baseUrl, authenticationHeader);
 
         this.freeAtHomeApi.on('close', this.onClose.bind(this));
         this.freeAtHomeApi.on('open', this.onOpen.bind(this));

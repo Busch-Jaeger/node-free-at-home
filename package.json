@@ -22,11 +22,12 @@
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
     "@types/eventsource": "^1.1.13",
-    "@types/node": "20.8.6",
+    "@types/node": "20.12.7",
     "@types/node-fetch": "^2.6.6",
     "abort-controller": "^3.0.0",
     "cspell": "7.3.8",
     "openapi-typescript-codegen": "^0.25.0",
+    "tsx": "^4.7.3",
     "typescript": "5.2.2"
   },
   "dependencies": {

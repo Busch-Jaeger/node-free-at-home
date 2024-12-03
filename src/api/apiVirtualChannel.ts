@@ -118,7 +118,7 @@ export class ApiVirtualChannel extends (EventEmitter as { new(): ChannelEventEmi
         return this.device.patchDevice({ displayName: value });
     }
 
-    public async getPairedChannels() {
-        return this.device.freeAtHomeApi.getPairedChannels(this.serialNumber);
+    public async getPairedChannels(forceUpdate?: boolean) {
+        return this.device.freeAtHomeApi.getPairedChannels(this.serialNumber, forceUpdate);
     }
 }
