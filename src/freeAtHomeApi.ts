@@ -43,6 +43,10 @@ export enum ConnectionStates {
 const nativeIdRegExp = new RegExp("^[a-zA-Z0-9\-_]{1,64}$");
 const websocketParameterRegExp = new RegExp("([0-9A-Z]{12})\/(?:ch([0-9A-Z]{4})\/)?par([0-9a-zA-Z]{4})");
 
+export const defaultTtl = 30 * 60;
+export const defaultDeviceCreationTimeout = defaultTtl / 3 * 2;
+export const defaultKeepAliveTime = defaultTtl  / 3 * 2;
+
 interface Events {
     open: FreeAtHomeApi,
     close: (code: number, reason: string) => void,
@@ -252,7 +256,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 {
                     type: deviceType,
                     properties: {
-                        ttl: "180",
+                        ttl: defaultTtl.toString(),
                         flavor: flavor,
                         capabilities: capabilities
                     }
@@ -274,7 +278,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 {
                     type: deviceType,
                     properties: {
-                        ttl: "180",
+                        ttl: defaultTtl.toString(),
                         displayname: displayName,
                         flavor: flavor,
                         capabilities: capabilities
@@ -497,7 +501,7 @@ export class Response extends EventEmitter {
 
     timeout: NodeJS.Timeout;
 
-    constructor(timeout: number = 2 * 60 * 1_000) { // set timeout to two minutes
+    constructor(timeout: number = defaultDeviceCreationTimeout * 1_000) {
         super();
         this.timeout =  setTimeout(this.onTimeout.bind(this), timeout);
         this.promise = new Promise<ApiVirtualDevice>((resolve, reject) => {

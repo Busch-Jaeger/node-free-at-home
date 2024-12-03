@@ -13,6 +13,7 @@ import { DeviceSerial, NativeSerial, SysapUuid, VirtualDevice } from '../fhapi';
 import {
   setImmediate
 } from 'node:timers/promises';
+import { defaultDeviceCreationTimeout } from '../freeAtHomeApi';
 
 const ACTUATOR_SERIAL_NUMBER = "6000D2CB27B2";
 const PAIRED_DEVICE_SERIAL_NUMBER = "6000D2CB27DD";
@@ -254,9 +255,13 @@ test('createVirtualDevice timeout', async (t) => {
 
   const getDeviceMock2 = t.mock.method(apiClient.api, "getdevice", mock_getdevice);
 
-  t.mock.timers.tick(3 * 60 * 1_000);
+  t.mock.timers.tick((defaultDeviceCreationTimeout * 1_000) + 10);
 
-  await assert.rejects(devicePromise);
+  await assert.rejects(devicePromise,
+    {
+      name: "Error",
+      message: "timeout while waiting for device description from api",
+    });
 
   assert.strictEqual(createVirtualDeviceMock.mock.callCount(), 1);
   assert.strictEqual(getDeviceMock.mock.callCount(), 1);

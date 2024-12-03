@@ -7,6 +7,8 @@ import { ApiVirtualChannel } from "./api/apiVirtualChannel";
 interface ChannelEvents {
 }
 
+import { defaultKeepAliveTime} from "./freeAtHomeApi";
+
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 
 export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
@@ -37,7 +39,7 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
                     } catch (error) {
                         console.log(error);
                     }
-                }, 1000 * 120);
+                }, 1000 * defaultKeepAliveTime);
         } else {
             if (this.autoKeepAliveTimer !== undefined)
             {
