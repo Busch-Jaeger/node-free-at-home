@@ -2,7 +2,7 @@ import { PairingIds } from '../freeAtHomeApi';
 import { ApiVirtualChannel } from "../api/apiVirtualChannel";
 import { Channel } from '../channel';
 import { Mixin } from 'ts-mixer';
-import { Datapoint } from '..';
+import { Capabilities, Datapoint } from '..';
 
 import { EventEmitter } from 'events';
 import { StrictEventEmitter } from 'strict-event-emitter-types';
@@ -12,8 +12,14 @@ interface ChannelEvents {
     isOnChanged(value: boolean): void;
     setModeAuto(): void;
     setModeCooling(): void;
+    setModeDry(): void;
+    setModeAiComfort(): void;
+    setModeCoolClean(): void;
+    setModeDryClean(): void;
+    setModeWind(): void;
     setModeHeating(): void;
     setFanSpeed(value: number): void;
+    setSwingMode(value: SplitUnitChannel.SupportedSwingModes): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -23,16 +29,21 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
     private swingOn = false;
     private isOn = false;
     private mode = 1; // AUTO
-    private supportedFeatures = 7; // AUTO + HEATING + COOLING
-    private remoteId = 0;
 
-    constructor(channel: ApiVirtualChannel) {
+    constructor(channel: ApiVirtualChannel, supportedOperations?: SplitUnitChannel.SupportedOperations, capabilities?: Capabilities.CAP_SWING_MODES[]) {
         super(channel);
         channel.on("inputDatapointChanged", this.dataPointChanged.bind(this));
         channel.on("sceneTriggered", this.sceneTriggered.bind(this));
         this.sendStatus();
-        this.sendSupportedFeatures();
-        this.setRemoteId(1);
+        if (undefined !== supportedOperations) {
+            this.sendSupportedFeatures(supportedOperations);
+            this.setSupportedOperations(supportedOperations);
+        }
+        else {
+            this.sendSupportedFeatures({ auto: true, cool: true, heat: true });
+            this.setSupportedOperations({ auto: true, cool: true, heat: true });
+        }
+        this.setSupportedSwingModes(supportedOperations?.swingModes);
     }
 
     /**
@@ -50,13 +61,13 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 this.emit("setPointTemperatureChanged", this.setPointTemperature);
             }
                 break;
-            case PairingIds.AL_INFO_ABSOLUTE_SET_POINT_REQUEST: {
-                const intValue = Number.parseFloat(value);
-                this.setPointTemperature = intValue;
-                if (this.isAutoConfirm)
-                    this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, this.setPointTemperature.toFixed(1));
-                this.emit("setPointTemperatureChanged", this.setPointTemperature);
-            }
+            case PairingIds.AL_INFO_ABSOLUTE_SET_POINT_REQUEST:
+                {
+                    const intValue = Number.parseFloat(value);
+                    if (this.isAutoConfirm)
+                        this.sendSetPointTemperature(intValue);
+                    this.emit("setPointTemperatureChanged", intValue);
+                }
                 break;
 
             case PairingIds.AL_CONTROLLER_ON_OFF_REQUEST:
@@ -77,22 +88,73 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 break;
             case PairingIds.AL_OPERATION_MODE:
                 {
-                    const intValue = Number.parseInt(value);
-                    if (this.isAutoConfirm)
-                        this.setMode(intValue);
-
+                    const intValue = Number.parseInt(value) & 0xf;
                     switch (intValue) {
                         case 1:
+                            if (this.isAutoConfirm)
+                                this.setModeAuto();
                             this.emit("setModeAuto");
                             break;
                         case 2:
+                            if (this.isAutoConfirm)
+                                this.setModeHeating();
                             this.emit("setModeHeating");
                             break;
                         case 3:
+                            if (this.isAutoConfirm)
+                                this.setModeCooling();
                             this.emit("setModeCooling");
                             break;
                     }
-                    break;
+                }
+            case PairingIds.AL_OPERATION_MODE_32:
+                {
+                    const enumValue = Number.parseInt(value) as SplitUnitChannel.Operations;
+
+                    switch (enumValue) {
+                        case SplitUnitChannel.Operations.auto:
+                            if (this.isAutoConfirm)
+                                this.setModeAuto();
+                            this.emit("setModeAuto");
+                            break;
+                        case SplitUnitChannel.Operations.cool:
+                            if (this.isAutoConfirm)
+                                this.setModeCooling();
+                            this.emit("setModeCooling");
+                            break;
+                        case SplitUnitChannel.Operations.dry:
+                            if (this.isAutoConfirm)
+                                this.setModeDry();
+                            this.emit("setModeDry");
+                            break;
+                        case SplitUnitChannel.Operations.wind:
+                            if (this.isAutoConfirm)
+                                this.setModeWind();
+                            this.emit("setModeWind")
+                            break;
+                        case SplitUnitChannel.Operations.ai_comfort:
+                            if (this.isAutoConfirm)
+                                this.setModeAiComfort();
+                            this.emit("setModeAiComfort")
+                            break;
+                        case SplitUnitChannel.Operations.cool_clean:
+                            if (this.isAutoConfirm)
+                                this.setModeCoolClean();
+                            this.emit("setModeCoolClean")
+                            break;
+                        case SplitUnitChannel.Operations.dry_clean:
+                            if (this.isAutoConfirm)
+                                this.setModeDryClean();
+                            this.emit("setModeDryClean")
+                            break;
+                        case SplitUnitChannel.Operations.heat:
+                            if (this.isAutoConfirm)
+                                this.setModeHeating();
+                            this.emit("setModeHeating");
+                            break;
+                        default:
+                            return;
+                    }
                 }
         }
     }
@@ -101,18 +163,25 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         return super.setDatapoint(id, value);
     }
 
-    setRemoteId(id: number) {
-        if (this.remoteId !== id) {
-            this.remoteId = id;
-            this.sendSupportedFeatures();
-        }
-    }
-
     setOn(isOn: boolean) {
         if (this.isOn !== isOn) {
             this.isOn = isOn;
             this.sendStatus();
         }
+
+        if(this.channel.outputPairingToPosition.has(PairingIds.AL_CONTROLLER_ON_OFF))
+            this.setDatapoint(PairingIds.AL_CONTROLLER_ON_OFF, (isOn) ? "1" : "0");
+    }
+
+    async setSupportedSwingModes(modes?: SplitUnitChannel.SupportedSwingModes) {
+        let value = 0;
+        if (modes?.horizontal)
+            value += 1 << 0;
+        if (modes?.vertical)
+            value += 1 << 1;
+        
+        if(this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_SUPPORTED_SWING_MODE))
+            await this.setDatapoint(PairingIds.AL_INFO_SUPPORTED_SWING_MODE, value.toString());
     }
 
     setSwingOn(swingOn: boolean) {
@@ -122,16 +191,75 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         }
     }
 
-    public setModeAuto() {
-        this.setMode(1);
+    protected async setSupportedOperations(supportedOperations: SplitUnitChannel.SupportedOperations) {
+        let value: number = 0;
+        if (supportedOperations?.auto)
+            value |= SplitUnitChannel.Operations.auto as number;
+        if (supportedOperations?.cool)
+            value |= SplitUnitChannel.Operations.cool as number;
+        if (supportedOperations?.dry)
+            value |= SplitUnitChannel.Operations.dry as number;
+        if (supportedOperations?.wind)
+            value |= SplitUnitChannel.Operations.wind as number;
+        if (supportedOperations?.ai_comfort)
+            value |= SplitUnitChannel.Operations.ai_comfort as number;
+        if (supportedOperations?.cool_clean)
+            value |= SplitUnitChannel.Operations.cool_clean as number;
+        if (supportedOperations?.dry_clean)
+            value |= SplitUnitChannel.Operations.dry_clean as number;
+        if (supportedOperations?.heat)
+            value |= SplitUnitChannel.Operations.heat as number;
+        
+        if(this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_SUPPORTED_OPERATION_MODE_32))
+            this.setDatapoint(PairingIds.AL_INFO_SUPPORTED_OPERATION_MODE_32, value.toString());
     }
 
-    public setModeHeating() {
-        this.setMode(2);
+    public async setModeAuto() {
+        await this.setMode(1);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.auto as number).toString());
     }
 
-    public setModeCooling() {
-        this.setMode(3);
+    public async setModeHeating() {
+        await this.setMode(2);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.heat as number).toString());
+    }
+
+    public async setModeCooling() {
+        await this.setMode(3);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.cool as number).toString());
+    }
+
+    public async setModeDry() {
+        await this.setMode(1);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.dry as number).toString());
+    }
+
+    public async setModeAiComfort() {
+        await this.setMode(1);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.ai_comfort as number).toString());
+    }
+
+    public async setModeCoolClean() {
+        await this.setMode(1);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.cool_clean as number).toString());
+    }
+
+    public async setModeDryClean() {
+        await this.setMode(1);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.dry_clean as number).toString());
+    }
+
+    public async setModeWind() {
+        await this.setMode(1);
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
+            await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.wind as number).toString());
     }
 
     public async setFanSpeed(value: number) {
@@ -140,14 +268,26 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         await this.setDatapoint(PairingIds.AL_FAN_COIL_LEVEL, value.toString());
     }
 
-    protected setMode(mode: number) {
+    public async setSwingMode(value: SplitUnitChannel.SupportedSwingModes) {
+        let mode = 0;
+        if (value?.horizontal)
+            mode |= 1 << 0;
+        if (value?.vertical)
+            mode |= 1 << 1;
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_SWING_MODE))
+            await this.setDatapoint(PairingIds.AL_INFO_SWING_MODE, mode.toString());
+    }
+
+    protected async setMode(mode: number) {
         if (this.mode !== mode) {
             this.mode = mode;
-            this.sendStatus()
+            await this.sendStatus()
         }
     }
 
-    protected sendStatus() {
+    protected async sendStatus() {
+        if(false === this.channel.outputPairingToPosition.has(PairingIds.AL_EXTENDED_STATUS))
+            return;
         let status = this.mode;
         if (this.isOn) {
             status |= 1 << 5;
@@ -155,18 +295,26 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         if (this.swingOn) {
             status |= 1 << 6;
         }
-        this.setDatapoint(PairingIds.AL_EXTENDED_STATUS, status.toString());
+        await this.setDatapoint(PairingIds.AL_EXTENDED_STATUS, status.toString());
     }
 
-    protected sendSupportedFeatures() {
-        let featuresMask = this.supportedFeatures
+    protected sendSupportedFeatures(supportedOperations: SplitUnitChannel.LegacySupportedOperations) {
+        if (false === this.channel.outputPairingToPosition.has(PairingIds.AL_SUPPORTED_FEATURES))
+            return;
+        let value = 0
+        if (supportedOperations?.auto)
+            value |= SplitUnitChannel.LegacyOperations.auto as number;
+        if (supportedOperations?.heat)
+            value |= SplitUnitChannel.LegacyOperations.heat as number;
+        if (supportedOperations?.cool)
+            value |= SplitUnitChannel.LegacyOperations.cool as number;
         // The id is encoded in bits 16-31. 
-        featuresMask |= this.remoteId << 16;
-        // only support auto mode
-        this.setDatapoint(PairingIds.AL_SUPPORTED_FEATURES, featuresMask.toString());
+        value |= 1 << 16; // set remote id to 1, just not set it to 0
+        this.setDatapoint(PairingIds.AL_SUPPORTED_FEATURES, value.toString());
     }
 
     public sendSetPointTemperature(value: number) {
+        this.setPointTemperature = value;
         this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, value.toFixed(1));
     }
 
@@ -177,9 +325,8 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 case PairingIds.AL_SET_POINT_TEMPERATURE:
                     {
                         const intValue = Number.parseFloat(value);
-                        this.setPointTemperature = intValue;
                         if (this.isAutoConfirm)
-                            this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, this.setPointTemperature.toFixed(1));
+                            this.sendSetPointTemperature(intValue);
                         this.emit("setPointTemperatureChanged", this.setPointTemperature);
                     }
                     break;
@@ -190,26 +337,128 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                         this.setOn(value === "1");
                     this.emit("isOnChanged", value === "1");
                     break;
-                case PairingIds.AL_EXTENDED_STATUS:
-                    {
-                        const intValue = Number.parseInt(value) & 0xf;
-                        if (this.isAutoConfirm)
-                            this.setMode(intValue);
-
-                        switch (intValue) {
-                            case 1:
-                                this.emit("setModeAuto");
-                                break;
-                            case 2:
-                                this.emit("setModeHeating");
-                                break;
-                            case 3:
-                                this.emit("setModeCooling");
-                                break;
-                        }
-                    }
-                    break;
+                    
             }
         }
+        
+        const infoOperationMode = scene.find((datapoint) => {
+            return datapoint.pairingID === PairingIds.AL_INFO_OPERATION_MODE_32;
+        })
+        if (undefined !== infoOperationMode) {
+            const enumValue = Number(infoOperationMode.value) as SplitUnitChannel.Operations;
+
+            switch (enumValue) {
+                case SplitUnitChannel.Operations.auto:
+                    if (this.isAutoConfirm)
+                        this.setModeAuto();
+                    this.emit("setModeAuto");
+                    break;
+                case SplitUnitChannel.Operations.cool:
+                    if (this.isAutoConfirm)
+                        this.setModeCooling();
+                    this.emit("setModeCooling");
+                    break;
+                case SplitUnitChannel.Operations.dry:
+                    if (this.isAutoConfirm)
+                        this.setModeDry();
+                    this.emit("setModeDry");
+                    break;
+                case SplitUnitChannel.Operations.wind:
+                    if (this.isAutoConfirm)
+                        this.setModeWind();
+                    this.emit("setModeWind")
+                    break;
+                case SplitUnitChannel.Operations.ai_comfort:
+                    if (this.isAutoConfirm)
+                        this.setModeAiComfort();
+                    this.emit("setModeAiComfort")
+                    break;
+                case SplitUnitChannel.Operations.cool_clean:
+                    if (this.isAutoConfirm)
+                        this.setModeCoolClean();
+                    this.emit("setModeCoolClean")
+                    break;
+                case SplitUnitChannel.Operations.dry_clean:
+                    if (this.isAutoConfirm)
+                        this.setModeDryClean();
+                    this.emit("setModeDryClean")
+                    break;
+                case SplitUnitChannel.Operations.heat:
+                    if (this.isAutoConfirm)
+                        this.setModeHeating();
+                    this.emit("setModeHeating");
+                    break;
+                default:
+                    return;
+            }
+        }
+        else {
+            const extendedStatus = scene.find((datapoint) => {
+                return datapoint.pairingID === PairingIds.AL_EXTENDED_STATUS;
+            })
+            if(undefined !== extendedStatus)
+            {
+                const intValue = Number.parseInt(extendedStatus.value) & 0xf;
+                switch (intValue) {
+                    case 1:
+                        if (this.isAutoConfirm)
+                            this.setModeAuto();
+                        this.emit("setModeAuto");
+                        break;
+                    case 2:
+                        if (this.isAutoConfirm)
+                            this.setModeHeating();
+                        this.emit("setModeHeating");
+                        break;
+                    case 3:
+                        if (this.isAutoConfirm)
+                            this.setModeCooling();
+                        this.emit("setModeCooling");
+                        break;
+                }
+            }
+        }
+    }
+}
+
+export namespace SplitUnitChannel {
+    export interface LegacySupportedOperations {
+        auto?: boolean;
+        heat?: boolean;
+        cool?: boolean;
+    }
+
+    export enum LegacyOperations {
+        auto = 1 << 0,
+        heat = 1 << 1,
+        cool = 1 << 2,
+    }
+
+    export interface SupportedSwingModes {
+        horizontal?: boolean;
+        vertical?: boolean;
+    }
+
+    export interface SupportedOperations extends LegacySupportedOperations {
+        auto?: boolean;
+        cool?: boolean;
+        dry?: boolean;
+        wind?: boolean;
+        ai_comfort?: boolean;
+        cool_clean?: boolean;
+        dry_clean?: boolean;
+        heat?: boolean;
+        swingModes?: SupportedSwingModes;
+    }
+
+    export enum Operations {
+        auto = 1 << 0,
+        cool = 1 << 1,
+        dry = 1 << 2,
+        wind = 1 << 3,
+        ai_comfort = 1 << 4,
+        cool_clean = 1 << 5,
+        dry_clean = 1 << 6,
+        heat = 1 << 7,
     }
 }

@@ -494,10 +494,16 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new HVACChannel(channel);
     }
 
-    async createSplitUnitDevice(nativeId: string, name?: string): Promise<SplitUnitChannel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"SplitUnit", nativeId, name);
+    async createSplitUnitDevice(nativeId: string, name?: string, features?: { hasSwingModes?: boolean, supportedOperations?: SplitUnitChannel.SupportedOperations}): Promise<SplitUnitChannel> {
+        const capabilities = (() => {
+            const result = new Array<Capabilities>();
+            if(features?.hasSwingModes)
+                result.push(Capabilities.CAP_SWING_MODES);
+            return result;
+        })();
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"SplitUnit", nativeId, name, undefined, capabilities);
         const channel = device.getChannels().next().value;
-        return new SplitUnitChannel(channel);
+        return new SplitUnitChannel(channel, features?.supportedOperations);
     }
 
     async createRGBDevice(nativeId: string, name?: string): Promise<RGBChannel> {
