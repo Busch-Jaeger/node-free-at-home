@@ -324,10 +324,10 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
             switch (datapoint.pairingID) {
                 case PairingIds.AL_SET_POINT_TEMPERATURE:
                     {
-                        const intValue = Number.parseFloat(value);
+                        const floatValue = Number.parseFloat(value);
                         if (this.isAutoConfirm)
-                            this.sendSetPointTemperature(intValue);
-                        this.emit("setPointTemperatureChanged", this.setPointTemperature);
+                            this.sendSetPointTemperature(floatValue);
+                        this.emit("setPointTemperatureChanged", floatValue);
                     }
                     break;
                 case PairingIds.AL_STATE_INDICATION:
