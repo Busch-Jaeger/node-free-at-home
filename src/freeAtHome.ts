@@ -57,6 +57,8 @@ import { Capabilities } from './capabilities';
 import { HVAC2Channel } from './virtualChannels/hvac2Channel';
 import { MeterSensorChannel } from './virtualChannels/meterSensorChannel';
 
+import { HouseKeepingChannel } from './virtualChannels/houseKeepingChannel';
+
 export interface WeatherStationChannels {
     brightness: WeatherBrightnessSensorChannel;
     rain: WeatherRainSensorChannel;
@@ -108,6 +110,11 @@ export interface AirQualityKaiterraChannels {
     pm25: AirPM25Channel;
     temperature: AirTemperatureChannel;
     voc: AirVOCChannel;
+}
+
+export interface WindowSensorChannels { 
+    sensor: WindowSensorChannel; 
+    houseKeeping?: HouseKeepingChannel;
 }
 
 interface Events {
@@ -231,6 +238,23 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice("WindowSensor", nativeId, name);
         const channel = device.getChannels().next().value;
         return new WindowSensorChannel(channel);
+    }
+
+    async createWindowSensorDeviceV2(nativeId: string, name?: string, features?: { hasBattery?: boolean }): Promise<{ sensor: WindowSensorChannel, houseKeeping?: HouseKeepingChannel }> {
+        const capabilities = (() => {
+            const result = new Array<Capabilities>();
+            if (features?.hasBattery) {
+                result.push(Capabilities.CAP_HOUSEKEEPING);
+                result.push(Capabilities.CAP_HOUSEKEEPING_SUPPORTS_BATTERY_LEVEL);
+            }
+            return result;
+        })();
+        const device = await this.freeAtHomeApi.createDevice("WindowSensorv2" as VirtualDeviceType, nativeId, name, undefined, capabilities);
+        const channelIterator = device.getChannels();
+        return {
+            sensor: new WindowSensorChannel(channelIterator.next().value),
+            houseKeeping: (features?.hasBattery) ? new HouseKeepingChannel(channelIterator.next().value) : undefined
+        };
     }
 
     async createSwitchSensorDevice(nativeId: string, name?: string): Promise<SwitchSensorChannel> {

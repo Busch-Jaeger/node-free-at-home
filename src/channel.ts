@@ -61,6 +61,13 @@ export class Channel extends (EventEmitter as { new(): ChannelEmitter }) {
         return Promise.resolve();
     }
 
+    public async setDatapointIfItExsists(id: PairingIds, value: string): Promise<void> {
+        if (this.channel.outputPairingToPosition.has(id)) {
+            return this.channel.setOutputDatapoint(id, value);
+        }
+        return Promise.resolve();
+    }
+
     public async setAuxiliaryData(index: number, auxiliaryData: string[]): Promise<void> {
         return this.channel.setAuxiliaryData(index, auxiliaryData);
     }

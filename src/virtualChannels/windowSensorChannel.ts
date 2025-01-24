@@ -26,19 +26,19 @@ export class WindowSensorChannel extends Mixin(Channel, (EventEmitter as { new()
         channel.on("parameterChanged", this.parameterChanged.bind(this));
     }
 
-    setWindowState(state: WindowState): void {
+    async setWindowState(state: WindowState): Promise<void> {
         switch (state) {
             case WindowState.closed:
-                this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "0");
-                this.setDatapoint(PairingIds.AL_WINDOW_DOOR_POSITION, "0");
+                await this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "0");
+                await this.setDatapointIfItExsists(PairingIds.AL_WINDOW_DOOR_POSITION, "0");
                 break;
             case WindowState.tilted:
-                this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "1");
-                this.setDatapoint(PairingIds.AL_WINDOW_DOOR_POSITION, "1");
+                await this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "1");
+                await this.setDatapointIfItExsists(PairingIds.AL_WINDOW_DOOR_POSITION, "1");
                 break;
             case WindowState.opened:
-                this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "1");
-                this.setDatapoint(PairingIds.AL_WINDOW_DOOR_POSITION, "0");
+                await this.setDatapoint(PairingIds.AL_WINDOW_DOOR, "1");
+                await this.setDatapointIfItExsists(PairingIds.AL_WINDOW_DOOR_POSITION, "0");
                 break;
             default:
                 console.error("unknown window state: %s", state);
