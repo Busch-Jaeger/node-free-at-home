@@ -263,8 +263,14 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         return new SwitchSensorChannel(channel);
     }
 
-    async createMediaPlayerDevice(nativeId: string, name?: string): Promise<MediaPlayerChannel> {
-        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"MediaPlayer_Type1", nativeId, name);
+    async createMediaPlayerDevice(nativeId: string, name?: string, features?: {onOff?: boolean}): Promise<MediaPlayerChannel> {
+        const capabilities = (() => {
+            const result = new Array<Capabilities>();
+            if(features?.onOff)
+                result.push(Capabilities.CAP_SWITCH_ON_OFF);
+            return result;
+        })();
+        const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"MediaPlayer_Type1", nativeId, name, undefined, capabilities);
         const channel = device.getChannels().next().value;
         return new MediaPlayerChannel(channel);
     }

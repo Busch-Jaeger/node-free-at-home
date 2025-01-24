@@ -47,6 +47,8 @@ interface ChannelEvents {
 
     playlist(value: number): void;
     input(value: number): void;
+
+    isOnChanged(value: boolean): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -271,6 +273,23 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                     }
                 }
                 break;
+            case PairingIds.AL_SWITCH_ON_OFF: {
+                switch (value) {
+                    case "1": {
+                        this.emit("isOnChanged", true);
+                        if (this.isAutoConfirm)
+                            this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
+                        break;
+                    }
+                    case "0": {
+                        this.emit("isOnChanged", false);
+                        if (this.isAutoConfirm)
+                            this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
+                        break;
+                    }
+                }
+                break;
+                }            
         }
     }
 
@@ -292,6 +311,10 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
             value |= (1 << 5);
         value |= this.playMode;
         return this.setDatapoint(PairingIds.AL_PLAYBACK_STATUS, value.toString());
+    }
+
+    public setOn(isOn: boolean) {
+        return this.setDatapoint(PairingIds.AL_INFO_ON_OFF, (isOn) ? "1" : "0");
     }
 
     protected parameterChanged(id: ParameterIds, value: string): void {
@@ -376,6 +399,12 @@ export class MediaPlayerChannel extends Mixin(Channel, (EventEmitter as { new():
                             this.setInputIndex(parseInt(value));
                         break;
                     }
+                case PairingIds.AL_INFO_ON_OFF: {
+                    this.emit("isOnChanged", ("1" === value));
+                    if (this.isAutoConfirm)
+                        this.setDatapoint(PairingIds.AL_INFO_ON_OFF, value);
+                    break;
+                    } 
             }
 
         }
