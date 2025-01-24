@@ -339,6 +339,8 @@ export enum PairingIds {
     AL_KNX_INFO_AUTONOMOUS_SWITCH_OFF_TIME = 0x5012, // 
     AL_KNX_TWILIGHT_BRIGHTNESS = 0x5013, // 
     AL_KNX_INFO_TWILIGHT_BRIGHTNESS = 0x5014, // 
+    AL_KNX_VALUE_BUTTON_PRESS = 0x5015, // 
+    AL_KNX_VALUE_BUTTON_LONG_PRESS = 0x5016, // 
     AL_TIME_OF_DAY = 0xF001, // Current local time
     AL_DATE = 0xF002, // Curent local date
     AL_MESSAGE_CENTER_NOTIFICATION = 0xF003, // Notification from message center

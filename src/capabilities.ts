@@ -46,9 +46,13 @@ export enum Capabilities {
     CAP_TIMED_MOVEMENT = 0x0070, // supports timed movement
     CAP_TIMED_PRESENCE = 0x0071, // supports timed presence
     CAP_BRIGHTNESS = 0x0072, // supports brightness
+    CAP_BRIGHTNESS_DEPENDENT_SWITCHING = 0x0073, // supports brightness dependent switching
     CAP_HUMIDITY = 0x0080, // supports humidity
     CAP_AIR_PREASURE = 0x0081, // supports air preasure
     CAP_CO2 = 0x0082, // supports co2
     CAP_VOC = 0x0083, // supports voc
+    CAP_HOUSEKEEPING = 0x0090, // supports housekeeping
+    CAP_HOUSEKEEPING_SUPPORTS_BATTERY_LEVEL = 0x0091, // housekeeping supports battery level
+    CAP_TIMED_DIMMING_SIMULATION = 0x0092, // activates data point simulation for timed dimming
     CAP_STRIP_TIMERS = 0x1000, // strip all timers from the description
 }
