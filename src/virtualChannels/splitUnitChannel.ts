@@ -55,9 +55,9 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         switch (<PairingIds>id) {
             case PairingIds.AL_RELATIVE_SET_POINT_REQUEST: {
                 const intValue = Number.parseFloat(value);
-                this.setPointTemperature += intValue;
+                this.setPointTemperature = 21 + intValue;
                 if (this.isAutoConfirm)
-                    this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, this.setPointTemperature.toFixed(1));
+                    this.sendSetPointTemperature(this.setPointTemperature);
                 this.emit("setPointTemperatureChanged", this.setPointTemperature);
             }
                 break;
@@ -313,9 +313,10 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         this.setDatapoint(PairingIds.AL_SUPPORTED_FEATURES, value.toString());
     }
 
-    public sendSetPointTemperature(value: number) {
+    public async sendSetPointTemperature(value: number) {
         this.setPointTemperature = value;
-        this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, value.toFixed(1));
+        await this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, value.toFixed(1));
+        await this.setDatapoint(PairingIds.AL_RELATIVE_SET_POINT_TEMPERATURE, (value - 21).toFixed(1));
     }
 
     protected sceneTriggered(scene: Datapoint[]): void {
