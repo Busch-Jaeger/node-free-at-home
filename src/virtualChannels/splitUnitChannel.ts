@@ -83,6 +83,8 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                 break;
 
             case PairingIds.AL_FAN_STAGE_REQUEST:
+                if (value === '4')
+                    value = '0';
                 if (this.isAutoConfirm) {
                     this.setDatapoint(PairingIds.AL_FAN_COIL_LEVEL, value);
                 }
