@@ -105,8 +105,19 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                                 this.setModeCooling();
                             this.emit("setModeCooling");
                             break;
+                        case 4:
+                            if (this.isAutoConfirm)
+                                this.setModeWind();
+                            this.emit("setModeWind");
+                            break;
+                        case 5:
+                            if (this.isAutoConfirm)
+                                this.setModeDry();
+                            this.emit("setModeDry");
+                            break;
                     }
                 }
+                break;
             case PairingIds.AL_OPERATION_MODE_32:
                 {
                     const enumValue = Number.parseInt(value) as SplitUnitChannel.Operations;
@@ -233,7 +244,7 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public async setModeDry() {
-        await this.setMode(1);
+        await this.setMode(5);
         if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
             await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.dry as number).toString());
     }
@@ -257,7 +268,7 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     public async setModeWind() {
-        await this.setMode(1);
+        await this.setMode(4);
         if (this.channel.outputPairingToPosition.has(PairingIds.AL_INFO_OPERATION_MODE_32))
             await this.setDatapoint(PairingIds.AL_INFO_OPERATION_MODE_32, (SplitUnitChannel.Operations.wind as number).toString());
     }
@@ -308,6 +319,10 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
             value |= SplitUnitChannel.LegacyOperations.heat as number;
         if (supportedOperations?.cool)
             value |= SplitUnitChannel.LegacyOperations.cool as number;
+        if (supportedOperations?.dry)
+            value |= SplitUnitChannel.LegacyOperations.dry as number;
+        if (supportedOperations?.wind)
+            value |= SplitUnitChannel.LegacyOperations.wind as number;
         // The id is encoded in bits 16-31. 
         value |= 1 << 16; // set remote id to 1, just not set it to 0
         this.setDatapoint(PairingIds.AL_SUPPORTED_FEATURES, value.toString());
@@ -416,6 +431,16 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                             this.setModeCooling();
                         this.emit("setModeCooling");
                         break;
+                        case 4:
+                            if (this.isAutoConfirm)
+                                this.setModeWind();
+                            this.emit("setModeWind");
+                            break;
+                        case 5:
+                            if (this.isAutoConfirm)
+                                this.setModeDry();
+                            this.emit("setModeDry");
+                        break;
                 }
             }
         }
@@ -427,12 +452,16 @@ export namespace SplitUnitChannel {
         auto?: boolean;
         heat?: boolean;
         cool?: boolean;
+        dry?: boolean,
+        wind?: boolean,
     }
 
     export enum LegacyOperations {
         auto = 1 << 0,
         heat = 1 << 1,
         cool = 1 << 2,
+        dry = 1 << 3,
+        wind = 1 << 4,
     }
 
     export interface SupportedSwingModes {
