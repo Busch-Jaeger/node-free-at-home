@@ -323,6 +323,13 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         }
 
         await this.setDatapoint(PairingIds.AL_EXTENDED_STATUS, status.toString());
+
+        let legacyStatus = 0;
+        legacyStatus |= 1 << 0; // comfort mode active
+        legacyStatus |= 1 << 6; // controller inactive
+        if (this.windowOpen)
+            legacyStatus |= 1 << 3;
+        await this.setDatapoint(PairingIds.AL_STATE_INDICATION, legacyStatus.toString());
     }
 
     protected sendSupportedFeatures(supportedOperations: SplitUnitChannel.LegacySupportedOperations) {
