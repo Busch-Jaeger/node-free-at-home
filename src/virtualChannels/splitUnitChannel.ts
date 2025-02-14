@@ -186,14 +186,12 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         return super.setDatapoint(id, value);
     }
 
-    setOn(isOn: boolean) {
-        if (this.isOn !== isOn) {
-            this.isOn = isOn;
-            this.sendStatus();
-        }
+    async setOn(isOn: boolean) {
+        this.isOn = isOn;
+        await this.sendStatus();
 
-        if(this.channel.outputPairingToPosition.has(PairingIds.AL_CONTROLLER_ON_OFF))
-            this.setDatapoint(PairingIds.AL_CONTROLLER_ON_OFF, (isOn) ? "1" : "0");
+        if (this.channel.outputPairingToPosition.has(PairingIds.AL_CONTROLLER_ON_OFF))
+            await this.setDatapoint(PairingIds.AL_CONTROLLER_ON_OFF, (isOn) ? "1" : "0");
     }
 
     async setSupportedSwingModes(modes?: SplitUnitChannel.SupportedSwingModes) {
@@ -302,10 +300,8 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
     }
 
     protected async setMode(mode: number) {
-        if (this.mode !== mode) {
-            this.mode = mode;
-            await this.sendStatus()
-        }
+        this.mode = mode;
+        await this.sendStatus();
     }
 
     protected async sendStatus() {
@@ -463,7 +459,7 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                             if (this.isAutoConfirm)
                                 this.setModeDry();
                             this.emit("setModeDry");
-                        break;
+                            break;
                 }
             }
         }
