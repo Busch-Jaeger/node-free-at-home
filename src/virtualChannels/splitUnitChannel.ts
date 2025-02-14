@@ -20,6 +20,7 @@ interface ChannelEvents {
     setModeHeating(): void;
     setFanSpeed(value: number): void;
     setSwingMode(value: SplitUnitChannel.SupportedSwingModes): void;
+    isWindowOpen(value: boolean): void;
 }
 
 type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
@@ -27,6 +28,7 @@ type ChannelEmitter = StrictEventEmitter<EventEmitter, ChannelEvents>;
 export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): ChannelEmitter })) {
     private setPointTemperature: number = 21.0;
     private swingOn = false;
+    private windowOpen = false;
     private isOn = false;
     private mode = 1; // AUTO
 
@@ -167,6 +169,14 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
                             return;
                     }
                 }
+                break;
+            case PairingIds.AL_WINDOW_DOOR:
+                this.emit("isWindowOpen", value === "1");
+                if (this.isAutoConfirm) {
+                    this.windowOpen = value === "1";
+                    this.sendStatus();
+                }
+                break;
         }
     }
 
@@ -306,6 +316,10 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
         if (this.swingOn) {
             status |= 1 << 6;
         }
+        if (this.windowOpen) {
+            status |= 1 << 9;
+        }
+
         await this.setDatapoint(PairingIds.AL_EXTENDED_STATUS, status.toString());
     }
 
