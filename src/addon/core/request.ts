@@ -211,6 +211,11 @@ export const getRequestBody = (options: ApiRequestOptions): any => {
     return undefined;
 };
 
+export let Settings = {
+    useUnixSocket: process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined,
+    unixSocketPrePath: "/run"
+};
+
 const useUnixSocket: boolean = process.env.FREEATHOME_USE_UNIX_SOCKET !== undefined;
 
 export function connectToUnixSocket(apiPath: string, options: http.ClientRequestArgs, connectionListener?: () => void) {
@@ -224,15 +229,16 @@ const tcpSocketAgent = new http.Agent(<object>{
 const socketAgents = new Map<string, http.Agent>();
 
 function getAgent(url: string, basePath: string) {
-    if (useUnixSocket) {
+    if (Settings.useUnixSocket) {
         try {
             const parsedUrl = new URL(basePath);
             const apiPath = parsedUrl.pathname;
             if (!socketAgents.has(apiPath)) {
                 const unixSocketAgent = new http.Agent(<object>{
                     host: "ws+unix:///run" + apiPath + ":" + apiPath,
-                    socketPath: "/run" + apiPath
+                    socketPath: Settings.unixSocketPrePath + apiPath
                 });
+                unixSocketAgent.maxSockets = 4;
                 socketAgents.set(apiPath, unixSocketAgent);
                 return unixSocketAgent;
             }
