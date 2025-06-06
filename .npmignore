@@ -4,5 +4,6 @@ lib/*.map
 tsconfig.json
 azure-pipelines.yml
 docs/
+test/
 .github/
 .devcontainer

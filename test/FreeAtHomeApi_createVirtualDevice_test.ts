@@ -1,19 +1,19 @@
 import assert from 'node:assert';
 import test from 'node:test';
 
-import { FreeAtHomeApi } from '..';
+import { FreeAtHomeApi } from '../src';
 
-import * as API from "../fhapi";
+import * as API from "../src/fhapi";
 
 import { EventEmitter } from 'node:stream';
-import { AutoReconnectWebSocket } from '../autoReconnectWebSocket';
-import { DeviceSerial, NativeSerial, SysapUuid, VirtualDevice } from '../fhapi';
+import { AutoReconnectWebSocket } from '../src/autoReconnectWebSocket';
+import { DeviceSerial, NativeSerial, SysapUuid, VirtualDevice } from '../src/fhapi';
 
 
 import {
   setImmediate
 } from 'node:timers/promises';
-import { defaultDeviceCreationTimeout } from '../freeAtHomeApi';
+import { defaultDeviceCreationTimeout } from '../src/freeAtHomeApi';
 
 const ACTUATOR_SERIAL_NUMBER = "6000D2CB27B2";
 const PAIRED_DEVICE_SERIAL_NUMBER = "6000D2CB27DD";

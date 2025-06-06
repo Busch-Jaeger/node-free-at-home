@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 import test from 'node:test';
 
-import * as api from "../fhapi";
-import { ApiChannel, ApiDevice, PairingIds } from '..'
+import * as api from "../src/fhapi";
+import { ApiChannel, ApiDevice, PairingIds } from '../src'
 
 test('ouput datapoint processing', (t) => {
   const deviceMock = {

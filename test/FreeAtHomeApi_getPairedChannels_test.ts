@@ -1,15 +1,15 @@
 import assert from 'node:assert';
 import test from 'node:test';
 
-import * as api from "../fhapi";
+import * as api from "../src/fhapi";
 
-import { ApiVirtualChannel, FreeAtHomeApi } from '..';
+import { ApiVirtualChannel, FreeAtHomeApi } from '../src';
 
-import * as API from "../fhapi";
+import * as API from "../src/fhapi";
 
 import { EventEmitter } from 'node:stream';
-import { AutoReconnectWebSocket } from '../autoReconnectWebSocket';
-import { DeviceSerial, NativeSerial, SysapUuid, VirtualDevice } from '../fhapi';
+import { AutoReconnectWebSocket } from '../src/autoReconnectWebSocket';
+import { DeviceSerial, NativeSerial, SysapUuid, VirtualDevice } from '../src/fhapi';
 
 const ACTUATOR_SERIAL_NUMBER = "6000D2CB27B2";
 const PAIRED_DEVICE_SERIAL_NUMBER = "6000D2CB27DD";

@@ -3,11 +3,11 @@ import test from 'node:test';
 import net from 'node:net';
 import { setTimeout } from "node:timers/promises";
 
-import * as API from "../fhapi";
+import * as API from "../src/fhapi";
 
 import Crypto from 'crypto';
 
-import { Settings } from "../fhapi/core/request";
+import { Settings } from "../src/fhapi/core/request";
 
 function randomString(size = 21) {
     return Crypto
@@ -16,48 +16,47 @@ function randomString(size = 21) {
         .slice(0, size)
 }
 
+const NumberOfConnectionToTest = 50;
 
-async function trackConnections(listenSocket: net.Server) {
-    let streams: Set<net.Socket> = new Set;
-
-    try {
-        await new Promise<void>((resolve, reject) => {
-            setTimeout(2000).then(reject);
-            let concurrentConnections = 0;
-            let connectionCounter = 0;
-            listenSocket.on('connection', async (stream) => {
-                streams.add(stream);
+async function trackConnections(listenSocket: net.Server, connectionsToServe: number = 10) {
+    return new Promise<number>((resolve, reject) => {
+        setTimeout(20 * connectionsToServe).then(reject);
+        let concurrentConnections = 0;
+        let connectionCounter = 0;
+        let maxSimultanConnections = 0;
+        listenSocket.on('connection', async (stream) => {
+            try {
                 concurrentConnections++;
-                assert(concurrentConnections <= 4, concurrentConnections.toFixed());
+                maxSimultanConnections = Math.max(maxSimultanConnections, concurrentConnections);
 
                 connectionCounter++;
-                if (connectionCounter === 10)
-                    resolve();
+                if (connectionCounter === connectionsToServe)
+                    resolve(maxSimultanConnections);
                 stream.on('close', () => {
                     concurrentConnections--;
                 })
 
-                await setTimeout(100);
-                streams.delete(stream);
-                stream.write("HTTP/1.1 200 OK\r\n\r\n");
+                await setTimeout(10);
+                stream.write("HTTP/1.1 200 OK\r\nConnection: close\r\ncontent-type: application/json\r\n\r\n{\"test\": \"json\"}");
                 stream.destroySoon();
-
-            });
+            } catch (error) {
+                stream.destroy();
+            }
         });
-        listenSocket.close();
-    }
-    catch (error) {
-        listenSocket.close();
-        for (const stream of streams)
-            stream.destroy();
-        assert(false);
-    };
+    });
 }
 
 test('check connection limit of unix socket connections', async (t) => {
+    t.after(() => {
+        Settings.useUnixSocket = false;
+    });
     Settings.useUnixSocket = true;
     Settings.unixSocketPrePath = "";
+
     const listenSocket = new net.Server();
+    t.after(() => {
+        listenSocket.close();
+    })
 
     const path = "/tmp/" + randomString();
 
@@ -76,18 +75,19 @@ test('check connection limit of unix socket connections', async (t) => {
     });
 
     const promises: Array<API.CancelablePromise<API.Configuration>> = new Array;
-    for (let i = 0; i < 10; i++)
+    for (let i = 0; i < NumberOfConnectionToTest; i++)
         promises.push(apiClient.api.getconfiguration());
 
-    await trackConnections(listenSocket);
+    assert.strictEqual(await trackConnections(listenSocket, NumberOfConnectionToTest), 16);
 
     await assert.doesNotReject(Promise.all(promises));
-    Settings.useUnixSocket = false;
 });
 
 test('check connection limit of tcp socket connections', async (t) => {
-
     const listenSocket = new net.Server();
+    t.after(() => {
+        listenSocket.close();
+    })
 
     const listenPort = await new Promise<number>((resolve, reject) => {
         listenSocket.listen(0, () => {
@@ -104,10 +104,10 @@ test('check connection limit of tcp socket connections', async (t) => {
     });
 
     const promises: Array<API.CancelablePromise<API.Configuration>> = new Array;
-    for (let i = 0; i < 10; i++)
+    for (let i = 0; i < NumberOfConnectionToTest; i++)
         promises.push(apiClient.api.getconfiguration());
 
-    await trackConnections(listenSocket);
+    assert.strictEqual(await trackConnections(listenSocket, NumberOfConnectionToTest), 4);
 
     await assert.doesNotReject(Promise.all(promises));
 });
