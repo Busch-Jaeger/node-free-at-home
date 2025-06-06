@@ -349,8 +349,8 @@ export class SplitUnitChannel extends Mixin(Channel, (EventEmitter as { new(): C
 
     public async sendSetPointTemperature(value: number) {
         this.setPointTemperature = value;
-        await this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, value.toFixed(1));
-        await this.setDatapoint(PairingIds.AL_RELATIVE_SET_POINT_TEMPERATURE, (value - 21).toFixed(1));
+        await this.setDatapoint(PairingIds.AL_SET_POINT_TEMPERATURE, value.toFixed());
+        await this.setDatapoint(PairingIds.AL_RELATIVE_SET_POINT_TEMPERATURE, (value - 21).toFixed());
     }
 
     protected sceneTriggered(scene: Datapoint[]): void {

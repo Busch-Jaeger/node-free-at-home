@@ -17,6 +17,7 @@ export { WeatherRainSensorChannel as freeAtHomeWeatherRainSensorChannel } from '
 export { WeatherWindSensorChannel as FreeAtHomeWeatherWindSensorChannel } from './virtualChannels/weatherWindSensorChannel'
 export { WindowSensorChannel as FreeAtHomeWindowSensorChannel } from './virtualChannels/windowSensorChannel';
 export { SwitchSensorChannel as FreeAtHomeSwitchSensorChannel } from './virtualChannels/switchSensor';
+export { SplitUnitChannel as FreeAtHomeSplitUnitChannel} from "./virtualChannels/splitUnitChannel";
 
 export { WeatherStationChannels } from './freeAtHome';
 
