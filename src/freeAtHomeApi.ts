@@ -86,6 +86,8 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         this.websocket = websocket;
 
         this.websocket.on('message', this.parseWebsocketData.bind(this));
+        this.websocket.on('open', () => this.emit('open', this));
+        this.websocket.on('close', (code: number, reason: string) => this.emit('close', code, reason));
     }
 
     disconnect() {
