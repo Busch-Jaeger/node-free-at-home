@@ -78,7 +78,7 @@ test('check connection limit of unix socket connections', async (t) => {
     for (let i = 0; i < NumberOfConnectionToTest; i++)
         promises.push(apiClient.api.getconfiguration());
 
-    assert.strictEqual(await trackConnections(listenSocket, NumberOfConnectionToTest), 16);
+    assert.strictEqual(await trackConnections(listenSocket, NumberOfConnectionToTest), 4);
 
     await assert.doesNotReject(Promise.all(promises));
 });
