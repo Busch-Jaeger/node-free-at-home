@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.1
 info:
   title: free@home add-on API
   description: free@home is the leading Smart Home System from ABB.
@@ -516,6 +516,50 @@ paths:
           description: Bad Gateway error
         "401":
           $ref: "#/components/responses/UnauthorizedError"
+  "/rest/journal":
+    get:
+      tags:
+        - container
+      summary: List journal files for container
+      description: List journal files for container
+      operationId: listJournals
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Journals"
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  "/rest/journal/{reference}":
+    get:
+      tags:
+        - container
+      summary: get journal file for container
+      description: get journal file for container
+      operationId: getJournal
+      parameters:
+        - name: reference
+          in: path
+          description: hash of commit sha256
+          required: true
+          schema:
+            $ref: "#/components/schemas/Reference"
+          example: "de.busch-jaeger.freeathome.i-net-radio"
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: string
+        "502":
+          description: Bad Gateway error
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 components:
   schemas:
     References:
@@ -543,8 +587,8 @@ components:
         version:
           type: string
         id:
-          type: string   
-        name: 
+          type: string
+        name:
           $ref: "#/components/schemas/TranslatedString"
         description:
           $ref: "#/components/schemas/TranslatedString"
@@ -571,7 +615,7 @@ components:
               items:
                 type: string
                 maxLength: 256
-                enum: ["webinterface", "serialport"]
+                enum: ["notification", "webinterface", "serialport"]
             networkAccess:
               type: boolean
             networkPorts:
@@ -598,7 +642,7 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/ParameterType"
-        minAuxFileUploadIntervalMinutes: 
+        minAuxFileUploadIntervalMinutes:
           type: integer
           minimum: 15
         organizationId:
@@ -610,7 +654,7 @@ components:
             type: string
             maxLength: 256
         limits:
-          allOf: 
+          allOf:
           - $ref: "#/components/schemas/TranslatedMessage"
           - $ref: "#/components/schemas/TranslatedFullMessage"
             type: object
@@ -623,10 +667,10 @@ components:
                 max:
                   type: integer
                   minimum: 1
-                type: 
-                  type: string         
+                type:
+                  type: string
                 group:
-                  type: string              
+                  type: string
         errors:
           type: object
           additionalProperties:
@@ -659,7 +703,7 @@ components:
         $ref: "#/components/schemas/Wizard"
 
     ParameterGroup:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - type: object
           required:
@@ -677,17 +721,27 @@ components:
             debug:
               type: boolean
               description: Show this parameter group only when debugging is enabled
-            display: 
-              allOf: 
+            display:
+              allOf:
                 - $ref: "#/components/schemas/TranslatedTitle"
                 - $ref: "#/components/schemas/TranslatedSubtitle"
                 - $ref: "#/components/schemas/TranslatedError"
                 - type: object
                   properties:
+                    highlight:
+                      type: string
+                      description: "highlight the display link with a colored circle"
+                      enum:
+                        - "none"
+                        - "hint"
+                        - "warning"
+                        - "error"
                     dependsOn:
                       type: object
                       additionalProperties:
-                        $ref: "#/components/schemas/DisplayDependsOn"
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DisplayDependsOn"
 
             items:
               type: object
@@ -695,22 +749,28 @@ components:
                 $ref: "#/components/schemas/Parameter"
 
     DisplayDependsOn:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedTitle"
         - $ref: "#/components/schemas/TranslatedSubtitle"
         - $ref: "#/components/schemas/TranslatedError"
         - type: object
           required:
             - "values"
-          properties: 
+          properties:
             values:
               type: array
               items:
                 type: string
-
+            highlight:
+              type: string
+              enum:
+                - "none"
+                - "hint"
+                - "warning"
+                - "error"
 
     ParameterType:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - type: object
           required:
@@ -720,18 +780,18 @@ components:
           properties:
             name:
               type: string
-            display: 
-              allOf: 
+            display:
+              allOf:
                 - $ref: "#/components/schemas/TranslatedTitle"
                 - $ref: "#/components/schemas/TranslatedSubtitle"
                 - $ref: "#/components/schemas/TranslatedError"
             items:
               type: object
               additionalProperties:
-                $ref: "#/components/schemas/Parameter"                
+                $ref: "#/components/schemas/Parameter"
 
-    Wizard: 
-      allOf: 
+    Wizard:
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - type: object
           required:
@@ -756,28 +816,28 @@ components:
               items:
                 $ref: "#/components/schemas/WizardStep"
 
-    BaseWizardStep: 
-      allOf: 
+    BaseWizardStep:
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - type: object
           required:
             - "id"
           properties:
             id:
-              type: string                        
-            parameterGroup: 
+              type: string
+            parameterGroup:
               type: string
             steps:
               type: array
-              items: 
-                $ref: "#/components/schemas/WizardSubStep"        
+              items:
+                $ref: "#/components/schemas/WizardSubStep"
             items:
               type: object
               additionalProperties:
                 $ref: "#/components/schemas/Parameter"
 
     WizardStep:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/BaseWizardStep"
         - type: object
           required:
@@ -787,13 +847,13 @@ components:
               type: string
             conditions:
               type: array
-              items: 
+              items:
                 oneOf:
                   - $ref: "#/components/schemas/WizardModeCondition"
                   - $ref: "#/components/schemas/WizardParameterCondition"
 
     WizardSubStep:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/BaseWizardStep"
         - type: object
           required:
@@ -803,7 +863,7 @@ components:
               type: string
             conditions:
               type: array
-              items: 
+              items:
                 oneOf:
                   - $ref: "#/components/schemas/WizardModeCondition"
                   - $ref: "#/components/schemas/WizardParameterCondition"
@@ -856,13 +916,13 @@ components:
       type: object
 
     SeparatorParameter:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
         - type: object
           required:
             - "type"
-          properties:              
+          properties:
             type:
               type: string
               enum:
@@ -871,34 +931,34 @@ components:
               type: string
             dependsOnValues:
               type: array
-              items: 
+              items:
                 type: string
 
     DescriptionParameter:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedDescription"
         - type: object
           required:
             - "description"
-          properties:              
+          properties:
             type:
               type: string
               enum:
-                - "description"            
+                - "description"
             description:
               type: string
             dependsOn:
               type: string
             dependsOnValues:
               type: array
-              items: 
+              items:
                 type: string
 
     BasicDependsOnConfig:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
-        - type: object   
+        - type: object
           required:
             - "values"
           minProperties: 2
@@ -909,7 +969,7 @@ components:
                   anyOf:
                   - type: string
                   - type: number
-                  - type: boolean 
+                  - type: boolean
             name:
               type: string
             required:
@@ -918,12 +978,12 @@ components:
               anyOf:
                 - type: string
                 - type: number
-                - type: boolean            
+                - type: boolean
             visible:
-              type: boolean    
+              type: boolean
 
     BasicParameter:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
         - $ref: "#/components/schemas/TranslatedButton"
@@ -932,7 +992,7 @@ components:
           required:
             - "name"
             - "type"
-          properties:              
+          properties:
             type:
               type: string
               enum:
@@ -973,9 +1033,9 @@ components:
                 - type: boolean
             preFill:
               type: boolean
-              description: Prefill this value with the last edited one              
+              description: Prefill this value with the last edited one
             visible:
-              type: boolean         
+              type: boolean
             dependsOn:
               type: string
             rpc:
@@ -995,7 +1055,7 @@ components:
               additionalProperties: true
             dependsOnValues:
               type: array
-              items: 
+              items:
                 anyOf:
                 - type: string
                 - type: number
@@ -1028,7 +1088,7 @@ components:
             copyable:
               type: boolean
               description: Adds the possibility to copy the current value into the clipboard, e.g. the addon sends some kind of ID via state to the UI and the user needs to copy that value to be able to use it elsewhere.
-            confirm: 
+            confirm:
               type: string
               description: "[Only for type=button] Show a confirm dialog with this text before sending the button event"
 
@@ -1046,7 +1106,7 @@ components:
             dependsOnConfig:
               type: array
               items:
-                allOf: 
+                allOf:
                   - $ref: "#/components/schemas/BasicDependsOnConfig"
                   - type: object
                     properties:
@@ -1067,9 +1127,9 @@ components:
             dependsOnConfig:
               type: array
               items:
-                allOf: 
+                allOf:
                   - $ref: "#/components/schemas/BasicDependsOnConfig"
-                  - type: object                      
+                  - type: object
                     properties:
                       min:
                         type: number
@@ -1092,7 +1152,7 @@ components:
               description: "Maximum values that can be selected (default: unlimited)"
             filters:
               type: array
-              items: 
+              items:
                 anyOf:
                   - $ref: "#/components/schemas/ChannelFunctionGroup"
                   - $ref: "#/components/schemas/ChannelDatapoints"
@@ -1120,14 +1180,14 @@ components:
               type: array
               items:
                 type: object
-                allOf: 
+                allOf:
                   - $ref: "#/components/schemas/BasicDependsOnConfig"
-                  - type: object   
+                  - type: object
                     properties:
                       options:
                         type: array
                         items:
-                          $ref: "#/components/schemas/SelectOption" 
+                          $ref: "#/components/schemas/SelectOption"
     ArrayParameter:
       allOf:
         - $ref: "#/components/schemas/BasicParameter"
@@ -1148,7 +1208,7 @@ components:
           type: string
 
     ChannelDatapoints:
-      type: object 
+      type: object
       properties:
         groups:
           type: boolean
@@ -1156,29 +1216,29 @@ components:
         scenes:
           type: boolean
           description: Allow scenes in the filtered list (input/output are inversed for filtering)
-        outputs: 
+        outputs:
           type: object
-          properties:            
-            allOf: 
+          properties:
+            allOf:
               $ref: "#/components/schemas/Datapoints"
             anyOf:
               $ref: "#/components/schemas/Datapoints"
 
         inputs:
           type: object
-          properties:            
-            allOf: 
+          properties:
+            allOf:
               $ref: "#/components/schemas/Datapoints"
             anyOf:
               $ref: "#/components/schemas/Datapoints"
 
-    Datapoints: 
+    Datapoints:
       type: array
       items:
         anyOf:
           - type: number
           - type: string
-            
+
     WizardModeCondition:
       type: object
       required:
@@ -1206,13 +1266,13 @@ components:
             type: string
 
     SelectOption:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - type: object
           required:
           - "key"
           properties:
-            key: 
+            key:
               oneOf:
                - type: string
                - type: number
@@ -1263,7 +1323,7 @@ components:
             cs:
               type: string
             tr:
-              type: string              
+              type: string
 
     TranslatedName:
       type: object
@@ -1545,109 +1605,109 @@ components:
       type: object
       properties:
         message:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@en:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@es:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@fr:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@it:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@nl:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@de:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@zh:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@da:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@fi:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@nb:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@pl:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@pt:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@ru:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@sv:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@el:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@cs:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         message@tr:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
@@ -1657,109 +1717,109 @@ components:
       type: object
       properties:
         fullMessage:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@en:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@es:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@fr:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@it:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@nl:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@de:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@zh:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@da:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@fi:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@nb:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@pl:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@pt:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@ru:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@sv:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@el:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@cs:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
                 type: string
         fullMessage@tr:
-          oneOf: 
+          oneOf:
             - type: string
             - type: array
               items:
@@ -1904,8 +1964,8 @@ components:
           type: string
         index:
           type: string
-        value: 
-          oneOf: 
+        value:
+          oneOf:
             - type: string
             - type: number
             - type: boolean
@@ -1981,7 +2041,7 @@ components:
         - $ref: "#/components/schemas/WizardStepEvent"
 
     Message:
-      allOf: 
+      allOf:
         - $ref: "#/components/schemas/TranslatedName"
         - $ref: "#/components/schemas/TranslatedDescription"
         - type: object
@@ -1996,7 +2056,7 @@ components:
     RPC:
       oneOf:
       - $ref: "#/components/schemas/RPCGetParameterValue"
-  
+
 
     RPCGetParameterValue:
       allOf:
@@ -2005,18 +2065,23 @@ components:
           - $parameter
           - $group
         properties:
-          $parameter: 
+          $parameter:
             type: string
             description: name of the parameter
-          $group: 
+          $group:
             type: string
-            description: name of the parameter group the requested parameter is defined in      
+            description: name of the parameter group the requested parameter is defined in
       - type: object
         additionalProperties: true
 
     RPCGetParameterConfig:
       allOf:
       - $ref: "#/components/schemas/RPCGetParameterValue"
+    Journals:
+      type: array
+      items:
+        type: string
+        maxLength: 256
 
   responses:
     UnauthorizedError:
