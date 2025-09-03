@@ -29,6 +29,7 @@ export type { DescriptionParameter } from './models/DescriptionParameter';
 export type { DisplayDependsOn } from './models/DisplayDependsOn';
 export type { EmptyParameter } from './models/EmptyParameter';
 export type { Event } from './models/Event';
+export type { Journals } from './models/Journals';
 export type { JsonParameter } from './models/JsonParameter';
 export type { Message } from './models/Message';
 export type { Metadata } from './models/Metadata';

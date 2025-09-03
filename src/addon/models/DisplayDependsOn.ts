@@ -9,5 +9,6 @@ import type { TranslatedTitle } from './TranslatedTitle';
 
 export type DisplayDependsOn = (TranslatedTitle & TranslatedSubtitle & TranslatedError & {
     values: Array<string>;
+    highlight?: 'none' | 'hint' | 'warning' | 'error';
 });
 

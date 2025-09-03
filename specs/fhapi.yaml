@@ -794,7 +794,7 @@ components:
     SysapSection:
       type: object
       properties:
-        sysapName: 
+        sysapName:
           type: string
         uartSerialNumber:
           type: string
@@ -942,6 +942,7 @@ components:
         - "HomeAppliance-Laundry"
         - "HVAC"
         - "SplitUnit"
+        - "Fan"
     VirtualDevice:
       type: object
       required:
@@ -959,7 +960,7 @@ components:
             flavor:
               type: "string"
             capabilities:
-              type: array      
+              type: array
               items:
                 type: integer
       example:
@@ -1270,14 +1271,14 @@ components:
         text/plain:
           schema:
             type: string
-    
+
     NotFoundError:
       description: Resource not found
       content:
         text/plain:
           schema:
             type: string
-    
+
     BadRequestError:
       description: Bad Request from Client
       content:

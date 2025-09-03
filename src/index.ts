@@ -56,7 +56,7 @@ export { EnergyInverterMeterChannels } from './freeAtHome';
 
 export { AirQualityKaiterraChannels } from './freeAtHome';
 
-export { WindowSensorChannels } from './freeAtHome';
+export { WindowSensorChannels, FanChannels } from './freeAtHome';
 
 export { CeilingFanChannel } from './virtualChannels/ceilingFanChannel';
 

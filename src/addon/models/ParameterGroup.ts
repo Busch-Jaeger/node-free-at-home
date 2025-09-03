@@ -22,7 +22,11 @@ export type ParameterGroup = (TranslatedName & {
      */
     debug?: boolean;
     display?: (TranslatedTitle & TranslatedSubtitle & TranslatedError & {
-        dependsOn?: Record<string, DisplayDependsOn>;
+        /**
+         * highlight the display link with a colored circle
+         */
+        highlight?: 'none' | 'hint' | 'warning' | 'error';
+        dependsOn?: Record<string, Array<DisplayDependsOn>>;
     });
     items: Record<string, Parameter>;
 });

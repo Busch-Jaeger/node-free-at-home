@@ -24,7 +24,7 @@ export type Metadata = {
     howtoUrl?: string;
     minSysapVersion?: string;
     accessControl?: {
-        allowedAPIs?: Array<'webinterface' | 'serialport'>;
+        allowedAPIs?: Array<'notification' | 'webinterface' | 'serialport'>;
         networkAccess?: boolean;
         networkPorts?: Array<number>;
     };

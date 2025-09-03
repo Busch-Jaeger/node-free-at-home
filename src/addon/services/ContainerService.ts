@@ -5,6 +5,7 @@
 import type { ApplicationState } from '../models/ApplicationState';
 import type { Configuration } from '../models/Configuration';
 import type { Event } from '../models/Event';
+import type { Journals } from '../models/Journals';
 import type { Metadata } from '../models/Metadata';
 import type { Reference } from '../models/Reference';
 
@@ -286,6 +287,46 @@ export class ContainerService {
         return this.httpRequest.request({
             method: 'POST',
             url: '/rest/container/{reference}/stop',
+            path: {
+                'reference': reference,
+            },
+            errors: {
+                401: `Authentication information is missing or invalid`,
+                502: `Bad Gateway error`,
+            },
+        });
+    }
+
+    /**
+     * List journal files for container
+     * List journal files for container
+     * @returns Journals Success
+     * @throws ApiError
+     */
+    public listJournals(): CancelablePromise<Journals> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/rest/journal',
+            errors: {
+                401: `Authentication information is missing or invalid`,
+                502: `Bad Gateway error`,
+            },
+        });
+    }
+
+    /**
+     * get journal file for container
+     * get journal file for container
+     * @param reference hash of commit sha256
+     * @returns string Success
+     * @throws ApiError
+     */
+    public getJournal(
+        reference: Reference,
+    ): CancelablePromise<string> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/rest/journal/{reference}',
             path: {
                 'reference': reference,
             },

@@ -112,8 +112,16 @@ export interface AirQualityKaiterraChannels {
     voc: AirVOCChannel;
 }
 
-export interface WindowSensorChannels { 
-    sensor: WindowSensorChannel; 
+export interface FanChannels {
+    fan: CeilingFanChannel;
+    dimmer?: DimActuatorChannel;
+    light?: SwitchingActuatorChannel;
+    upLight?: SwitchingActuatorChannel;
+    downLight?: SwitchingActuatorChannel;
+}
+
+export interface WindowSensorChannels {
+    sensor: WindowSensorChannel;
     houseKeeping?: HouseKeepingChannel;
 }
 
@@ -534,6 +542,22 @@ export class FreeAtHome extends (EventEmitter as { new(): Emitter }) {
         const device = await this.freeAtHomeApi.createDevice(<VirtualDeviceType>"SplitUnit", nativeId, name, undefined, capabilities);
         const channel = device.getChannels().next().value;
         return new SplitUnitChannel(channel, features?.supportedOperations);
+    }
+
+    async createFan(nativeId: string, name?: string, features?: { hasLight?: boolean }): Promise<FanChannels> {
+        let flavor = "00";
+        if (features?.hasLight) {
+            flavor = "01";
+        }
+        const device = await this.freeAtHomeApi.createDevice("Fan", nativeId, name, flavor);
+        const channelIterator = device.getChannels();
+        const channels : FanChannels = {
+            fan: new CeilingFanChannel(channelIterator.next().value)
+        }
+        if (features?.hasLight) {
+            channels.light = new SwitchingActuatorChannel(channelIterator.next().value);
+        }
+        return channels;
     }
 
     async createRGBDevice(nativeId: string, name?: string): Promise<RGBChannel> {
