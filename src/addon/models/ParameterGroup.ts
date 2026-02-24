@@ -14,6 +14,10 @@ export type ParameterGroup = (TranslatedName & {
     name: string;
     multiple?: boolean;
     /**
+     * adds a checkbox to the displayed item (display configuration is needed for this) where the user can disable that entry. The addon will receive an additional boolean property named "$disabled" for this entry and has to handle it accordingly.
+     */
+    canBeDisabled?: boolean;
+    /**
      * Show this parameter group only when debugging is enabled
      */
     debug?: boolean;

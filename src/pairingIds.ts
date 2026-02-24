@@ -5,6 +5,7 @@ export enum PairingIds {
     AL_SCENE_CONTROL = 0x0004, // Recall or learn the set value related to encoded scene number
     AL_TIMED_MOVEMENT = 0x0006, // Activation of an autonomous switch off function triggered by an movement detector
     AL_TIMED_PRESENCE = 0x0007, // Announces presence triggered by an movement detector to be used by e.g. RTCs. Is independent of brightness and can be used for alerts e.g.
+    AL_TIMED_MUTE_OUTPUT = 0x0008, // Mute output of device for some time
     AL_RELATIVE_SET_VALUE_CONTROL = 0x0010, // Relative dimming value
     AL_ABSOLUTE_SET_VALUE_CONTROL = 0x0011, // Absolute control of the set value
     AL_NIGHT = 0x0012, // Toggle between day and night where day = 0 and night = 1
@@ -75,6 +76,8 @@ export enum PairingIds {
     AL_INFO_VALUE_COOLING = 0x0132, // States the current flow volume of the conrol valve
     AL_HEATING_COOLING = 0x0135, // switch between heating and cooling: heating = 0 / cooling = 1
     AL_ACTUATING_FAN_STAGE_HEATING = 0x0136, // Requests a new manual fan stage from actuator in heating mode
+    AL_MEASURED_TEMPERATURE_RAW = 0x013A, // Indicates the actual measured temperature
+    AL_MEASURED_TEMPERATURE_OVERRIDE = 0x013B, // Indicates the actual measured temperature
     AL_INFO_ABSOLUTE_SET_POINT_REQUEST = 0x0140, // Absolute set point temperature input for timer
     AL_INFO_ACTUATING_VALUE_ADD_HEATING = 0x0141, // Feedback
     AL_INFO_ACTUATING_VALUE_ADD_COOLING = 0x0142, // Feedback
@@ -134,6 +137,9 @@ export enum PairingIds {
     AL_TIMEFRAME_MOVEMENT = 0x01AB, // Activation of a delayed autonomous switch off function triggered by a movement detector over an extended time period
     AL_TIMED_DIMMING = 0x01AC, // Dim to a given value in a given time
     AL_INFO_TIMED_DIMMING = 0x01AD, // Target dimming feedback
+    AL_AUTONOMOUS_SWITCH_OFF_TIME_DURATION = 0x01AE, // Target dimming feedback
+    AL_INFO_AUTONOMOUS_SWITCH_OFF_TIME_DURATION = 0x01AF, // Target dimming feedback
+    AL_MEASURE_BRIGHTNESS = 0x01B0, // Start brightness measuring
     AL_BOOL_VALUE_1 = 0x0280, // Bool Value 1
     AL_BOOL_VALUE_2 = 0x0281, // Bool Value 2
     AL_BOOL_VALUE_3 = 0x0282, // Bool Value 3
@@ -299,6 +305,40 @@ export enum PairingIds {
     AL_SELECT_PROFILE = 0x062F, // 
     AL_INFO_RUNNING = 0x0630, // Feedback: Operation is running
     AL_REMOTE_START = 0x0631, // Remotely starts operation
+    AL_SWITCH_ACTUATOR_OPERATION_MODE = 0x0632, // 
+    AL_INFO_SWITCH_ACTUATOR_OPERATION_MODE = 0x0633, // 
+    AL_MOVEMENT_DETECTOR_TEST_MODE = 0x0634, // 
+    AL_INFO_MOVEMENT_DETECTOR_TEST_MODE = 0x0635, // 
+    AL_TWILIGHT_BRIGHTNESS = 0x0636, // 
+    AL_INFO_TWILIGHT_BRIGHTNESS = 0x0637, // 
+    AL_MOVEMENT_DETECTOR_SWITCH_ON_CONDITIONS = 0x0638, // 
+    AL_INFO_MOVEMENT_DETECTOR_SWITCH_ON_CONDITIONS = 0x0639, // 
+    AL_SENSOR_GROUP_ARM_NO_PREDICTION = 0x0640, // Arm/Disarm a sensor group whereby a client must not predict the next value
+    AL_INFO_SENSOR_GROUP_ARM_NO_PREDICTION = 0x0641, // Arm/Disarm status a sensor group whereby a client must not predict the next value
+    AL_FIRE_ALARM_ACTIVE_FIRST = 0x0642, // Triggered by the sensor that initiates an alarm. Used to identify first source of alarm.
+    AL_DOORLOCK_EVENT = 0x0643, // Card/tag event at a door lock.
+    AL_SILENT_ALARM = 0x0644, // Triggered by the sensor that initiates a silent alarm.
+    AL_KNX_SWITCH_ON_OFF = 0x5000, // indicates wether a button was pressed, released etc. Coupled with emi Datapoint DIOCMD_BUTTON_PRESS
+    AL_KNX_INFO_ON_OFF = 0x5001, // Reflects the binary state of the actuator
+    AL_KNX_ABSOLUTE_SET_VALUE_CONTROL = 0x5002, // Absolute control of the set value
+    AL_KNX_INFO_ACTUAL_DIMMING_VALUE = 0x5003, // Reflects the actual value of the actuator
+    AL_KNX_SET_ABSOLUTE_POSITION_BLINDS_PERCENTAGE = 0x5004, // Moves the sunblinds into a specified position
+    AL_KNX_SET_ABSOLUTE_POSITION_SLATS_PERCENTAGE = 0x5005, // Moves the slats into a specified position
+    AL_KNX_CURRENT_ABSOLUTE_POSITION_BLINDS_PERCENTAGE = 0x5006, // Indicate the current position of the sunblinds in percentage
+    AL_KNX_CURRENT_ABSOLUTE_POSITION_SLATS_PERCENTAGE = 0x5007, // Indicate the current position of the slats in percentage
+    AL_KNX_INFO_MOVE_UP_DOWN = 0x5008, // Indicates last moving direction and whether moving  currently or not
+    AL_KNX_MOVE_UP_DOWN = 0x5009, // Moves sunblind up (0) and down (1)
+    AL_KNX_SCENE_CONTROL = 0x500A, // Recall or learn the set value related to encoded scene number
+    AL_KNX_MOVEMENT_DETECTOR_TEST_MODE = 0x500B, // 
+    AL_KNX_INFO_MOVEMENT_DETECTOR_TEST_MODE = 0x500C, // 
+    AL_KNX_CONTINUOUSLY_ON = 0x500D, // indicates wether a button was pressed, released etc. Coupled with emi Datapoint DIOCMD_BUTTON_PRESS
+    AL_KNX_CONTINUOUSLY_OFF = 0x500E, // indicates wether a button was pressed, released etc. Coupled with emi Datapoint DIOCMD_BUTTON_PRESS
+    AL_KNX_INFO_CONTINOUS_MODE = 0x500F, // Indicates the cause of forced operation (0 = not forced)
+    AL_KNX_BRIGHTNESS_LEVEL = 0x5010, // Weatherstation brightness level
+    AL_KNX_AUTONOMOUS_SWITCH_OFF_TIME = 0x5011, // 
+    AL_KNX_INFO_AUTONOMOUS_SWITCH_OFF_TIME = 0x5012, // 
+    AL_KNX_TWILIGHT_BRIGHTNESS = 0x5013, // 
+    AL_KNX_INFO_TWILIGHT_BRIGHTNESS = 0x5014, // 
     AL_TIME_OF_DAY = 0xF001, // Current local time
     AL_DATE = 0xF002, // Curent local date
     AL_MESSAGE_CENTER_NOTIFICATION = 0xF003, // Notification from message center
@@ -313,6 +353,7 @@ export enum PairingIds {
     AL_STANDBY_STATISTICS = 0xF10E, // Statistics about standby usage for battery devices
     AL_HEARTBEAT_DELAY = 0xF10F, // Time period between two heartbeats
     AL_INFO_HEARTBEAT_DELAY = 0xF110, // Time period between two heartbeats
+    AL_TIME_ZONE_OFFSET = 0xF111, // Time zone offset to UTC time in minutes.
     AL_MEASURED_TEMPERATURE_1 = 0xFF01, // For debug purposes
     AL_MEASURED_TEMPERATURE_2 = 0xFF02, // For debug purposes
     AL_MEASURED_TEMPERATURE_3 = 0xFF03, // For debug purposes

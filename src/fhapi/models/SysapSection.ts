@@ -10,7 +10,7 @@ export type SysapSection = {
     version: string;
     sunRiseTimes: Array<number>;
     sunSetTimes: Array<number>;
-    locale?: string;
+    locale?: 'en' | 'es' | 'fr' | 'it' | 'nl' | 'de' | 'zh' | 'da' | 'fi' | 'nb' | 'pl' | 'pt' | 'ru' | 'sv' | 'el' | 'cs' | 'tr';
     location?: {
         latitude: number;
         longitude: number;

@@ -35,6 +35,8 @@ components:
       required:
         - sysName
       properties:
+        id:
+          type: string
         sysName:
           type: string
         vID:

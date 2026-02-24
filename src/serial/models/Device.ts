@@ -4,6 +4,7 @@
 /* eslint-disable */
 
 export type Device = {
+    id?: string;
     sysName: string;
     vID?: string;
     pID?: string;

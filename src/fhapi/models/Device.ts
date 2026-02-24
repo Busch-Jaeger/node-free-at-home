@@ -13,6 +13,9 @@ export type Device = {
     deviceId?: string;
     interface?: string;
     nativeId?: string;
+    unresponsive?: boolean;
+    unresponsiveCounter?: number;
+    defect?: boolean;
     channels?: Record<string, Channel>;
     parameters?: Record<string, string>;
 };

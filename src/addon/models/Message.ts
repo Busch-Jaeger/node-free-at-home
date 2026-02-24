@@ -6,7 +6,7 @@
 import type { TranslatedDescription } from './TranslatedDescription';
 import type { TranslatedName } from './TranslatedName';
 
-export type Error = (TranslatedName & TranslatedDescription & {
+export type Message = (TranslatedName & TranslatedDescription & {
     name: string;
     description?: string;
 });

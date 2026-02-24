@@ -2,10 +2,14 @@ export enum Capabilities {
     CAP_LED_BRIGHTNESS = 0x0001, // can be LED brighness be configured
     CAP_EXTERNAL_TEMPERATURE_SENSOR = 0x0002, // does the device support an external temperature sensor
     CAP_STANDARD_RTC_UI = 0x0003, // does the device support the standard Room Temperature Controller user inteface
-    CAP_CALDION_UI = 0x0004, // does the device support the Caldion user interface
+    CAP_CALDION_UI = 0x0004, // does the device support the Caldion user inteface
     CAP_RELATIVE_DIMMING_SIMULATION = 0x0005, // activates data point simulation for relative dimming
     CAP_SWITCH_ROCKER_BUTTONS = 0x0006, // device allows switch of rocker button semantic
     CAP_TIMED_START_STOP_SIMULATION = 0x0007, // activates data point simulation for timed start/stop
+    CAP_WEAR_FREE_RELAY = 0x0008, // switching is performed with a wear-free solid state relay
+    CAP_RELATIVE_DIMMING = 0x0009, // activates data point for relative dimming
+    CAP_TIMED_START_STOP = 0x000A, // activates data point for timed start/stop
+    CAP_FORCE_SIMULATION = 0x000B, // activates data point simulation for force mode
     CAP_ENERGY_CURRENT_POWER = 0x0010, // supports energy measurement with current power
     CAP_ENERGY_TODAY = 0x0011, // supports energy measurement and serves today value
     CAP_ENERGY_TOTAL = 0x0012, // supports energy measurement and serves total value
@@ -14,10 +18,10 @@ export enum Capabilities {
     CAP_ECO_CHARGING = 0x0015, // supports eco charging
     CAP_PHASES = 0x0016, // supports different numbers of phases
     CAP_FREE_VENDING = 0x0017, // supports free vending
-    CAP_DISABLE_CHARGING = 0x0018, // supports disable charging    
+    CAP_DISABLE_CHARGING = 0x0018, // supports disable charging
     CAP_ENERGY_COST = 0x0019, // supports delivery of energy cost information
     CAP_ENERGY_IMPORT = 0x001A, // supports information for energy import
-    CAP_ENERGY_EXPORT = 0x001B, // description="supports information for energy export
+    CAP_ENERGY_EXPORT = 0x001B, // supports information for energy export
     CAP_VOLTAGE = 0x001C, // supports delivery of voltage information
     CAP_CURRENT = 0x001D, // supports delivery of current
     CAP_CURRENT_LIMIT = 0x001E, // supports limitation of current
@@ -30,5 +34,21 @@ export enum Capabilities {
     CAP_WIND_ALARM = 0x0053, // supports wind alarm
     CAP_RAIN_ALARM = 0x0054, // supports rain alarm
     CAP_FROST_ALARM = 0x0055, // supports frost alarm
-
+    CAP_CARD_READER = 0x0056, // supports card reader for door locks
+    CAP_TEMPERATURE_SENSOR = 0x0060, // supports temperature measurement
+    CAP_TEMPERATURE_CORRECTION = 0x0061, // supports temperature measurement
+    CAP_SETPOINT_LIMITATION = 0x0062, // supports temperature measurement
+    CAP_ECO_MODE = 0x0063, // supports temperature measurement
+    CAP_WINDOW_DOOR = 0x0064, // supports temperature measurement
+    CAP_HEATING = 0x0065, // supports temperature measurement
+    CAP_COOLING = 0x0066, // supports temperature measurement
+    CAP_REMOTE_TEMPERATURE_SENSOR = 0x0067, // supports remote temperature measurement
+    CAP_TIMED_MOVEMENT = 0x0070, // supports timed movement
+    CAP_TIMED_PRESENCE = 0x0071, // supports timed presence
+    CAP_BRIGHTNESS = 0x0072, // supports brightness
+    CAP_HUMIDITY = 0x0080, // supports humidity
+    CAP_AIR_PREASURE = 0x0081, // supports air preasure
+    CAP_CO2 = 0x0082, // supports co2
+    CAP_VOC = 0x0083, // supports voc
+    CAP_STRIP_TIMERS = 0x1000, // strip all timers from the description
 }

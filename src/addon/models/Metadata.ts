@@ -3,9 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Error } from './Error';
+import type { Message } from './Message';
 import type { Parameters } from './Parameters';
 import type { ParameterType } from './ParameterType';
+import type { TranslatedFullMessage } from './TranslatedFullMessage';
+import type { TranslatedMessage } from './TranslatedMessage';
 import type { TranslatedString } from './TranslatedString';
 import type { TranslatedUri } from './TranslatedUri';
 import type { Wizards } from './Wizards';
@@ -35,6 +37,8 @@ export type Metadata = {
     minAuxFileUploadIntervalMinutes?: number;
     organizationId?: string;
     rpc?: Array<string>;
-    errors?: Record<string, Error>;
+    limits?: (TranslatedMessage & TranslatedFullMessage);
+    errors?: Record<string, Message>;
+    messages?: Record<string, Message>;
 };
 

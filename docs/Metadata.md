@@ -337,7 +337,25 @@ Possible types are:
 
 - `button`
 
-  Shows a button that sends an event of type `buttonPressed` event to the Addon.
+  Shows a button that sends an event of type `buttonPressed` event to the Addon. To override the default button text "send" you can
+  define an additional translatable attribute `buttonLabel`. You can also define a translatable `confirm` message that the UI should
+  show before sending the event. The user has to confirm that he wants to proceed.
+
+  Full example:
+  
+   e.g.
+
+    ```json
+    "clearDB": {
+        "name": "Clear all data",
+        "name@de": "Alle Daten löschen",
+        "type": "button",
+        "buttonLabel": "Delete",
+        "buttonLabel@de": "Löschen",
+        "confirm": "Are you sure you want to delete all data? This cannot be undone.",
+        "confirm@de": "Sind Sie sicher, dass Sie alle Daten löschen möchten? Dies kann nicht rückgängig gemacht werden."
+    }
+    ```
 
 - `error`
 
@@ -460,6 +478,12 @@ Beside the already explained `name`, `type` and `description` attributes there a
   > **NOTE:** Requires free@home app version >= 2.4.0
 
   A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed. You have to delete the entry and create a new one, if you want to change this value.
+
+- `copyable`
+
+  > **NOTE:** Requires free@home app version > 2.4.0
+
+  Adds the possibility to copy the current value into the clipboard, e.g. the addon sends some kind of ID via state to the UI and the user needs to copy that value to be able to use it elsewhere.
 
 - `dependsOn`
 
@@ -602,6 +626,30 @@ Beside the already explained `name`, `type` and `description` attributes there a
   The addons receives the rpc everytime any other parameter of the same groups changes. The parameters of the rpc contains all parameter values of the current group and in addition to that `"parameter": "curve"`, `"group": "configs"` and whats configured in `rpcAdditionalParameters`.
   With all these values the addon can generate an SVG-Chart and send it as response. That chart will be shown to the user and he gets live feedback to every configuration changed by seeing an updated curve.
 
+- `multiple`
+
+  > **NOTE:** Requires free@home app version >= 3.5.0
+  
+  > **NOTE:** Currently only implemented for parameters of type ``channel``
+
+  If this is added with a `true` value this parameter allows more that one value.
+
+- `minValues`
+
+  > **NOTE:** Requires free@home app version >= 3.5.0
+
+  > **NOTE:** only for parameters with ``multiple: true``!
+
+  Defines a minimum number of values (default: 0)
+
+- `minValues`
+
+  > **NOTE:** Requires free@home app version >= 3.5.0
+  
+  > **NOTE:** only for parameters with ``multiple: true``!
+
+  Defines a maximum number of values (default: unlimited)
+
 #### Parameter groups
 
 If an Addon provides many parameters, grouping them may be useful.
@@ -710,11 +758,11 @@ the Addon. The configured value will show up in the `Configuration`of the Addon,
 Please see the [writing Addons section](Writing-addons) for more information about using
 the configuration parameters in the Addon.
 
-### Errors
+### Errors & Messages
 
   > **NOTE:** Requires free@home app version >= 2.4.0  
 
-Define custom error messages that the UI can show e.g. when the Addon responds to a RPC with an error.
+Define custom (error-) messages that the UI can show e.g. when the Addon responds to a RPC with a result message
 
 Basic exampe:
 
@@ -726,13 +774,19 @@ Basic exampe:
       "description": "Device reports internal error. Please check all settings especially `Modbus ID`, 'Function' and 'Datatype'",
       "description@de": "Gerät meldet internen Fehler. Bitte überrüfen sie alle Einstellungen, insb. `Modbus ID`, 'Funktion' und 'Datentyp'"
   }
+
+"messages": {
+  "OK": {
+      "name": "Successful",
+      "name@de": "Erfolgreich"
+  }
 ```
 
-The addon can respond to a RPC with one of the defined error codes and the UI shows the translated error & description.
-Currently this is implemented only for the parameter RPC `getParameterValue`. In order to show the error from the example, the addon
-has to respond with ```{"error": "ADDON_ERROR:CODE_1"}```.
+The addon can respond to a RPC with one of the defined error/message codes and the UI shows the translated name & description.
+Currently this is implemented only for the parameter RPC `getParameterValue`. In order to show the message from the example, the addon
+has to respond with ```{"error": "ADDON_ERROR:CODE_1"}``` or ```{"message": "ADDON_MSG:OK"}```.
 
-The Addon can also respond with a custom error message, that will be shown as is in the UI.
+The Addon can also respond with a custom 7message, that will be shown as is in the UI.
 ```{"error": "This is a custom error"}```. In that case a translation is not possible, also there will be no possibility to show additional information below the error as its done with the `description` from a predefined error. The box with the red background will not be visible when you send a custom error message.
 
 ![Screenshot of error in the app](img/metadata/internal_error.png)
@@ -895,3 +949,41 @@ This step has the `parameterGroup` property, which means it will create / edit a
 This step will use the `items` from that group to generate the form elements in the UI. Some of those are prefilled by values from the first step.
 
 The wizards itself do not store anything when closed, so you can create / edit multiple settings with wizards and have to save your changes at the end.
+
+### Limits
+
+> **NOTE:** Requires free@home app version >= 3.5.0
+
+You can define global limits for configurable values, e.g. if you have a parameter of type "channel" that allows the selection of multiple values and that parameter is maybe part of a group that also
+allows to create multiple entries you can defined a limit of the total sum of selected channels either
+for that parameter group of globally for the whole addon configuration.
+
+```json
+"limits": {
+    "maxChannels": {
+        "max": 64,
+        "type": "channel",
+        "group": "connections",
+        "message": ["You can select %1 more channel", "You can select %1 more channels"],
+        "message@de": ["Sie können %1 weiteren Kanal hinzufügen", "Sie können %1 weitere Kanäle hinzufügen"],
+        "fullMessage": [
+            "You cannot add more channels, limit of %1 channel has been reached",
+            "You cannot add more channels, limit of %1 channels has been reached"
+        ],
+        "fullMessage@de": [
+            "Sie können keinen weiteren Kanal mehr hinzufügen, das Limit von %1 Kanal wurde erreicht.",
+            "Sie können keinen weiteren Kanal mehr hinzufügen, das Limit von %1 Kanälen wurde erreicht."
+        ]
+    }
+}
+```
+
+In this example all selected values of type "channel" in the parameter group "connections" are counted.
+If the counter is under the defined limit of 64 the "message" will shown and informs the user how many
+channels he can still add. If the limit is reached the "fullMessage" is shown instead as a warning and the user cannot select more channels.
+
+The translated string are a little bit different from the translations in other parts of the settings because they allow a numeric placeholder and therefore support plurals.
+In the "message" the ``%1`` will be replaced with the remaining number of channels that can be selected until the limit is reached. In "fullMessage" the placeholder ``%1`` will be replaced with the value of ``max``.
+
+For plural support the translated string are an array of up to 3 values. Depending of the number that replaces the placeholder one of the values in the array is chosen as the currently translated string.
+The rules that decide which value of the array is chosen can be seen here: https://doc.qt.io/qt-6/i18n-plural-rules.html

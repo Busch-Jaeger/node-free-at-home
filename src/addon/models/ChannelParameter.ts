@@ -8,7 +8,18 @@ import type { ChannelDatapoints } from './ChannelDatapoints';
 import type { ChannelFunctionGroup } from './ChannelFunctionGroup';
 
 export type ChannelParameter = (BasicParameter & {
-    multiSelect?: boolean;
+    /**
+     * allow more than one channel
+     */
+    multiple?: boolean;
+    /**
+     * Minimum values that must be selected (default: 0)
+     */
+    minValues?: number;
+    /**
+     * Maximum values that can be selected (default: unlimited)
+     */
+    maxValues?: number;
     filters?: Array<(ChannelFunctionGroup | ChannelDatapoints)>;
 });
 

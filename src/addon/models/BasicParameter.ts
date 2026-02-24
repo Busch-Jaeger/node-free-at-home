@@ -5,10 +5,11 @@
 
 import type { BasicDependsOnConfig } from './BasicDependsOnConfig';
 import type { TranslatedButton } from './TranslatedButton';
+import type { TranslatedConfirm } from './TranslatedConfirm';
 import type { TranslatedDescription } from './TranslatedDescription';
 import type { TranslatedName } from './TranslatedName';
 
-export type BasicParameter = (TranslatedName & TranslatedDescription & TranslatedButton & {
+export type BasicParameter = (TranslatedName & TranslatedDescription & TranslatedButton & TranslatedConfirm & {
     type: 'string' | 'multilinestring' | 'password' | 'number' | 'boolean' | 'date' | 'time' | 'weekdays' | 'ipv4' | 'floor' | 'room' | 'channel' | 'select' | 'button' | 'text' | 'error' | 'description' | 'displayQRCode' | 'scanQRCode' | 'hidden' | 'jsonSelector' | 'array' | 'svg' | 'uuid' | 'custom' | 'serialPort';
     name: string;
     required?: boolean;
@@ -48,5 +49,13 @@ export type BasicParameter = (TranslatedName & TranslatedDescription & Translate
      * A fixed value can only be edited when a new configuration entry of an multiple parameter group is created. Once this value is saved, it cannot be changed.
      */
     fixed?: boolean;
+    /**
+     * Adds the possibility to copy the current value into the clipboard, e.g. the addon sends some kind of ID via state to the UI and the user needs to copy that value to be able to use it elsewhere.
+     */
+    copyable?: boolean;
+    /**
+     * [Only for type=button] Show a confirm dialog with this text before sending the button event
+     */
+    confirm?: string;
 });
 

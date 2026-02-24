@@ -51,6 +51,18 @@ interface Events {
 // Typed Event emitter: https://github.com/bterlson/strict-event-emitter-types#usage-with-subclasses
 type Emitter = StrictEventEmitter<EventEmitter, Events>;
 
+export function createFreeAtHomeApi(baseUrl: string, authenticationHeader: object = {}) {
+    const apiClient = new API.FahClient({
+        BASE: baseUrl,
+        HEADERS: authenticationHeader as Record<string, string>
+    });
+
+    const websocket = new AutoReconnectWebSocket(baseUrl, "/api/ws", {
+        ...authenticationHeader
+    });
+    return new FreeAtHomeApi(apiClient, websocket);
+}
+
 export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
     private apiClient: API.FahClient;
     websocket: AutoReconnectWebSocket;
@@ -67,19 +79,13 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
 
     enableLogging: boolean = false;
 
-    constructor(baseUrl: string, authenticationHeader: object = {}) {
+    constructor(apiClient: API.FahClient, websocket: AutoReconnectWebSocket) {
         super();
 
-        this.apiClient = new API.FahClient({
-            BASE: baseUrl,
-            HEADERS: authenticationHeader as Record<string, string>
-        });
+        this.apiClient = apiClient;
+        this.websocket = websocket;
 
-        this.websocket = new AutoReconnectWebSocket(baseUrl, "/api/ws", {
-            ...authenticationHeader
-        });
         this.websocket.on('message', this.parseWebsocketData.bind(this));
-
     }
 
     disconnect() {
@@ -322,6 +328,7 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
                 throw new Error("device not found in response");
             }
         } catch (e) {
+            handleRequestError(e, this.enableLogging);
             return await devicePromiseWithTimeout.promise;
             // throw new Error("Could not read device from ata model error code: " + res.status);
         }
@@ -439,12 +446,13 @@ export class FreeAtHomeApi extends (EventEmitter as { new(): Emitter }) {
         return channels;
     }
 
-    public async getPairedChannels(path: string)
+    public async getPairedChannels(path: string, forceUpdate?: boolean)
     {
-        const cacheAge =  Math.abs(this.lastUpdateOnCachedPairings - Date.now())/1000;
-        if(cacheAge > 10) {
+        const now = Date.now()
+        const cacheAge =  Math.abs(now - this.lastUpdateOnCachedPairings)/1000;
+        if(forceUpdate || cacheAge > 10) {
             await this.updateCachedPairings();
-            this.lastUpdateOnCachedPairings = Date.now();
+            this.lastUpdateOnCachedPairings = now;
         }
         const pairings = this.cachedPairings.get(path) ?? [];
         return this.getChannelsFromList(pairings);
